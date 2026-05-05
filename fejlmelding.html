@@ -172,7 +172,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
           <div class="fejl-check" id="chk-service"></div>
           <div class="fejl-icon">🔧</div>
           <div class="fejl-label-wrap">
-            <div class="fejl-label">Service</div>
+            <div class="fejl-label">Servicelampe/-behov</div>
             <div class="fejl-sublabel">Vedligehold / serviceeftersyn</div>
           </div>
         </div>
@@ -422,7 +422,7 @@ async function submitAll() {
   btn.innerHTML = '<span class="spinner"></span> Sender…';
 
   const CAT_LABELS = {
-    service: 'Service', stenslag: 'Stenslag', daektryk: 'Dæktryk',
+    service: 'Servicelampe/-behov', stenslag: 'Stenslag', daektryk: 'Dæktryk',
     buler: 'Buler / karosseriskader',
     andet: 'Andet', tankkort: 'Tankkort', ladebrik: 'Ladebrik',
   };
@@ -476,6 +476,7 @@ function showResult(type, msg) {
 
 const CAT_META = {
   'Service':                  { icon: '🔧', cls: 'service'  },
+  'Servicelampe/-behov':      { icon: '🔧', cls: 'service'  },
   'Stenslag':                 { icon: '💥', cls: 'stenslag' },
   'Dæktryk':                  { icon: '⚠️', cls: 'daektryk' },
   'Buler / karosseriskader':  { icon: '🚗', cls: 'buler'    },

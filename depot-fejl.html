@@ -608,7 +608,7 @@ function renderAll() {
 // ─── STATS ────────────────────────────────────────────────────────────────────
 function updateStats(aktive) {
   document.getElementById('s-total').textContent    = aktive.length;
-  document.getElementById('s-service').textContent  = aktive.filter(r => r.kategori === 'Service').length;
+  document.getElementById('s-service').textContent  = aktive.filter(r => r.kategori === 'Service' || r.kategori === 'Servicelampe/-behov').length;
   document.getElementById('s-stenslag').textContent = aktive.filter(r => r.kategori === 'Stenslag').length;
   document.getElementById('s-daektryk').textContent = aktive.filter(r => r.kategori === 'Dæktryk').length;
   document.getElementById('s-andet').textContent    = aktive.filter(r => r.kategori === 'Andet').length;
@@ -616,7 +616,8 @@ function updateStats(aktive) {
 
 // ─── CAT META ─────────────────────────────────────────────────────────────────
 const CAT_META = {
-  'Service':   { icon: '🔧', cls: 'service' },
+  'Service':              { icon: '🔧', cls: 'service' },
+  'Servicelampe/-behov':  { icon: '🔧', cls: 'service' },
   'Stenslag':  { icon: '💥', cls: 'stenslag' },
   'Dæktryk':   { icon: '🔴', cls: 'daektryk' },
   'Andet':     { icon: '📝', cls: 'andet' },
