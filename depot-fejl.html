@@ -595,6 +595,7 @@ async function loadData() {
       status:    (r[5] || '').toLowerCase(),
       kvitteretAf: r[6] || '',
       kvitteretTs: r[7] || '',
+      udbedretMeldt: r[9] || '',
     }));
     renderAll();
   } catch(e) {
@@ -677,13 +678,17 @@ function renderActiveTable(aktive) {
     return;
   }
   tbody.innerHTML = filtered.map(r => `
-    <tr>
+    <tr${r.udbedretMeldt ? ' style="background:var(--green-light);"' : ''}>
       <td><span class="car-code">${r.bil}</span></td>
       <td>${catBadge(r.kategori)}</td>
       <td class="desc-cell">${r.beskrivelse || '<i>—</i>'}</td>
       <td class="ts-cell">${fmtTs(r.timestamp)}</td>
       <td>
-        <button class="btn btn-sm btn-green" onclick="openKvitModal(${r.rowIndex})">✓ Kvittér</button>
+        ${r.udbedretMeldt
+          ? `<div style="font-size:11px;color:var(--green);margin-bottom:4px;">✓ Udbedret meldt af ${r.udbedretMeldt}</div>
+             <button class="btn btn-sm btn-green" onclick="openKvitModal(${r.rowIndex})" style="background:var(--green);color:white;border-color:var(--green);">✓ Bekræft udbedring</button>`
+          : `<button class="btn btn-sm btn-green" onclick="openKvitModal(${r.rowIndex})">✓ Kvittér</button>`
+        }
       </td>
     </tr>
   `).join('');
@@ -801,11 +806,8 @@ const APPS_SCRIPT_CODE = `// ═════════════════
 
 function doGet(e) {
   const params = e.parameter;
-  
-  if (params.action === 'kvitter') {
-    return kvitter(params);
-  }
-  
+  if (params.action === 'kvitter')   return kvitter(params);
+  if (params.action === 'udbedret')  return udbedret(params);
   return ContentService
     .createTextOutput(JSON.stringify({ status: 'ok', msg: 'TV2 Depot Webhook aktiv' }))
     .setMimeType(ContentService.MimeType.JSON);
@@ -813,26 +815,36 @@ function doGet(e) {
 
 function kvitter(params) {
   try {
-    const sheetId    = params.sheetId;
-    const rowIndex   = parseInt(params.rowIndex);
-    const kvitNavn   = params.kvitteretAf || '';
-    const note       = params.note || '';
-    const kvitTs     = params.kvitteretTs || new Date().toLocaleString('da-DK');
-    
-    const ss    = SpreadsheetApp.openById(sheetId);
-    const sheet = ss.getSheets()[0]; // Første ark (Formularrespons 1)
-    
-    // A=Tidsstempel | B=Mailadresse | C=Bil | D=Kategori | E=Beskrivelse
+    const ss    = SpreadsheetApp.openById(params.sheetId);
+    const sheet = ss.getSheets()[0];
+    const row   = parseInt(params.rowIndex);
+    const ts    = params.kvitteretTs || new Date().toLocaleString('da-DK');
     // F=6=Status | G=7=Kvitteret_af | H=8=Kvitteret_tidspunkt | I=9=Note
-    sheet.getRange(rowIndex, 6).setValue('Kvitteret');
-    sheet.getRange(rowIndex, 7).setValue(kvitNavn);
-    sheet.getRange(rowIndex, 8).setValue(kvitTs);
-    if (note) sheet.getRange(rowIndex, 9).setValue(note);
-    
+    sheet.getRange(row, 6).setValue('Kvitteret');
+    sheet.getRange(row, 7).setValue(params.kvitteretAf || '');
+    sheet.getRange(row, 8).setValue(ts);
+    if (params.note) sheet.getRange(row, 9).setValue(params.note);
     return ContentService
-      .createTextOutput(JSON.stringify({ status: 'ok', row: rowIndex }))
+      .createTextOutput(JSON.stringify({ status: 'ok', row }))
       .setMimeType(ContentService.MimeType.JSON);
-      
+  } catch(err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'error', msg: err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function udbedret(params) {
+  try {
+    const ss    = SpreadsheetApp.openById(params.sheetId);
+    const sheet = ss.getSheets()[0];
+    const row   = parseInt(params.rowIndex);
+    const ts    = params.ts || new Date().toLocaleString('da-DK');
+    // J=10=Udbedret_meldt (initialer + tidspunkt)
+    sheet.getRange(row, 10).setValue(params.init + ' ' + ts);
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'ok', row }))
+      .setMimeType(ContentService.MimeType.JSON);
   } catch(err) {
     return ContentService
       .createTextOutput(JSON.stringify({ status: 'error', msg: err.toString() }))

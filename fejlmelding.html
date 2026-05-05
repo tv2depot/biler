@@ -482,20 +482,25 @@ async function submitAll() {
   }
 }
 
-async function meldUdbedret(kategori, init, btn) {
+async function meldUdbedret(kategori, init, rowIndex, btn) {
   btn.textContent = '⏳ Sender…';
   btn.disabled = true;
-  const fd = new FormData();
-  fd.append(CFG.entryCarId,  bilId);
-  fd.append(CFG.entryCatId,  'Udbedret: ' + kategori);
-  fd.append(CFG.entryDescId, '[' + (init || '?') + '] Fejl meldt udbedret');
+  const now = new Date().toLocaleString('da-DK');
+  const params = new URLSearchParams({
+    action: 'udbedret',
+    sheetId: CFG.sheetId,
+    rowIndex: rowIndex,
+    init: init || '?',
+    ts: now,
+  });
+  const scriptUrl = 'https://script.google.com/macros/s/AKfycbzJjGswm3m3A9WqnFfqgPjMktVNcpoLPx8Xq4jAgrIvveCnIRoFla7tEWA0GdMy1mkd/exec';
   try {
-    await fetch(CFG.formUrl, { method: 'POST', mode: 'no-cors', body: fd });
+    fetch(scriptUrl + '?' + params.toString(), { mode: 'no-cors' });
     btn.textContent = '✅ Meldt udbedret';
     btn.style.background = 'var(--green-light)';
     btn.style.color = 'var(--green)';
     btn.style.borderColor = 'var(--green)';
-    setTimeout(loadActiveFaults, 3000);
+    btn.style.borderRadius = '20px';
   } catch(e) {
     btn.textContent = '✓ Udbedret';
     btn.disabled = false;
@@ -560,6 +565,7 @@ async function loadActiveFaults() {
     const data = await res.json();
     const rows = (data.values || []).slice(1);
     console.log('Alle rækker:', rows.length, rows);
+    window._allRows = rows;
     const mine = rows.filter(r => (r[2]||'').toUpperCase().trim() === bilId && (r[5]||'').toLowerCase() !== 'kvitteret');
     console.log('Mine rækker:', mine.length, 'bilId søgt:', bilId);
     if (!mine.length) { el.innerHTML = '<div class="no-faults">✅ Ingen aktive fejlmeldinger på denne bil</div>'; return; }
@@ -567,7 +573,10 @@ async function loadActiveFaults() {
       const meta = CAT_META[r[3]] || { icon: '❓', cls: '' };
       const { init, text } = parseDesc(r[4] || '');
       const ts = fmtTimestamp(r[0]);
-      const rowIdx = idx + 2; // approximate row index
+      // Find den rigtige rækkeindeks fra det originale datasæt
+      const allRowsData = (window._allRows || []);
+      const originalIdx = allRowsData.findIndex(row => row[0] === r[0] && row[2] === r[2] && row[3] === r[3]);
+      const rowIndex = originalIdx >= 0 ? originalIdx + 2 : 0;
       return `<div class="fault-card ${meta.cls}">
         <div class="fault-icon">${meta.icon}</div>
         <div class="fault-body">
@@ -575,7 +584,7 @@ async function loadActiveFaults() {
           ${text ? `<div class="fault-desc">${text}</div>` : ''}
           <div class="fault-footer">
             <div class="fault-time">${ts}</div>
-            <button class="udbedret-btn" onclick="meldUdbedret('${r[3]||''}', '${init}', this)">✓ Udbedret</button>
+            <button class="udbedret-btn" onclick="meldUdbedret('${r[3]||''}', '${init}', ${rowIndex}, this)">✓ Udbedret</button>
           </div>
         </div>
       </div>`;
