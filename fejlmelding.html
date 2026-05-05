@@ -215,7 +215,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
       <div class="fejl-item daektryk" id="item-daektryk">
         <div class="fejl-header" onclick="toggleFejl('daektryk')">
           <div class="fejl-check" id="chk-daektryk"></div>
-          <div class="fejl-icon">🛞</div>
+          <div class="fejl-icon">⚠️</div>
           <div class="fejl-label-wrap">
             <div class="fejl-label">Dæktryk</div>
             <div class="fejl-sublabel">Lavt lufttryk i dæk</div>
@@ -475,13 +475,15 @@ function showResult(type, msg) {
 }
 
 const CAT_META = {
-  'Service':                  { icon: '🔧', cls: 'service' },
+  'Service':                  { icon: '🔧', cls: 'service'  },
   'Stenslag':                 { icon: '💥', cls: 'stenslag' },
-  'Dæktryk':                  { icon: '🛞', cls: 'daektryk' },
+  'Dæktryk':                  { icon: '⚠️', cls: 'daektryk' },
   'Buler / karosseriskader':  { icon: '🚗', cls: 'buler'    },
   'Andet':                    { icon: '📝', cls: 'andet'    },
   'Tankkort':                 { icon: '⛽', cls: 'tankkort' },
+  'Tankkort mangler':         { icon: '⛽', cls: 'tankkort' },
   'Ladebrik':                 { icon: '⚡', cls: 'ladebrik' },
+  'Ladebrik mangler':         { icon: '⚡', cls: 'ladebrik' },
 };
 
 function fmtTimestamp(ts) {
