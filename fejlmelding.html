@@ -172,7 +172,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
           <div class="fejl-check" id="chk-service"></div>
           <div class="fejl-icon">🔧</div>
           <div class="fejl-label-wrap">
-            <div class="fejl-label">Servicelampe/-behov</div>
+            <div class="fejl-label">Servicelampe lyser</div>
             <div class="fejl-sublabel">Vedligehold / serviceeftersyn</div>
           </div>
         </div>
@@ -422,7 +422,7 @@ async function submitAll() {
   btn.innerHTML = '<span class="spinner"></span> Sender…';
 
   const CAT_LABELS = {
-    service: 'Servicelampe/-behov', stenslag: 'Stenslag', daektryk: 'Dæktryk',
+    service: 'Servicelampe lyser', stenslag: 'Stenslag', daektryk: 'Dæktryk',
     buler: 'Buler / karosseriskader',
     andet: 'Andet', tankkort: 'Tankkort', ladebrik: 'Ladebrik',
   };
@@ -476,7 +476,7 @@ function showResult(type, msg) {
 
 const CAT_META = {
   'Service':                  { icon: '🔧', cls: 'service'  },
-  'Servicelampe/-behov':      { icon: '🔧', cls: 'service'  },
+  'Servicelampe lyser':      { icon: '🔧', cls: 'service'  },
   'Stenslag':                 { icon: '💥', cls: 'stenslag' },
   'Dæktryk':                  { icon: '⚠️', cls: 'daektryk' },
   'Buler / karosseriskader':  { icon: '🚗', cls: 'buler'    },
@@ -487,7 +487,10 @@ const CAT_META = {
   'Ladebrik mangler':         { icon: '⚡', cls: 'ladebrik' },
 };
 
-function fmtTimestamp(ts) {
+function visningsNavn(kat) {
+  const oversæt = { 'Service': 'Servicelampe lyser' };
+  return oversæt[kat] || kat;
+}
   if (!ts) return '';
   // Google Sheets dansk format: "05/05/2026 20.00.28" — erstat punktum med kolon i tidsdelen
   const fixed = ts.replace(/(\d{2})\.(\d{2})\.(\d{2})$/, '$1:$2:$3');
@@ -527,7 +530,7 @@ async function loadActiveFaults() {
       return `<div class="fault-card ${meta.cls}">
         <div class="fault-icon">${meta.icon}</div>
         <div class="fault-body">
-          <div class="fault-category">${r[3]||''}${init ? ` <span style="font-size:11px;font-weight:400;color:var(--text-muted);">— ${init}</span>` : ''}</div>
+          <div class="fault-category">${visningsNavn(r[3]||'')}${init ? ` <span style="font-size:11px;font-weight:400;color:var(--text-muted);">— ${init}</span>` : ''}</div>
           ${text ? `<div class="fault-desc">${text}</div>` : ''}
           <div class="fault-time">${ts}</div>
         </div>
