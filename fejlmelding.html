@@ -494,6 +494,7 @@ async function meldUdbedret(kategori, init, rowIndex, btn) {
     ts: now,
   });
   const scriptUrl = 'https://script.google.com/macros/s/AKfycbzJjGswm3m3A9WqnFfqgPjMktVNcpoLPx8Xq4jAgrIvveCnIRoFla7tEWA0GdMy1mkd/exec';
+  console.log('meldUdbedret kaldt — rowIndex:', rowIndex, 'URL:', scriptUrl + '?' + params.toString());
   try {
     fetch(scriptUrl + '?' + params.toString(), { mode: 'no-cors' });
     btn.textContent = '✅ Meldt udbedret';
