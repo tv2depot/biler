@@ -489,7 +489,9 @@ async function loadActiveFaults() {
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     const rows = (data.values || []).slice(1);
+    console.log('Alle rækker:', rows.length, rows);
     const mine = rows.filter(r => (r[2]||'').toUpperCase().trim() === bilId && (r[5]||'').toLowerCase() !== 'kvitteret');
+    console.log('Mine rækker:', mine.length, 'bilId søgt:', bilId);
     if (!mine.length) { el.innerHTML = '<div class="no-faults">✅ Ingen aktive fejlmeldinger på denne bil</div>'; return; }
     el.innerHTML = mine.map(r => {
       const meta = CAT_META[r[3]] || { icon: '❓', cls: '' };
