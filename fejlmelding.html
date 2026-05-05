@@ -466,10 +466,14 @@ const CAT_META = {
 
 function fmtTimestamp(ts) {
   if (!ts) return '';
-  const d = new Date(ts);
+  // Google Sheets dansk format: "05/05/2026 20.00.28" — erstat punktum med kolon i tidsdelen
+  const fixed = ts.replace(/(\d{2})\.(\d{2})\.(\d{2})$/, '$1:$2:$3');
+  // Konverter DD/MM/YYYY til MM/DD/YYYY for Safari/Firefox kompatibilitet
+  const iso = fixed.replace(/^(\d{2})\/(\d{2})\/(\d{4})/, '$2/$1/$3');
+  const d = new Date(iso);
   if (isNaN(d)) return ts;
-  return d.toLocaleDateString('da-DK', { day:'2-digit', month:'short' }) + ' ' +
-         d.toLocaleTimeString('da-DK', { hour:'2-digit', minute:'2-digit' });
+  return d.toLocaleTimeString('da-DK', { hour:'2-digit', minute:'2-digit' }) + ' ' +
+         d.toLocaleDateString('da-DK', { day:'2-digit', month:'short' });
 }
 
 function parseDesc(desc) {
@@ -496,8 +500,7 @@ async function loadActiveFaults() {
     el.innerHTML = mine.map(r => {
       const meta = CAT_META[r[3]] || { icon: '❓', cls: '' };
       const { init, text } = parseDesc(r[4] || '');
-      const ts = r[0] ? new Date(r[0]).toLocaleTimeString('da-DK', { hour:'2-digit', minute:'2-digit' }) +
-        ' ' + new Date(r[0]).toLocaleDateString('da-DK', { day:'2-digit', month:'short' }) : '';
+      const ts = fmtTimestamp(r[0]);
       return `<div class="fault-card ${meta.cls}">
         <div class="fault-icon">${meta.icon}</div>
         <div class="fault-body">
