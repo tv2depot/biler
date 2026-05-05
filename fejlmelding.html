@@ -484,7 +484,7 @@ async function loadActiveFaults() {
   if (!bilId) { el.innerHTML = '<div class="no-faults">⚠️ Ingen bil-ID i URL</div>'; return; }
   el.innerHTML = '<div class="loading"><span class="spinner"></span>Henter fejlmeldinger…</div>';
   try {
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${CFG.sheetId}/values/${encodeURIComponent(CFG.sheetName + '!A1:E1000')}?key=${CFG.apiKey}`;
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${CFG.sheetId}/values/${encodeURIComponent(CFG.sheetName + '!A:I')}?key=${CFG.apiKey}`;
     const res = await fetch(url);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
