@@ -566,17 +566,16 @@ async function loadActiveFaults() {
     const rows = (data.values || []).slice(1);
     console.log('Alle rækker:', rows.length, rows);
     window._allRows = rows;
-    const mine = rows.filter(r => (r[2]||'').toUpperCase().trim() === bilId && (r[5]||'').toLowerCase() !== 'kvitteret');
+    // Gem rowIndex (1-baseret + 1 for header) direkte på hver række
+    const mine = rows
+      .map((r, i) => ({ r, rowIndex: i + 2 }))
+      .filter(({ r }) => (r[2]||'').toUpperCase().trim() === bilId && (r[5]||'').toLowerCase() !== 'kvitteret');
     console.log('Mine rækker:', mine.length, 'bilId søgt:', bilId);
     if (!mine.length) { el.innerHTML = '<div class="no-faults">✅ Ingen aktive fejlmeldinger på denne bil</div>'; return; }
-    el.innerHTML = mine.map((r, idx) => {
+    el.innerHTML = mine.map(({ r, rowIndex }) => {
       const meta = CAT_META[r[3]] || { icon: '❓', cls: '' };
       const { init, text } = parseDesc(r[4] || '');
       const ts = fmtTimestamp(r[0]);
-      // Find den rigtige rækkeindeks fra det originale datasæt
-      const allRowsData = (window._allRows || []);
-      const originalIdx = allRowsData.findIndex(row => row[0] === r[0] && row[2] === r[2] && row[3] === r[3]);
-      const rowIndex = originalIdx >= 0 ? originalIdx + 2 : 0;
       return `<div class="fault-card ${meta.cls}">
         <div class="fault-icon">${meta.icon}</div>
         <div class="fault-body">
@@ -584,7 +583,7 @@ async function loadActiveFaults() {
           ${text ? `<div class="fault-desc">${text}</div>` : ''}
           <div class="fault-footer">
             <div class="fault-time">${ts}</div>
-            <button class="udbedret-btn" onclick="meldUdbedret('${r[3]||''}', '${init}', ${rowIndex}, this)">✓ Udbedret</button>
+            <button class="udbedret-btn" onclick="meldUdbedret('${(r[3]||'').replace(/'/g,"\\'")}', '${init}', ${rowIndex}, this)">✓ Udbedret</button>
           </div>
         </div>
       </div>`;
