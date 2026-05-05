@@ -672,11 +672,26 @@ function sortTable(col) {
   renderActiveTable(aktive);
 }
 
+function parseSheetDate(ts) {
+  if (!ts) return new Date(0);
+  // Dansk format: "05/05/2026 20.00.28" eller "5.5.2026, 22.09.39"
+  // Format 1: DD/MM/YYYY HH.MM.SS
+  let m = ts.match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2})\.(\d{2})/);
+  if (m) return new Date(`${m[3]}-${m[2]}-${m[1]}T${m[4]}:${m[5]}:00`);
+  // Format 2: D.M.YYYY, HH.MM.SS
+  m = ts.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4}),?\s+(\d{2})\.(\d{2})/);
+  if (m) return new Date(`${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}T${m[4]}:${m[5]}:00`);
+  return new Date(0);
+}
+
 function sortRows(rows) {
   return [...rows].sort((a, b) => {
     let va = a[sortCol] || '';
     let vb = b[sortCol] || '';
-    if (sortCol === 'timestamp') { va = new Date(va.replace(/(\d{2})\.(\d{2})\.(\d{2})$/, '$1:$2:$3').replace(/^(\d{2})\/(\d{2})\/(\d{4})/, '$2/$1/$3')); vb = new Date(vb.replace(/(\d{2})\.(\d{2})\.(\d{2})$/, '$1:$2:$3').replace(/^(\d{2})\/(\d{2})\/(\d{4})/, '$2/$1/$3')); }
+    if (sortCol === 'timestamp') {
+      va = parseSheetDate(va);
+      vb = parseSheetDate(vb);
+    }
     if (va < vb) return -1 * sortDir;
     if (va > vb) return 1 * sortDir;
     return 0;
@@ -736,7 +751,7 @@ function renderLogTable(log) {
     return;
   }
   // Nyeste øverst
-  const sorted = [...log].sort((a,b) => new Date(b.kvitteretTs) - new Date(a.kvitteretTs));
+  const sorted = [...log].sort((a,b) => parseSheetDate(b.kvitteretTs) - parseSheetDate(a.kvitteretTs));
   tbody.innerHTML = sorted.map(r => `
     <tr class="log-row">
       <td><span class="car-code">${r.bil}</span></td>
