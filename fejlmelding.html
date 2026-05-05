@@ -78,16 +78,16 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 .form-card { background: var(--bg-card); border: 1px solid var(--gray-border); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 16px; }
 .form-title { font-size: 18px; font-weight: 700; margin-bottom: 18px; }
 
-.initialer-wrap { margin-bottom: 18px; }
-.initialer-wrap label { font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px; }
+.initialer-wrap { margin-bottom: 20px; }
+.initialer-wrap label { font-size: 16px; font-weight: 600; display: block; margin-bottom: 8px; }
 .initialer-wrap label span { color: var(--red); }
-.initialer-input { width: 100%; border: 1.5px solid var(--gray-border); border-radius: var(--radius); padding: 12px 14px; font-family: var(--font-mono); font-size: 16px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text); background: var(--bg); outline: none; transition: border-color 0.15s; }
+.initialer-input { width: 100%; border: 1.5px solid var(--gray-border); border-radius: var(--radius); padding: 14px 16px; font-family: var(--font-mono); font-size: 20px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text); background: var(--bg); outline: none; transition: border-color 0.15s; }
 .initialer-input:focus { border-color: var(--red); }
 
-.cat-section-title { font-size: 12px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; margin-top: 4px; }
-.divider { border: none; border-top: 1px solid var(--gray-border); margin: 16px 0; }
+.cat-section-title { font-size: 14px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; margin-top: 8px; }
+.divider { border: none; border-top: 1px solid var(--gray-border); margin: 20px 0; }
 
-.fejl-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.fejl-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
 .fejl-item { border: 1.5px solid var(--gray-border); border-radius: var(--radius); overflow: hidden; transition: border-color 0.15s; background: var(--bg-card); }
 .fejl-item.selected { border-color: var(--red); }
 .fejl-item.selected.service  { border-color: var(--orange); }
@@ -97,9 +97,9 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 .fejl-item.selected.ladebrik { border-color: var(--green); }
 .fejl-item.selected.andet    { border-color: var(--gray); }
 
-.fejl-header { display: flex; align-items: center; gap: 12px; padding: 12px 14px; cursor: pointer; user-select: none; transition: background 0.1s; }
+.fejl-header { display: flex; align-items: center; gap: 14px; padding: 16px 16px; cursor: pointer; user-select: none; transition: background 0.1s; }
 .fejl-header:active { background: var(--gray-light); }
-.fejl-check { width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--gray-border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; font-size: 13px; font-weight: 700; color: white; }
+.fejl-check { width: 28px; height: 28px; border-radius: 8px; border: 2px solid var(--gray-border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; font-size: 16px; font-weight: 700; color: white; }
 .fejl-item.selected .fejl-check { background: var(--red); border-color: var(--red); }
 .fejl-item.selected.service  .fejl-check { background: var(--orange); border-color: var(--orange); }
 .fejl-item.selected.daektryk .fejl-check { background: var(--blue);   border-color: var(--blue);   }
@@ -107,40 +107,39 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 .fejl-item.selected.ladebrik .fejl-check { background: var(--green);  border-color: var(--green);  }
 .fejl-item.selected.andet    .fejl-check { background: var(--gray);   border-color: var(--gray);   }
 
-.fejl-icon { font-size: 20px; }
+.fejl-icon { font-size: 26px; }
 .fejl-label-wrap { flex: 1; }
-.fejl-label { font-size: 14px; font-weight: 600; }
-.fejl-sublabel { font-size: 11px; color: var(--text-muted); }
+.fejl-label { font-size: 17px; font-weight: 600; }
+.fejl-sublabel { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
 
-.fejl-subitems { display: none; padding: 0 14px 12px 48px; gap: 8px; flex-wrap: wrap; }
+.fejl-subitems { display: none; padding: 0 16px 14px 58px; gap: 10px; flex-wrap: wrap; }
 .fejl-item.selected .fejl-subitems { display: flex; }
-.subitem-group-label { width: 100%; font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
-.subitem-btn { padding: 6px 12px; border-radius: 20px; border: 1.5px solid var(--gray-border); background: var(--bg); font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; color: var(--text-muted); font-family: var(--font); }
+.subitem-group-label { width: 100%; font-size: 13px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+.subitem-btn { padding: 10px 16px; border-radius: 20px; border: 1.5px solid var(--gray-border); background: var(--bg); font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.15s; color: var(--text-muted); font-family: var(--font); }
 .subitem-btn:active { transform: scale(0.97); }
 .fejl-item.tankkort .subitem-btn.selected { background: var(--purple-light); border-color: var(--purple); color: var(--purple); }
 .fejl-item.ladebrik .subitem-btn.selected { background: var(--green-light);  border-color: var(--green);  color: var(--green);  }
 
-.fejl-desc-wrap { display: none; padding: 0 14px 12px; }
+.fejl-desc-wrap { display: none; padding: 0 16px 14px; }
 .fejl-item.selected .fejl-desc-wrap { display: block; }
-.desc-hint { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; }
-.fejl-desc-input { width: 100%; border: 1px solid var(--gray-border); border-radius: var(--radius); padding: 10px 12px; font-family: var(--font); font-size: 13px; color: var(--text); background: var(--gray-light); resize: none; min-height: 70px; outline: none; transition: border-color 0.15s; }
+.desc-hint { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
+.fejl-desc-input { width: 100%; border: 1px solid var(--gray-border); border-radius: var(--radius); padding: 12px 14px; font-family: var(--font); font-size: 16px; color: var(--text); background: var(--gray-light); resize: none; min-height: 80px; outline: none; transition: border-color 0.15s; }
 .fejl-desc-input:focus { border-color: var(--red); background: white; }
 
 .fejl-item.selected.buler    { border-color: #b45309; }
-.fejl-item.buler .fejl-check.selected-check { background: #b45309; border-color: #b45309; }
-.submit-hint { text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 8px; min-height: 18px; transition: color 0.2s; }
+.submit-hint { text-align: center; font-size: 14px; color: var(--text-muted); margin-top: 10px; min-height: 20px; transition: color 0.2s; }
 .submit-hint.error { color: var(--red); font-weight: 600; }
-.submit-btn { width: 100%; background: var(--red); color: white; border: none; border-radius: var(--radius); padding: 16px; font-family: var(--font); font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.submit-btn { width: 100%; background: var(--red); color: white; border: none; border-radius: var(--radius); padding: 20px; font-family: var(--font); font-size: 18px; font-weight: 700; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
 .submit-btn:active { transform: scale(0.98); background: var(--red-dark); }
 .submit-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
 
-.result-msg { display: none; border-radius: var(--radius); padding: 14px; font-size: 14px; font-weight: 500; text-align: center; margin-top: 12px; }
+.result-msg { display: none; border-radius: var(--radius); padding: 16px; font-size: 16px; font-weight: 500; text-align: center; margin-top: 14px; }
 .result-msg.success { display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--green-light); color: var(--green); border: 1px solid #c3e8d0; }
 .result-msg.error   { display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--red-light);   color: var(--red);   border: 1px solid #f5c0c0; }
 
-.spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--gray-border); border-top-color: var(--red); border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
+.spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid var(--gray-border); border-top-color: var(--red); border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 8px; }
 @keyframes spin { to { transform: rotate(360deg); } }
-.loading { text-align: center; padding: 16px; color: var(--text-muted); font-size: 13px; }
+.loading { text-align: center; padding: 20px; color: var(--text-muted); font-size: 16px; }
 </style>
 </head>
 <body>
@@ -170,7 +169,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 <div class="content">
 
   <div class="active-faults" style="margin-bottom:0;">
-    <div class="section-title">Aktive fejlmeldinger på denne bil</div>
+    <div class="section-title">Aktive fejlmeldinger på <span id="section-car-title">denne bil</span></div>
     <div id="active-faults-list">
       <div class="loading"><span class="spinner"></span>Henter fejlmeldinger…</div>
     </div>
@@ -353,6 +352,7 @@ const urlParams = new URLSearchParams(window.location.search);
 const bilId = (urlParams.get('bil') || '').toUpperCase().trim();
 document.getElementById('car-id-display').textContent = bilId || '???';
 document.getElementById('form-car-title').textContent = bilId || '???';
+document.getElementById('section-car-title').textContent = bilId || 'denne bil';
 if (!bilId) document.getElementById('car-id-display').style.color = 'rgba(255,255,255,0.4)';
 
 const selectedFejl = new Set();

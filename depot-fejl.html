@@ -168,9 +168,9 @@ body {
 }
 table { width: 100%; border-collapse: collapse; }
 th.sortable { cursor: pointer; user-select: none; }
-th.sortable:hover { background: var(--gray-border); }
-th.sort-asc::after { content: ' ↑'; }
-th.sort-desc::after { content: ' ↓'; }
+th.sortable:hover { color: var(--text); }
+th.sort-asc::after { content: ' ↑'; opacity: 0.6; }
+th.sort-desc::after { content: ' ↓'; opacity: 0.6; }
   background: var(--gray-light);
   padding: 10px 14px;
   font-size: 11px;
@@ -447,10 +447,10 @@ tr:hover td { background: var(--gray-light); }
       <table>
         <thead>
           <tr>
-            <th class="sortable" data-col="bil" onclick="sortTable('bil')">Bil ⇅</th>
-            <th class="sortable" data-col="kategori" onclick="sortTable('kategori')">Kategori ⇅</th>
+            <th class="sortable" data-col="bil" onclick="sortTable('bil')">Bil</th>
+            <th class="sortable" data-col="kategori" onclick="sortTable('kategori')">Kategori</th>
             <th>Beskrivelse</th>
-            <th class="sortable" data-col="timestamp" onclick="sortTable('timestamp')">Tidsstempel ⇅</th>
+            <th class="sortable" data-col="timestamp" onclick="sortTable('timestamp')">Tidsstempel</th>
             <th>Handling</th>
           </tr>
         </thead>
