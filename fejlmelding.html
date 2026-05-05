@@ -489,17 +489,17 @@ async function loadActiveFaults() {
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     const rows = (data.values || []).slice(1);
-    const mine = rows.filter(r => (r[1]||'').toUpperCase().trim() === bilId && (r[4]||'').toLowerCase() !== 'kvitteret');
+    const mine = rows.filter(r => (r[2]||'').toUpperCase().trim() === bilId && (r[5]||'').toLowerCase() !== 'kvitteret');
     if (!mine.length) { el.innerHTML = '<div class="no-faults">✅ Ingen aktive fejlmeldinger på denne bil</div>'; return; }
     el.innerHTML = mine.map(r => {
-      const meta = CAT_META[r[2]] || { icon: '❓', cls: '' };
-      const { init, text } = parseDesc(r[3] || '');
+      const meta = CAT_META[r[3]] || { icon: '❓', cls: '' };
+      const { init, text } = parseDesc(r[4] || '');
       const ts = r[0] ? new Date(r[0]).toLocaleTimeString('da-DK', { hour:'2-digit', minute:'2-digit' }) +
         ' ' + new Date(r[0]).toLocaleDateString('da-DK', { day:'2-digit', month:'short' }) : '';
       return `<div class="fault-card ${meta.cls}">
         <div class="fault-icon">${meta.icon}</div>
         <div class="fault-body">
-          <div class="fault-category">${r[2]||''}${init ? ` <span style="font-size:11px;font-weight:400;color:var(--text-muted);">— ${init}</span>` : ''}</div>
+          <div class="fault-category">${r[3]||''}${init ? ` <span style="font-size:11px;font-weight:400;color:var(--text-muted);">— ${init}</span>` : ''}</div>
           ${text ? `<div class="fault-desc">${text}</div>` : ''}
           <div class="fault-time">${ts}</div>
         </div>
