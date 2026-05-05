@@ -167,7 +167,10 @@ body {
   overflow: hidden;
 }
 table { width: 100%; border-collapse: collapse; }
-th {
+th.sortable { cursor: pointer; user-select: none; }
+th.sortable:hover { background: var(--gray-border); }
+th.sort-asc::after { content: ' ↑'; }
+th.sort-desc::after { content: ' ↓'; }
   background: var(--gray-light);
   padding: 10px 14px;
   font-size: 11px;
@@ -444,10 +447,10 @@ tr:hover td { background: var(--gray-light); }
       <table>
         <thead>
           <tr>
-            <th>Bil</th>
-            <th>Kategori</th>
+            <th class="sortable" data-col="bil" onclick="sortTable('bil')">Bil ⇅</th>
+            <th class="sortable" data-col="kategori" onclick="sortTable('kategori')">Kategori ⇅</th>
             <th>Beskrivelse</th>
-            <th>Tidsstempel</th>
+            <th class="sortable" data-col="timestamp" onclick="sortTable('timestamp')">Tidsstempel ⇅</th>
             <th>Handling</th>
           </tr>
         </thead>
@@ -651,7 +654,31 @@ function fmtTs(ts) {
     + ' ' + d.toLocaleTimeString('da-DK', { hour:'2-digit', minute:'2-digit' });
 }
 
-// ─── RENDER AKTIVE ────────────────────────────────────────────────────────────
+// ─── SORTERING ────────────────────────────────────────────────────────────────
+let sortCol = 'timestamp';
+let sortDir = -1; // -1 = nyeste først
+
+function sortTable(col) {
+  if (sortCol === col) { sortDir *= -1; }
+  else { sortCol = col; sortDir = col === 'timestamp' ? -1 : 1; }
+  document.querySelectorAll('th.sortable').forEach(th => {
+    th.classList.remove('sort-asc', 'sort-desc');
+    if (th.dataset.col === col) th.classList.add(sortDir === 1 ? 'sort-asc' : 'sort-desc');
+  });
+  const aktive = allRows.filter(r => r.status !== 'kvitteret');
+  renderActiveTable(aktive);
+}
+
+function sortRows(rows) {
+  return [...rows].sort((a, b) => {
+    let va = a[sortCol] || '';
+    let vb = b[sortCol] || '';
+    if (sortCol === 'timestamp') { va = new Date(va.replace(/(\d{2})\.(\d{2})\.(\d{2})$/, '$1:$2:$3').replace(/^(\d{2})\/(\d{2})\/(\d{4})/, '$2/$1/$3')); vb = new Date(vb.replace(/(\d{2})\.(\d{2})\.(\d{2})$/, '$1:$2:$3').replace(/^(\d{2})\/(\d{2})\/(\d{4})/, '$2/$1/$3')); }
+    if (va < vb) return -1 * sortDir;
+    if (va > vb) return 1 * sortDir;
+    return 0;
+  });
+}
 function filterCat(el, cat) {
   document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
@@ -670,6 +697,7 @@ function matchKat(r, cat) {
 
 function renderActiveTable(aktive) {
   const filtered = activeFilter === 'alle' ? aktive : aktive.filter(r => matchKat(r, activeFilter));
+  const sorted = sortRows(filtered);
   const tbody = document.getElementById('active-tbody');
   if (!filtered.length) {
     tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text-muted);">
@@ -677,7 +705,7 @@ function renderActiveTable(aktive) {
     </td></tr>`;
     return;
   }
-  tbody.innerHTML = filtered.map(r => `
+  tbody.innerHTML = sorted.map(r => `
     <tr${r.udbedretMeldt ? ' style="background:var(--green-light);"' : ''}>
       <td><span class="car-code">${r.bil}</span></td>
       <td>${catBadge(r.kategori)}</td>
