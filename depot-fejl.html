@@ -732,7 +732,7 @@ async function confirmKvit() {
   // Send til Sheets i baggrunden
   fetch(cfg.scriptUrl + '?' + params.toString(), { mode: 'no-cors' })
     .catch(() => showToast('⚠ Kunne ikke gemme kvittering i Sheets'));
-  setTimeout(loadData, 4000);
+  setTimeout(loadData, 30000);
 }
 
 // ─── TABS ────────────────────────────────────────────────────────────────────
