@@ -560,7 +560,7 @@ async function loadActiveFaults() {
   if (!bilId) { el.innerHTML = '<div class="no-faults">⚠️ Ingen bil-ID i URL</div>'; return; }
   el.innerHTML = '<div class="loading"><span class="spinner"></span>Henter fejlmeldinger…</div>';
   try {
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${CFG.sheetId}/values/${encodeURIComponent(CFG.sheetName + '!A:I')}?key=${CFG.apiKey}`;
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${CFG.sheetId}/values/${encodeURIComponent(CFG.sheetName + '!A:J')}?key=${CFG.apiKey}`;
     const res = await fetch(url);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
@@ -577,6 +577,10 @@ async function loadActiveFaults() {
       const meta = CAT_META[r[3]] || { icon: '❓', cls: '' };
       const { init, text } = parseDesc(r[4] || '');
       const ts = fmtTimestamp(r[0]);
+      const udbedret = r[9] || '';
+      const udbedretBtn = udbedret
+        ? `<button class="udbedret-btn" disabled style="background:var(--green-light);color:var(--green);border-color:var(--green);">✅ Meldt udbedret</button>`
+        : `<button class="udbedret-btn" onclick="meldUdbedret('${(r[3]||'').replace(/'/g,"\\'")}', '${init}', ${rowIndex}, this)">✓ Udbedret</button>`;
       return `<div class="fault-card ${meta.cls}">
         <div class="fault-icon">${meta.icon}</div>
         <div class="fault-body">
@@ -584,7 +588,7 @@ async function loadActiveFaults() {
           ${text ? `<div class="fault-desc">${text}</div>` : ''}
           <div class="fault-footer">
             <div class="fault-time">${ts}</div>
-            <button class="udbedret-btn" onclick="meldUdbedret('${(r[3]||'').replace(/'/g,"\\'")}', '${init}', ${rowIndex}, this)">✓ Udbedret</button>
+            ${udbedretBtn}
           </div>
         </div>
       </div>`;
