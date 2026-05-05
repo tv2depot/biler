@@ -102,6 +102,10 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 .fejl-desc-input { width: 100%; border: 1px solid var(--gray-border); border-radius: var(--radius); padding: 10px 12px; font-family: var(--font); font-size: 13px; color: var(--text); background: var(--gray-light); resize: none; min-height: 70px; outline: none; transition: border-color 0.15s; }
 .fejl-desc-input:focus { border-color: var(--red); background: white; }
 
+.fejl-item.selected.buler    { border-color: #b45309; }
+.fejl-item.buler .fejl-check.selected-check { background: #b45309; border-color: #b45309; }
+.submit-hint { text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 8px; min-height: 18px; transition: color 0.2s; }
+.submit-hint.error { color: var(--red); font-weight: 600; }
 .submit-btn { width: 100%; background: var(--red); color: white; border: none; border-radius: var(--radius); padding: 16px; font-family: var(--font); font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
 .submit-btn:active { transform: scale(0.98); background: var(--red-dark); }
 .submit-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
@@ -149,7 +153,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
   </div>
 
   <div class="form-card">
-    <div class="form-title">📋 Ny fejlmelding</div>
+    <div class="form-title">📋 Ny fejlmelding — <span id="form-car-title" style="font-family:var(--font-mono);color:var(--red);">—</span></div>
 
     <div class="initialer-wrap">
       <label>Dine initialer <span>*</span></label>
@@ -176,6 +180,21 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
         </div>
       </div>
 
+      <div class="fejl-item buler" id="item-buler">
+        <div class="fejl-header" onclick="toggleFejl('buler')">
+          <div class="fejl-check" id="chk-buler"></div>
+          <div class="fejl-icon">🚗</div>
+          <div class="fejl-label-wrap">
+            <div class="fejl-label">Buler / karosseriskader</div>
+            <div class="fejl-sublabel">Skader på karrosseri</div>
+          </div>
+        </div>
+        <div class="fejl-desc-wrap">
+          <div class="desc-hint">Valgfri beskrivelse:</div>
+          <textarea class="fejl-desc-input" id="desc-buler" placeholder="fx Bule på bagskærm højre side…" rows="2"></textarea>
+        </div>
+      </div>
+
       <div class="fejl-item stenslag" id="item-stenslag">
         <div class="fejl-header" onclick="toggleFejl('stenslag')">
           <div class="fejl-check" id="chk-stenslag"></div>
@@ -197,7 +216,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
           <div class="fejl-icon">🔴</div>
           <div class="fejl-label-wrap">
             <div class="fejl-label">Dæktryk</div>
-            <div class="fejl-sublabel">TPMS-advarsel</div>
+            <div class="fejl-sublabel">Lavt lufttryk i dæk</div>
           </div>
         </div>
         <div class="fejl-desc-wrap">
@@ -248,7 +267,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
           <div class="subitem-group-label">Problem:</div>
           <button class="subitem-btn problem-btn" onclick="toggleSubitem(this,event)">Mangler / bortkommet</button>
           <button class="subitem-btn problem-btn" onclick="toggleSubitem(this,event)">Virker ikke / afvist</button>
-          <button class="subitem-btn problem-btn" onclick="toggleSubitem(this,event)">Glemt hjemme</button>
+          <button class="subitem-btn problem-btn" onclick="toggleSubitem(this,event)">Låst / blokeret</button>
         </div>
         <div class="fejl-desc-wrap">
           <div class="desc-hint">Valgfri bemærkning:</div>
@@ -272,7 +291,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
           <div class="subitem-group-label" style="margin-top:6px;">Problem:</div>
           <button class="subitem-btn problem-btn" onclick="toggleSubitem(this,event)">Mangler / bortkommet</button>
           <button class="subitem-btn problem-btn" onclick="toggleSubitem(this,event)">Virker ikke / afvist</button>
-          <button class="subitem-btn problem-btn" onclick="toggleSubitem(this,event)">Glemt hjemme</button>
+          <button class="subitem-btn problem-btn" onclick="toggleSubitem(this,event)">Låst / blokeret</button>
         </div>
         <div class="fejl-desc-wrap">
           <div class="desc-hint">Valgfri bemærkning:</div>
@@ -282,9 +301,10 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 
     </div>
 
-    <button class="submit-btn" id="submit-btn" onclick="submitAll()" disabled>
+    <button class="submit-btn" id="submit-btn" onclick="submitAll()">
       ⚡ Send fejlmelding
     </button>
+    <div id="submit-hint" class="submit-hint">Udfyld initialer og vælg mindst én fejl</div>
     <div class="result-msg" id="result-msg"></div>
   </div>
 
@@ -304,6 +324,7 @@ const CFG = {
 const urlParams = new URLSearchParams(window.location.search);
 const bilId = (urlParams.get('bil') || '').toUpperCase().trim();
 document.getElementById('car-id-display').textContent = bilId || '???';
+document.getElementById('form-car-title').textContent = bilId || '???';
 if (!bilId) document.getElementById('car-id-display').style.color = 'rgba(255,255,255,0.4)';
 
 const selectedFejl = new Set();
@@ -335,12 +356,46 @@ function getSelectedSubitems(type) {
 
 function updateSubmitBtn() {
   const init = document.getElementById('initialer').value.trim();
-  document.getElementById('submit-btn').disabled = !init || !bilId || selectedFejl.size === 0;
+  const hint = document.getElementById('submit-hint');
+  const btn  = document.getElementById('submit-btn');
+
+  if (!init && selectedFejl.size === 0) {
+    hint.textContent = 'Udfyld initialer og vælg mindst én fejl';
+    hint.classList.remove('error');
+    btn.style.opacity = '0.5';
+  } else if (!init) {
+    hint.textContent = '⬆ Udfyld dine initialer for at sende';
+    hint.classList.add('error');
+    btn.style.opacity = '0.5';
+  } else if (selectedFejl.size === 0) {
+    hint.textContent = 'Vælg mindst én fejl ovenfor';
+    hint.classList.remove('error');
+    btn.style.opacity = '0.5';
+  } else {
+    hint.textContent = '';
+    hint.classList.remove('error');
+    btn.style.opacity = '1';
+  }
 }
 
 async function submitAll() {
   const init = document.getElementById('initialer').value.trim().toUpperCase();
-  if (!init || selectedFejl.size === 0 || !bilId) return;
+  if (!init) {
+    document.getElementById('initialer').focus();
+    document.getElementById('initialer').style.borderColor = 'var(--red)';
+    document.getElementById('initialer').style.background = 'var(--red-light)';
+    const hint = document.getElementById('submit-hint');
+    hint.textContent = '⬆ Udfyld dine initialer for at sende';
+    hint.classList.add('error');
+    return;
+  }
+  if (selectedFejl.size === 0) {
+    const hint = document.getElementById('submit-hint');
+    hint.textContent = 'Vælg mindst én fejl ovenfor';
+    hint.classList.add('error');
+    return;
+  }
+  if (!bilId) return;
 
   const btn = document.getElementById('submit-btn');
   btn.disabled = true;
@@ -348,7 +403,8 @@ async function submitAll() {
 
   const CAT_LABELS = {
     service: 'Service', stenslag: 'Stenslag', daektryk: 'Dæktryk',
-    andet: 'Andet', tankkort: 'Tankkort mangler', ladebrik: 'Ladebrik mangler',
+    buler: 'Buler / karosseriskader',
+    andet: 'Andet', tankkort: 'Tankkort', ladebrik: 'Ladebrik',
   };
 
   const promises = Array.from(selectedFejl).map(type => {
@@ -368,6 +424,8 @@ async function submitAll() {
   try {
     await Promise.all(promises);
     showResult('success', `✅ ${selectedFejl.size} fejlmelding${selectedFejl.size > 1 ? 'er' : ''} sendt — tak ${init}!`);
+    document.getElementById('initialer').style.borderColor = '';
+    document.getElementById('initialer').style.background = '';
     // Reset
     Array.from(selectedFejl).forEach(type => {
       document.getElementById('item-' + type).classList.remove('selected');
@@ -397,12 +455,13 @@ function showResult(type, msg) {
 }
 
 const CAT_META = {
-  'Service':          { icon: '🔧', cls: 'service' },
-  'Stenslag':         { icon: '💥', cls: 'stenslag' },
-  'Dæktryk':          { icon: '🔴', cls: 'daektryk' },
-  'Andet':            { icon: '📝', cls: 'andet' },
-  'Tankkort mangler': { icon: '⛽', cls: 'tankkort' },
-  'Ladebrik mangler': { icon: '⚡', cls: 'ladebrik' },
+  'Service':                  { icon: '🔧', cls: 'service' },
+  'Stenslag':                 { icon: '💥', cls: 'stenslag' },
+  'Dæktryk':                  { icon: '🔴', cls: 'daektryk' },
+  'Buler / karosseriskader':  { icon: '🚗', cls: 'buler'    },
+  'Andet':                    { icon: '📝', cls: 'andet'    },
+  'Tankkort':                 { icon: '⛽', cls: 'tankkort' },
+  'Ladebrik':                 { icon: '⚡', cls: 'ladebrik' },
 };
 
 function fmtTimestamp(ts) {
