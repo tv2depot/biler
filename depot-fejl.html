@@ -578,7 +578,7 @@ async function loadData() {
   // Hent alle rækker fra "Formularrespons 1" (Google Forms default ark)
   try {
     const sheetName = encodeURIComponent(cfg.sheetName || 'Formularsvar 1');
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheetId}/values/${encodeURIComponent((cfg.sheetName || 'Formularsvar 1') + '!A:I')}?key=${cfg.apiKey}`;
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheetId}/values/${encodeURIComponent((cfg.sheetName || 'Formularsvar 1') + '!A:J')}?key=${cfg.apiKey}`;
     const res = await fetch(url);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
