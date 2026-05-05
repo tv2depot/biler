@@ -713,8 +713,11 @@ function renderActiveTable(aktive) {
       <td class="ts-cell">${fmtTs(r.timestamp)}</td>
       <td>
         ${r.udbedretMeldt
-          ? `<div style="font-size:11px;color:var(--green);margin-bottom:4px;">✓ Udbedret meldt af ${r.udbedretMeldt}</div>
-             <button class="btn btn-sm btn-green" onclick="openKvitModal(${r.rowIndex})" style="background:var(--green);color:white;border-color:var(--green);">✓ Bekræft udbedring</button>`
+          ? `<div style="font-size:11px;color:var(--green);margin-bottom:6px;">✓ Udbedret meldt af ${r.udbedretMeldt}</div>
+             <div style="display:flex;gap:6px;">
+               <button class="btn btn-sm btn-green" onclick="openKvitModal(${r.rowIndex})" style="background:var(--green);color:white;border-color:var(--green);">✓ Bekræft</button>
+               <button class="btn btn-sm" onclick="afvisUdbedring(${r.rowIndex})" style="background:var(--red-light);color:var(--red);border-color:var(--red);">✗ Afvis</button>
+             </div>`
           : `<button class="btn btn-sm btn-green" onclick="openKvitModal(${r.rowIndex})">✓ Kvittér</button>`
         }
       </td>
@@ -751,6 +754,26 @@ function openKvitModal(rowIndex) {
   document.getElementById('kvit-note').value = '';
   document.getElementById('kvit-modal').classList.add('open');
 }
+async function afvisUdbedring(rowIndex) {
+  const cfg = loadConfig();
+  const now = new Date().toLocaleString('da-DK');
+  const navn = localStorage.getItem('depotfej_lastKvitName') || 'Depot';
+  const params = new URLSearchParams({
+    action: 'afvisUdbedring',
+    sheetId: cfg.sheetId,
+    rowIndex,
+    navn,
+    ts: now,
+  });
+  const row = allRows.find(r => r.rowIndex === rowIndex);
+  if (row) row.udbedretMeldt = '';
+  renderAll();
+  showToast('↩ Udbedring afvist — fejl er stadig aktiv');
+  fetch(cfg.scriptUrl + '?' + params.toString(), { mode: 'no-cors' })
+    .catch(() => {});
+  setTimeout(loadData, 15000);
+}
+
 function closeKvitModal() {
   document.getElementById('kvit-modal').classList.remove('open');
   pendingKvitRow = null;
@@ -834,8 +857,9 @@ const APPS_SCRIPT_CODE = `// ═════════════════
 
 function doGet(e) {
   const params = e.parameter;
-  if (params.action === 'kvitter')   return kvitter(params);
-  if (params.action === 'udbedret')  return udbedret(params);
+  if (params.action === 'kvitter')        return kvitter(params);
+  if (params.action === 'udbedret')       return udbedret(params);
+  if (params.action === 'afvisUdbedring') return afvisUdbedring(params);
   return ContentService
     .createTextOutput(JSON.stringify({ status: 'ok', msg: 'TV2 Depot Webhook aktiv' }))
     .setMimeType(ContentService.MimeType.JSON);
@@ -873,12 +897,22 @@ function udbedret(params) {
     return ContentService
       .createTextOutput(JSON.stringify({ status: 'ok', row }))
       .setMimeType(ContentService.MimeType.JSON);
+function afvisUdbedring(params) {
+  try {
+    const ss    = SpreadsheetApp.openById(params.sheetId);
+    const sheet = ss.getSheets()[0];
+    const row   = parseInt(params.rowIndex);
+    // Ryd kolonne J (Udbedret_meldt)
+    sheet.getRange(row, 10).setValue('');
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'ok', row }))
+      .setMimeType(ContentService.MimeType.JSON);
   } catch(err) {
     return ContentService
       .createTextOutput(JSON.stringify({ status: 'error', msg: err.toString() }))
       .setMimeType(ContentService.MimeType.JSON);
   }
-}`;
+}`;  // <-- denne linje afslutter APPS_SCRIPT_CODE strengen
 
 function showScriptCode() {
   document.getElementById('script-code-box').value = APPS_SCRIPT_CODE;
