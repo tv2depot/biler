@@ -622,11 +622,16 @@ function updateStats(aktive) {
 
 // ─── CAT META ─────────────────────────────────────────────────────────────────
 const CAT_META = {
-  'Service':              { icon: '🔧', cls: 'service' },
-  'Servicelampe lyser':  { icon: '🔧', cls: 'service' },
-  'Stenslag':  { icon: '💥', cls: 'stenslag' },
-  'Dæktryk':   { icon: '🔴', cls: 'daektryk' },
-  'Andet':     { icon: '📝', cls: 'andet' },
+  'Service':                 { icon: '🔧', cls: 'service'  },
+  'Servicelampe lyser':      { icon: '🔧', cls: 'service'  },
+  'Stenslag':                { icon: '💥', cls: 'stenslag' },
+  'Dæktryk':                 { icon: '⚠️', cls: 'daektryk' },
+  'Buler / karosseriskader': { icon: '🚗', cls: 'buler'    },
+  'Andet':                   { icon: '📝', cls: 'andet'    },
+  'Tankkort':                { icon: '⛽', cls: 'tankkort' },
+  'Tankkort mangler':        { icon: '⛽', cls: 'tankkort' },
+  'Ladebrik':                { icon: '⚡', cls: 'ladebrik' },
+  'Ladebrik mangler':        { icon: '⚡', cls: 'ladebrik' },
 };
 function catBadge(cat) {
   const m = CAT_META[cat] || { icon: '❓', cls: '' };
