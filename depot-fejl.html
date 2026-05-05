@@ -420,16 +420,20 @@ tr:hover td { background: var(--gray-light); }
     <div class="stat-card red"><div class="stat-num" id="s-stenslag">—</div><div class="stat-label">Stenslag</div></div>
     <div class="stat-card blue"><div class="stat-num" id="s-daektryk">—</div><div class="stat-label">Dæktryk</div></div>
     <div class="stat-card green"><div class="stat-num" id="s-andet">—</div><div class="stat-label">Andet</div></div>
+    <div class="stat-card" style="--num-color:#7c3aed;"><div class="stat-num" id="s-tankkort" style="color:#7c3aed;">—</div><div class="stat-label">Tankkort</div></div>
+    <div class="stat-card green"><div class="stat-num" id="s-ladebrik">—</div><div class="stat-label">Ladebrik</div></div>
   </div>
 
   <!-- ── TAB: AKTIVE ── -->
   <div id="view-aktive">
     <div class="filter-row">
-      <div class="filter-chip active" onclick="filterCat(this,'alle')">Alle</div>
+      <div class="filter-chip" onclick="filterCat(this,'alle')">Alle</div>
       <div class="filter-chip service" onclick="filterCat(this,'Service')">🔧 Service</div>
       <div class="filter-chip stenslag" onclick="filterCat(this,'Stenslag')">💥 Stenslag</div>
-      <div class="filter-chip daektryk" onclick="filterCat(this,'Dæktryk')">🔴 Dæktryk</div>
+      <div class="filter-chip daektryk" onclick="filterCat(this,'Dæktryk')">⚠️ Dæktryk</div>
       <div class="filter-chip andet" onclick="filterCat(this,'Andet')">📝 Andet</div>
+      <div class="filter-chip" style="border-color:#7c3aed;" onclick="filterCat(this,'Tankkort')">⛽ Tankkort</div>
+      <div class="filter-chip" style="border-color:var(--green);" onclick="filterCat(this,'Ladebrik')">⚡ Ladebrik</div>
     </div>
     <div class="table-wrap">
       <table>
@@ -608,16 +612,18 @@ function renderAll() {
 // ─── STATS ────────────────────────────────────────────────────────────────────
 function updateStats(aktive) {
   document.getElementById('s-total').textContent    = aktive.length;
-  document.getElementById('s-service').textContent  = aktive.filter(r => r.kategori === 'Service' || r.kategori === 'Servicelampe/-behov').length;
+  document.getElementById('s-service').textContent  = aktive.filter(r => r.kategori === 'Service' || r.kategori === 'Servicelampe lyser').length;
   document.getElementById('s-stenslag').textContent = aktive.filter(r => r.kategori === 'Stenslag').length;
   document.getElementById('s-daektryk').textContent = aktive.filter(r => r.kategori === 'Dæktryk').length;
   document.getElementById('s-andet').textContent    = aktive.filter(r => r.kategori === 'Andet').length;
+  document.getElementById('s-tankkort').textContent = aktive.filter(r => r.kategori === 'Tankkort' || r.kategori === 'Tankkort mangler').length;
+  document.getElementById('s-ladebrik').textContent = aktive.filter(r => r.kategori === 'Ladebrik' || r.kategori === 'Ladebrik mangler').length;
 }
 
 // ─── CAT META ─────────────────────────────────────────────────────────────────
 const CAT_META = {
   'Service':              { icon: '🔧', cls: 'service' },
-  'Servicelampe/-behov':  { icon: '🔧', cls: 'service' },
+  'Servicelampe lyser':  { icon: '🔧', cls: 'service' },
   'Stenslag':  { icon: '💥', cls: 'stenslag' },
   'Dæktryk':   { icon: '🔴', cls: 'daektryk' },
   'Andet':     { icon: '📝', cls: 'andet' },
@@ -643,8 +649,16 @@ function filterCat(el, cat) {
   renderActiveTable(aktive);
 }
 
+function matchKat(r, cat) {
+  if (cat === 'alle') return true;
+  if (cat === 'Service') return r.kategori === 'Service' || r.kategori === 'Servicelampe lyser';
+  if (cat === 'Tankkort') return r.kategori === 'Tankkort' || r.kategori === 'Tankkort mangler';
+  if (cat === 'Ladebrik') return r.kategori === 'Ladebrik' || r.kategori === 'Ladebrik mangler';
+  return r.kategori === cat;
+}
+
 function renderActiveTable(aktive) {
-  const filtered = activeFilter === 'alle' ? aktive : aktive.filter(r => r.kategori === activeFilter);
+  const filtered = activeFilter === 'alle' ? aktive : aktive.filter(r => matchKat(r, activeFilter));
   const tbody = document.getElementById('active-tbody');
   if (!filtered.length) {
     tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text-muted);">
