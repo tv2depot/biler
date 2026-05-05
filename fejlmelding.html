@@ -7,340 +7,122 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --red: #CC0000;
-  --red-dark: #990000;
-  --red-light: #fff0f0;
-  --green: #2a8a4a;
-  --green-light: #e6f4ec;
-  --orange: #d47c00;
-  --orange-light: #fff4e0;
-  --blue: #1a6fc4;
-  --blue-light: #e8f1fb;
-  --gray: #6b7280;
-  --gray-light: #f4f4f2;
-  --gray-border: #e2e1dc;
-  --text: #1a1a18;
-  --text-muted: #6b7280;
-  --bg: #f7f6f2;
-  --bg-card: #ffffff;
-  --font: 'DM Sans', sans-serif;
-  --font-mono: 'DM Mono', monospace;
-  --radius: 10px;
-  --radius-lg: 16px;
+  --red: #CC0000; --red-dark: #990000; --red-light: #fff0f0;
+  --green: #2a8a4a; --green-light: #e6f4ec;
+  --orange: #d47c00; --orange-light: #fff4e0;
+  --blue: #1a6fc4; --blue-light: #e8f1fb;
+  --purple: #7c3aed; --purple-light: #f3f0ff;
+  --gray: #6b7280; --gray-light: #f4f4f2; --gray-border: #e2e1dc;
+  --text: #1a1a18; --text-muted: #6b7280;
+  --bg: #f7f6f2; --bg-card: #ffffff;
+  --font: 'DM Sans', sans-serif; --font-mono: 'DM Mono', monospace;
+  --radius: 10px; --radius-lg: 16px;
 }
-
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.5; min-height: 100vh; padding-bottom: 60px; }
 
-body {
-  font-family: var(--font);
-  background: var(--bg);
-  color: var(--text);
-  font-size: 15px;
-  line-height: 1.5;
-  min-height: 100vh;
-  padding-bottom: 40px;
-}
-
-/* ── HEADER ── */
-.header {
-  background: var(--red);
-  color: white;
-  padding: 20px 20px 24px;
-  position: relative;
-  overflow: hidden;
-}
-.header::after {
-  content: '';
-  position: absolute;
-  bottom: -20px; left: -10px; right: -10px;
-  height: 40px;
-  background: var(--bg);
-  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
-}
-.header-top {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 14px;
-}
-.logo-circle {
-  width: 36px; height: 36px; border-radius: 50%;
-  background: rgba(255,255,255,0.2);
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
+.header { background: var(--red); color: white; padding: 20px 20px 28px; position: relative; overflow: hidden; }
+.header::after { content: ''; position: absolute; bottom: -20px; left: -10px; right: -10px; height: 40px; background: var(--bg); border-radius: 50% 50% 0 0 / 100% 100% 0 0; }
+.header-top { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.logo-circle { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .logo-circle svg { width: 20px; height: 20px; }
 .header-brand { font-size: 13px; font-weight: 600; opacity: 0.9; }
 .header-sub { font-size: 11px; opacity: 0.7; }
-
-.car-badge {
-  background: rgba(255,255,255,0.15);
-  border: 1px solid rgba(255,255,255,0.3);
-  border-radius: var(--radius);
-  padding: 10px 14px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+.car-badge { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: var(--radius); padding: 10px 14px; display: flex; align-items: center; gap: 10px; }
 .car-badge-icon { font-size: 22px; }
-.car-badge-id {
-  font-size: 22px;
-  font-weight: 700;
-  font-family: var(--font-mono);
-  letter-spacing: 0.03em;
-}
+.car-badge-id { font-size: 22px; font-weight: 700; font-family: var(--font-mono); letter-spacing: 0.03em; }
 .car-badge-label { font-size: 11px; opacity: 0.75; }
 
-/* ── CONTENT ── */
 .content { padding: 28px 16px 0; }
-
-/* ── AKTIVE FEJL ── */
-.section-title {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin-bottom: 10px;
-}
+.section-title { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; }
 
 .active-faults { margin-bottom: 24px; }
-
-.fault-card {
-  background: var(--bg-card);
-  border: 1px solid var(--gray-border);
-  border-radius: var(--radius);
-  padding: 12px 14px;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-}
-.fault-card.service { border-left: 3px solid var(--orange); }
+.fault-card { background: var(--bg-card); border: 1px solid var(--gray-border); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 8px; display: flex; align-items: flex-start; gap: 10px; }
+.fault-card.service  { border-left: 3px solid var(--orange); }
 .fault-card.stenslag { border-left: 3px solid var(--red); }
 .fault-card.daektryk { border-left: 3px solid var(--blue); }
-.fault-card.andet { border-left: 3px solid var(--gray); }
-
+.fault-card.tankkort { border-left: 3px solid var(--purple); }
+.fault-card.ladebrik { border-left: 3px solid var(--green); }
+.fault-card.andet    { border-left: 3px solid var(--gray); }
 .fault-icon { font-size: 18px; margin-top: 1px; }
 .fault-body { flex: 1; min-width: 0; }
 .fault-category { font-size: 13px; font-weight: 600; }
 .fault-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
 .fault-time { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); margin-top: 4px; }
+.no-faults { background: var(--green-light); border: 1px solid #c3e8d0; border-radius: var(--radius); padding: 12px 14px; font-size: 13px; color: var(--green); display: flex; align-items: center; gap: 8px; }
 
-.no-faults {
-  background: var(--green-light);
-  border: 1px solid #c3e8d0;
-  border-radius: var(--radius);
-  padding: 12px 14px;
-  font-size: 13px;
-  color: var(--green);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+.form-card { background: var(--bg-card); border: 1px solid var(--gray-border); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 16px; }
+.form-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
 
-/* ── FORM CARD ── */
-.form-card {
-  background: var(--bg-card);
-  border: 1px solid var(--gray-border);
-  border-radius: var(--radius-lg);
-  padding: 20px;
-  margin-bottom: 20px;
-}
+.initialer-wrap { margin-bottom: 18px; }
+.initialer-wrap label { font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px; }
+.initialer-wrap label span { color: var(--red); }
+.initialer-input { width: 100%; border: 1.5px solid var(--gray-border); border-radius: var(--radius); padding: 12px 14px; font-family: var(--font-mono); font-size: 16px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text); background: var(--bg); outline: none; transition: border-color 0.15s; }
+.initialer-input:focus { border-color: var(--red); }
 
-.form-title {
-  font-size: 16px;
-  font-weight: 700;
-  margin-bottom: 16px;
-  color: var(--text);
-}
+.cat-section-title { font-size: 12px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; margin-top: 4px; }
+.divider { border: none; border-top: 1px solid var(--gray-border); margin: 16px 0; }
 
-/* ── KATEGORI KNAPPER ── */
-.cat-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 16px;
-}
+.fejl-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.fejl-item { border: 1.5px solid var(--gray-border); border-radius: var(--radius); overflow: hidden; transition: border-color 0.15s; background: var(--bg-card); }
+.fejl-item.selected { border-color: var(--red); }
+.fejl-item.selected.service  { border-color: var(--orange); }
+.fejl-item.selected.stenslag { border-color: var(--red); }
+.fejl-item.selected.daektryk { border-color: var(--blue); }
+.fejl-item.selected.tankkort { border-color: var(--purple); }
+.fejl-item.selected.ladebrik { border-color: var(--green); }
+.fejl-item.selected.andet    { border-color: var(--gray); }
 
-.cat-btn {
-  background: var(--gray-light);
-  border: 2px solid transparent;
-  border-radius: var(--radius);
-  padding: 14px 12px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.15s;
-  -webkit-user-select: none;
-  user-select: none;
-}
-.cat-btn:active { transform: scale(0.97); }
-.cat-btn.selected {
-  background: var(--red-light);
-  border-color: var(--red);
-}
-.cat-btn.selected.service { background: var(--orange-light); border-color: var(--orange); }
-.cat-btn.selected.stenslag { background: var(--red-light); border-color: var(--red); }
-.cat-btn.selected.daektryk { background: var(--blue-light); border-color: var(--blue); }
-.cat-btn.selected.andet { background: var(--gray-light); border-color: var(--gray); }
+.fejl-header { display: flex; align-items: center; gap: 12px; padding: 12px 14px; cursor: pointer; user-select: none; transition: background 0.1s; }
+.fejl-header:active { background: var(--gray-light); }
+.fejl-check { width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--gray-border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; font-size: 13px; font-weight: 700; color: white; }
+.fejl-item.selected .fejl-check { background: var(--red); border-color: var(--red); }
+.fejl-item.selected.service  .fejl-check { background: var(--orange); border-color: var(--orange); }
+.fejl-item.selected.daektryk .fejl-check { background: var(--blue);   border-color: var(--blue);   }
+.fejl-item.selected.tankkort .fejl-check { background: var(--purple); border-color: var(--purple); }
+.fejl-item.selected.ladebrik .fejl-check { background: var(--green);  border-color: var(--green);  }
+.fejl-item.selected.andet    .fejl-check { background: var(--gray);   border-color: var(--gray);   }
 
-.cat-icon { font-size: 24px; margin-bottom: 6px; display: block; }
-.cat-label { font-size: 13px; font-weight: 600; color: var(--text); }
-.cat-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.fejl-icon { font-size: 20px; }
+.fejl-label-wrap { flex: 1; }
+.fejl-label { font-size: 14px; font-weight: 600; }
+.fejl-sublabel { font-size: 11px; color: var(--text-muted); }
 
-/* ── TEXTAREA ── */
-.fritekst-wrap {
-  display: none;
-  margin-bottom: 16px;
-}
-.fritekst-wrap.show { display: block; }
+.fejl-subitems { display: none; padding: 0 14px 12px 48px; gap: 8px; flex-wrap: wrap; }
+.fejl-item.selected .fejl-subitems { display: flex; }
+.subitem-group-label { width: 100%; font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
+.subitem-btn { padding: 6px 12px; border-radius: 20px; border: 1.5px solid var(--gray-border); background: var(--bg); font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; color: var(--text-muted); font-family: var(--font); }
+.subitem-btn:active { transform: scale(0.97); }
+.fejl-item.tankkort .subitem-btn.selected { background: var(--purple-light); border-color: var(--purple); color: var(--purple); }
+.fejl-item.ladebrik .subitem-btn.selected { background: var(--green-light);  border-color: var(--green);  color: var(--green);  }
 
-textarea {
-  width: 100%;
-  border: 1px solid var(--gray-border);
-  border-radius: var(--radius);
-  padding: 12px;
-  font-family: var(--font);
-  font-size: 14px;
-  color: var(--text);
-  background: var(--bg);
-  resize: none;
-  min-height: 90px;
-  outline: none;
-  transition: border-color 0.15s;
-}
-textarea:focus { border-color: var(--red); }
-.char-count { font-size: 11px; color: var(--text-muted); text-align: right; margin-top: 4px; }
+.fejl-desc-wrap { display: none; padding: 0 14px 12px; }
+.fejl-item.selected .fejl-desc-wrap { display: block; }
+.desc-hint { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; }
+.fejl-desc-input { width: 100%; border: 1px solid var(--gray-border); border-radius: var(--radius); padding: 10px 12px; font-family: var(--font); font-size: 13px; color: var(--text); background: var(--gray-light); resize: none; min-height: 70px; outline: none; transition: border-color 0.15s; }
+.fejl-desc-input:focus { border-color: var(--red); background: white; }
 
-/* ── SUBMIT ── */
-.submit-btn {
-  width: 100%;
-  background: var(--red);
-  color: white;
-  border: none;
-  border-radius: var(--radius);
-  padding: 16px;
-  font-family: var(--font);
-  font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.15s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
+.submit-btn { width: 100%; background: var(--red); color: white; border: none; border-radius: var(--radius); padding: 16px; font-family: var(--font); font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
 .submit-btn:active { transform: scale(0.98); background: var(--red-dark); }
-.submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.submit-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
 
-/* ── SUCCESS / ERROR ── */
-.result-msg {
-  display: none;
-  border-radius: var(--radius);
-  padding: 14px;
-  font-size: 14px;
-  font-weight: 500;
-  text-align: center;
-  margin-top: 12px;
-}
-.result-msg.success {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background: var(--green-light);
-  color: var(--green);
-  border: 1px solid #c3e8d0;
-}
-.result-msg.error {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background: var(--red-light);
-  color: var(--red);
-  border: 1px solid #f5c0c0;
-}
+.result-msg { display: none; border-radius: var(--radius); padding: 14px; font-size: 14px; font-weight: 500; text-align: center; margin-top: 12px; }
+.result-msg.success { display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--green-light); color: var(--green); border: 1px solid #c3e8d0; }
+.result-msg.error   { display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--red-light);   color: var(--red);   border: 1px solid #f5c0c0; }
 
-/* ── LOADING ── */
-.loading { text-align: center; padding: 16px; color: var(--text-muted); font-size: 13px; }
-.spinner {
-  display: inline-block;
-  width: 16px; height: 16px;
-  border: 2px solid var(--gray-border);
-  border-top-color: var(--red);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-  vertical-align: middle;
-  margin-right: 6px;
-}
+.spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--gray-border); border-top-color: var(--red); border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
 @keyframes spin { to { transform: rotate(360deg); } }
-
-/* ── CONFIG OVERLAY ── */
-.config-overlay {
-  display: none;
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.5);
-  z-index: 200;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-.config-overlay.show { display: flex; }
-.config-box {
-  background: var(--bg-card);
-  border-radius: var(--radius-lg);
-  padding: 24px;
-  width: 100%;
-  max-width: 400px;
-}
-.config-box h2 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
-.config-box p { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
-.config-box label { font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px; }
-.config-box input {
-  width: 100%;
-  border: 1px solid var(--gray-border);
-  border-radius: var(--radius);
-  padding: 10px 12px;
-  font-size: 14px;
-  font-family: var(--font-mono);
-  outline: none;
-  margin-bottom: 12px;
-}
-.config-box input:focus { border-color: var(--red); }
-.config-save {
-  width: 100%;
-  background: var(--red);
-  color: white;
-  border: none;
-  border-radius: var(--radius);
-  padding: 12px;
-  font-family: var(--font);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-/* ── FOOTER SETTINGS LINK ── */
-.settings-link {
-  text-align: center;
-  margin-top: 16px;
-  font-size: 12px;
-  color: var(--text-muted);
-  cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
+.loading { text-align: center; padding: 16px; color: var(--text-muted); font-size: 13px; }
 </style>
 </head>
 <body>
 
-<!-- ── HEADER ── -->
 <div class="header">
   <div class="header-top">
     <div class="logo-circle">
       <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v4h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+        <rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v4h-7V8z"/>
+        <circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
       </svg>
     </div>
     <div>
@@ -357,10 +139,8 @@ textarea:focus { border-color: var(--red); }
   </div>
 </div>
 
-<!-- ── CONTENT ── -->
 <div class="content">
 
-  <!-- AKTIVE FEJL PÅ DENNE BIL -->
   <div class="active-faults">
     <div class="section-title">Aktive fejlmeldinger på denne bil</div>
     <div id="active-faults-list">
@@ -368,39 +148,141 @@ textarea:focus { border-color: var(--red); }
     </div>
   </div>
 
-  <!-- FORMULAR -->
   <div class="form-card">
     <div class="form-title">📋 Ny fejlmelding</div>
 
-    <div class="cat-grid">
-      <div class="cat-btn service" onclick="selectCategory('service', this)">
-        <span class="cat-icon">🔧</span>
-        <div class="cat-label">Service</div>
-        <div class="cat-sub">Vedligehold</div>
-      </div>
-      <div class="cat-btn stenslag" onclick="selectCategory('stenslag', this)">
-        <span class="cat-icon">💥</span>
-        <div class="cat-label">Stenslag</div>
-        <div class="cat-sub">Rude/lak</div>
-      </div>
-      <div class="cat-btn daektryk" onclick="selectCategory('daektryk', this)">
-        <span class="cat-icon">🔴</span>
-        <div class="cat-label">Dæktryk</div>
-        <div class="cat-sub">TPMS-advarsel</div>
-      </div>
-      <div class="cat-btn andet" onclick="selectCategory('andet', this)">
-        <span class="cat-icon">📝</span>
-        <div class="cat-label">Andet</div>
-        <div class="cat-sub">Fritekst</div>
-      </div>
+    <div class="initialer-wrap">
+      <label>Dine initialer <span>*</span></label>
+      <input class="initialer-input" id="initialer" type="text" maxlength="6"
+        placeholder="" autocomplete="off" autocorrect="off" spellcheck="false"
+        oninput="this.value=this.value.toUpperCase();updateSubmitBtn()">
     </div>
 
-    <div class="fritekst-wrap" id="fritekst-wrap">
-      <textarea id="fritekst" placeholder="Beskriv fejlen kort…" maxlength="300" oninput="updateCharCount()"></textarea>
-      <div class="char-count"><span id="char-count">0</span>/300</div>
+    <div class="cat-section-title">🔧 Tekniske fejl</div>
+    <div class="fejl-list">
+
+      <div class="fejl-item service" id="item-service">
+        <div class="fejl-header" onclick="toggleFejl('service')">
+          <div class="fejl-check" id="chk-service"></div>
+          <div class="fejl-icon">🔧</div>
+          <div class="fejl-label-wrap">
+            <div class="fejl-label">Service</div>
+            <div class="fejl-sublabel">Vedligehold / serviceeftersyn</div>
+          </div>
+        </div>
+        <div class="fejl-desc-wrap">
+          <div class="desc-hint">Valgfri beskrivelse:</div>
+          <textarea class="fejl-desc-input" id="desc-service" placeholder="fx Servicelampe tændt…" rows="2"></textarea>
+        </div>
+      </div>
+
+      <div class="fejl-item stenslag" id="item-stenslag">
+        <div class="fejl-header" onclick="toggleFejl('stenslag')">
+          <div class="fejl-check" id="chk-stenslag"></div>
+          <div class="fejl-icon">💥</div>
+          <div class="fejl-label-wrap">
+            <div class="fejl-label">Stenslag</div>
+            <div class="fejl-sublabel">Rude / lak / karosseri</div>
+          </div>
+        </div>
+        <div class="fejl-desc-wrap">
+          <div class="desc-hint">Valgfri beskrivelse:</div>
+          <textarea class="fejl-desc-input" id="desc-stenslag" placeholder="fx Stenslag i forrude, chaufførside…" rows="2"></textarea>
+        </div>
+      </div>
+
+      <div class="fejl-item daektryk" id="item-daektryk">
+        <div class="fejl-header" onclick="toggleFejl('daektryk')">
+          <div class="fejl-check" id="chk-daektryk"></div>
+          <div class="fejl-icon">🔴</div>
+          <div class="fejl-label-wrap">
+            <div class="fejl-label">Dæktryk</div>
+            <div class="fejl-sublabel">TPMS-advarsel</div>
+          </div>
+        </div>
+        <div class="fejl-desc-wrap">
+          <div class="desc-hint">Valgfri beskrivelse:</div>
+          <textarea class="fejl-desc-input" id="desc-daektryk" placeholder="fx Baghjul højre side…" rows="2"></textarea>
+        </div>
+      </div>
+
+      <div class="fejl-item andet" id="item-andet">
+        <div class="fejl-header" onclick="toggleFejl('andet')">
+          <div class="fejl-check" id="chk-andet"></div>
+          <div class="fejl-icon">📝</div>
+          <div class="fejl-label-wrap">
+            <div class="fejl-label">Andet</div>
+            <div class="fejl-sublabel">Beskriv fejlen</div>
+          </div>
+        </div>
+        <div class="fejl-desc-wrap">
+          <div class="desc-hint">Beskriv fejlen:</div>
+          <textarea class="fejl-desc-input" id="desc-andet" placeholder="Beskriv fejlen…" rows="3"></textarea>
+        </div>
+      </div>
+
     </div>
 
-    <button class="submit-btn" id="submit-btn" onclick="submitFault()" disabled>
+    <hr class="divider">
+
+    <div class="cat-section-title">💳 Fejl/mangler — tankkort & ladebrikker</div>
+    <div class="fejl-list">
+
+      <div class="fejl-item tankkort" id="item-tankkort">
+        <div class="fejl-header" onclick="toggleFejl('tankkort')">
+          <div class="fejl-check" id="chk-tankkort"></div>
+          <div class="fejl-icon">⛽</div>
+          <div class="fejl-label-wrap">
+            <div class="fejl-label">Tankkort</div>
+            <div class="fejl-sublabel">Vælg selskab og problemtype</div>
+          </div>
+        </div>
+        <div class="fejl-subitems" id="subitems-tankkort">
+          <div class="subitem-group-label">Selskab:</div>
+          <button class="subitem-btn" onclick="toggleSubitem(this,event)">CircleK</button>
+          <button class="subitem-btn" onclick="toggleSubitem(this,event)">Shell</button>
+          <button class="subitem-btn" onclick="toggleSubitem(this,event)">Q8</button>
+          <button class="subitem-btn" onclick="toggleSubitem(this,event)" title="Findes ikke i alle biler">OK *</button>
+          <button class="subitem-btn" onclick="toggleSubitem(this,event)" title="Findes ikke i alle biler">DKV *</button>
+          <div style="width:100%;font-size:11px;color:var(--text-muted);margin-top:2px;margin-bottom:6px;">* Findes ikke i alle biler</div>
+          <div class="subitem-group-label">Problem:</div>
+          <button class="subitem-btn problem-btn" onclick="toggleSubitem(this,event)">Mangler / bortkommet</button>
+          <button class="subitem-btn problem-btn" onclick="toggleSubitem(this,event)">Virker ikke / afvist</button>
+          <button class="subitem-btn problem-btn" onclick="toggleSubitem(this,event)">Glemt hjemme</button>
+        </div>
+        <div class="fejl-desc-wrap">
+          <div class="desc-hint">Valgfri bemærkning:</div>
+          <textarea class="fejl-desc-input" id="desc-tankkort" placeholder="" rows="2"></textarea>
+        </div>
+      </div>
+
+      <div class="fejl-item ladebrik" id="item-ladebrik">
+        <div class="fejl-header" onclick="toggleFejl('ladebrik')">
+          <div class="fejl-check" id="chk-ladebrik"></div>
+          <div class="fejl-icon">⚡</div>
+          <div class="fejl-label-wrap">
+            <div class="fejl-label">Ladebrik</div>
+            <div class="fejl-sublabel">Vælg udbyder og problemtype</div>
+          </div>
+        </div>
+        <div class="fejl-subitems" id="subitems-ladebrik">
+          <div class="subitem-group-label">Udbyder:</div>
+          <button class="subitem-btn" onclick="toggleSubitem(this,event)">Clever</button>
+          <button class="subitem-btn" onclick="toggleSubitem(this,event)">Sprii</button>
+          <div class="subitem-group-label" style="margin-top:6px;">Problem:</div>
+          <button class="subitem-btn problem-btn" onclick="toggleSubitem(this,event)">Mangler / bortkommet</button>
+          <button class="subitem-btn problem-btn" onclick="toggleSubitem(this,event)">Virker ikke / afvist</button>
+          <button class="subitem-btn problem-btn" onclick="toggleSubitem(this,event)">Glemt hjemme</button>
+        </div>
+        <div class="fejl-desc-wrap">
+          <div class="desc-hint">Valgfri bemærkning:</div>
+          <textarea class="fejl-desc-input" id="desc-ladebrik" placeholder="" rows="2"></textarea>
+        </div>
+      </div>
+
+    </div>
+
+    <button class="submit-btn" id="submit-btn" onclick="submitAll()" disabled>
       ⚡ Send fejlmelding
     </button>
     <div class="result-msg" id="result-msg"></div>
@@ -409,152 +291,95 @@ textarea:focus { border-color: var(--red); }
 </div>
 
 <script>
-// ─── KONFIGURATION (hardcodet) ────────────────────────────────────────────────
 const CFG = {
-  formUrl:    'https://docs.google.com/forms/d/e/1FAIpQLSfxhwFJVPvHbYovZ3koGf-bCTFFRGUUS54ZJ9B71LuH3Dj4fA/formResponse',
-  entryCarId: 'entry.380708390',
-  entryCatId: 'entry.306348509',
-  entryDescId:'entry.540856135',
-  sheetId:    '16pClSqAXH0z22bSvqrll5FNLhw9NiHudU4HBCk0J41c',
-  apiKey:     'AIzaSyBnntcgnLNxS4nXq1xW-nbn619ImEXeDhg',
-  sheetName:  'Formularsvar 1',
+  formUrl:     'https://docs.google.com/forms/d/e/1FAIpQLSfxhwFJVPvHbYovZ3koGf-bCTFFRGUUS54ZJ9B71LuH3Dj4fA/formResponse',
+  entryCarId:  'entry.380708390',
+  entryCatId:  'entry.306348509',
+  entryDescId: 'entry.540856135',
+  sheetId:     '16pClSqAXH0z22bSvqrll5FNLhw9NiHudU4HBCk0J41c',
+  apiKey:      'AIzaSyBnntcgnLNxS4nXq1xW-nbn619ImEXeDhg',
+  sheetName:   'Formularsvar 1',
 };
 
-function loadConfig() { return CFG; }
-
-// ─── BIL FRA URL ─────────────────────────────────────────────────────────────
 const urlParams = new URLSearchParams(window.location.search);
 const bilId = (urlParams.get('bil') || '').toUpperCase().trim();
-
 document.getElementById('car-id-display').textContent = bilId || '???';
-if (!bilId) {
-  document.getElementById('car-id-display').style.color = 'rgba(255,255,255,0.4)';
-}
+if (!bilId) document.getElementById('car-id-display').style.color = 'rgba(255,255,255,0.4)';
 
-// ─── KATEGORI VALG ────────────────────────────────────────────────────────────
-let selectedCategory = null;
+const selectedFejl = new Set();
 
-function selectCategory(cat, el) {
-  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('selected'));
-  el.classList.add('selected');
-  selectedCategory = cat;
-  document.getElementById('fritekst-wrap').classList.toggle('show', cat === 'andet');
+function toggleFejl(type) {
+  const item = document.getElementById('item-' + type);
+  if (selectedFejl.has(type)) {
+    selectedFejl.delete(type);
+    item.classList.remove('selected');
+    document.getElementById('chk-' + type).textContent = '';
+  } else {
+    selectedFejl.add(type);
+    item.classList.add('selected');
+    document.getElementById('chk-' + type).textContent = '✓';
+  }
   updateSubmitBtn();
 }
 
+function toggleSubitem(btn, e) {
+  e.stopPropagation();
+  btn.classList.toggle('selected');
+}
+
+function getSelectedSubitems(type) {
+  const wrap = document.getElementById('subitems-' + type);
+  if (!wrap) return '';
+  return Array.from(wrap.querySelectorAll('.subitem-btn.selected')).map(b => b.textContent).join(', ');
+}
+
 function updateSubmitBtn() {
-  const btn = document.getElementById('submit-btn');
-  btn.disabled = !selectedCategory || !bilId;
+  const init = document.getElementById('initialer').value.trim();
+  document.getElementById('submit-btn').disabled = !init || !bilId || selectedFejl.size === 0;
 }
 
-function updateCharCount() {
-  const v = document.getElementById('fritekst').value.length;
-  document.getElementById('char-count').textContent = v;
-}
-
-// ─── AKTIVE FEJLMELDINGER ─────────────────────────────────────────────────────
-const CAT_META = {
-  'Service':   { icon: '🔧', cls: 'service' },
-  'Stenslag':  { icon: '💥', cls: 'stenslag' },
-  'Dæktryk':   { icon: '🔴', cls: 'daektryk' },
-  'Andet':     { icon: '📝', cls: 'andet' },
-};
-
-function catKey(cat) {
-  // Normaliser til dansk visningsnavn
-  const m = { service: 'Service', stenslag: 'Stenslag', daektryk: 'Dæktryk', andet: 'Andet' };
-  return m[cat] || cat;
-}
-
-function fmtTimestamp(ts) {
-  if (!ts) return '';
-  const d = new Date(ts);
-  if (isNaN(d)) return ts;
-  return d.toLocaleDateString('da-DK', { day:'2-digit', month:'short' }) + ' ' +
-         d.toLocaleTimeString('da-DK', { hour:'2-digit', minute:'2-digit' });
-}
-
-async function loadActiveFaults() {
-  const el = document.getElementById('active-faults-list');
-  if (!bilId) {
-    el.innerHTML = '<div class="no-faults">⚠️ Ingen bil-ID i URL (brug ?bil=ENG103)</div>';
-    return;
-  }
-  const cfg = loadConfig();
-  if (!cfg.sheetId || !cfg.apiKey) {
-    el.innerHTML = '<div class="no-faults">ℹ️ Konfigurer Google Sheets nedenfor for at vise fejlmeldinger.</div>';
-    return;
-  }
-
-  el.innerHTML = '<div class="loading"><span class="spinner"></span>Henter fejlmeldinger…</div>';
-
-  try {
-    // Kolonnerækkefølge: A=Tidsstempel | B=Mailadresse | C=Bil | D=Kategori | E=Beskrivelse | F=Status
-    const sheetName = encodeURIComponent(cfg.sheetName || 'Formularsvar 1');
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheetId}/values/${sheetName}?key=${cfg.apiKey}`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-
-    const rows = (data.values || []).slice(1); // skip header
-    const mine = rows.filter(r => (r[2]||'').toUpperCase().trim() === bilId && (r[5]||'').toLowerCase() !== 'kvitteret');
-
-    if (!mine.length) {
-      el.innerHTML = '<div class="no-faults">✅ Ingen aktive fejlmeldinger på denne bil</div>';
-      return;
-    }
-
-    el.innerHTML = mine.map(r => {
-      const ts   = r[0] || '';
-      const cat  = r[3] || '';
-      const desc = r[4] || '';
-      const meta = CAT_META[cat] || { icon: '❓', cls: '' };
-      return `
-        <div class="fault-card ${meta.cls}">
-          <div class="fault-icon">${meta.icon}</div>
-          <div class="fault-body">
-            <div class="fault-category">${cat}</div>
-            ${desc ? `<div class="fault-desc">${desc}</div>` : ''}
-            <div class="fault-time">${fmtTimestamp(ts)}</div>
-          </div>
-        </div>`;
-    }).join('');
-  } catch(e) {
-    el.innerHTML = `<div class="no-faults" style="background:var(--red-light);color:var(--red);border-color:#f5c0c0;">⚠️ Kunne ikke hente fejlmeldinger (${e.message})</div>`;
-  }
-}
-
-// ─── INDSEND FEJLMELDING ──────────────────────────────────────────────────────
-async function submitFault() {
-  if (!selectedCategory || !bilId) return;
-  const cfg = loadConfig();
-  const fritekst = document.getElementById('fritekst').value.trim();
-  if (selectedCategory === 'andet' && !fritekst) {
-    document.getElementById('fritekst').focus();
-    return;
-  }
+async function submitAll() {
+  const init = document.getElementById('initialer').value.trim().toUpperCase();
+  if (!init || selectedFejl.size === 0 || !bilId) return;
 
   const btn = document.getElementById('submit-btn');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> Sender…';
 
-  // Google Forms indsend via no-cors (returnerer altid opaque response)
-  const formData = new FormData();
-  formData.append(cfg.entryCarId, bilId);
-  formData.append(cfg.entryCatId, catKey(selectedCategory));
-  if (cfg.entryDescId) formData.append(cfg.entryDescId, fritekst);
+  const CAT_LABELS = {
+    service: 'Service', stenslag: 'Stenslag', daektryk: 'Dæktryk',
+    andet: 'Andet', tankkort: 'Tankkort mangler', ladebrik: 'Ladebrik mangler',
+  };
+
+  const promises = Array.from(selectedFejl).map(type => {
+    let desc = (document.getElementById('desc-' + type)?.value || '').trim();
+    const subitems = getSelectedSubitems(type);
+    if (subitems) desc = subitems + (desc ? ' — ' + desc : '');
+    // Initialer gemmes som prefix i beskrivelsen
+    const fullDesc = '[' + init + ']' + (desc ? ' ' + desc : '');
+
+    const fd = new FormData();
+    fd.append(CFG.entryCarId,  bilId);
+    fd.append(CFG.entryCatId,  CAT_LABELS[type] || type);
+    fd.append(CFG.entryDescId, fullDesc);
+    return fetch(CFG.formUrl, { method: 'POST', mode: 'no-cors', body: fd });
+  });
 
   try {
-    await fetch(cfg.formUrl, { method: 'POST', mode: 'no-cors', body: formData });
-    // no-cors giver ingen fejl ved success
-    showResult('success', '✅ Fejlmelding sendt til depotpersonalet');
+    await Promise.all(promises);
+    showResult('success', `✅ ${selectedFejl.size} fejlmelding${selectedFejl.size > 1 ? 'er' : ''} sendt — tak ${init}!`);
     // Reset
-    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('selected'));
-    document.getElementById('fritekst').value = '';
-    document.getElementById('fritekst-wrap').classList.remove('show');
-    document.getElementById('char-count').textContent = '0';
-    selectedCategory = null;
-    setTimeout(loadActiveFaults, 3000); // Genlæs efter 3s
+    Array.from(selectedFejl).forEach(type => {
+      document.getElementById('item-' + type).classList.remove('selected');
+      document.getElementById('chk-' + type).textContent = '';
+      const ta = document.getElementById('desc-' + type);
+      if (ta) ta.value = '';
+      const si = document.getElementById('subitems-' + type);
+      if (si) si.querySelectorAll('.subitem-btn').forEach(b => b.classList.remove('selected'));
+    });
+    selectedFejl.clear();
+    updateSubmitBtn();
+    setTimeout(loadActiveFaults, 3000);
   } catch(e) {
     showResult('error', '⚠️ Netværksfejl — prøv igen');
   } finally {
@@ -568,10 +393,54 @@ function showResult(type, msg) {
   const el = document.getElementById('result-msg');
   el.className = 'result-msg ' + type;
   el.textContent = msg;
-  setTimeout(() => { el.className = 'result-msg'; }, 5000);
+  setTimeout(() => { el.className = 'result-msg'; }, 6000);
 }
 
-// ─── INIT ─────────────────────────────────────────────────────────────────────
+const CAT_META = {
+  'Service':          { icon: '🔧', cls: 'service' },
+  'Stenslag':         { icon: '💥', cls: 'stenslag' },
+  'Dæktryk':          { icon: '🔴', cls: 'daektryk' },
+  'Andet':            { icon: '📝', cls: 'andet' },
+  'Tankkort mangler': { icon: '⛽', cls: 'tankkort' },
+  'Ladebrik mangler': { icon: '⚡', cls: 'ladebrik' },
+};
+
+function fmtTimestamp(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  if (isNaN(d)) return ts;
+  return d.toLocaleDateString('da-DK', { day:'2-digit', month:'short' }) + ' ' +
+         d.toLocaleTimeString('da-DK', { hour:'2-digit', minute:'2-digit' });
+}
+
+async function loadActiveFaults() {
+  const el = document.getElementById('active-faults-list');
+  if (!bilId) { el.innerHTML = '<div class="no-faults">⚠️ Ingen bil-ID i URL</div>'; return; }
+  el.innerHTML = '<div class="loading"><span class="spinner"></span>Henter fejlmeldinger…</div>';
+  try {
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${CFG.sheetId}/values/${encodeURIComponent(CFG.sheetName)}?key=${CFG.apiKey}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const rows = (data.values || []).slice(1);
+    const mine = rows.filter(r => (r[1]||'').toUpperCase().trim() === bilId && (r[4]||'').toLowerCase() !== 'kvitteret');
+    if (!mine.length) { el.innerHTML = '<div class="no-faults">✅ Ingen aktive fejlmeldinger på denne bil</div>'; return; }
+    el.innerHTML = mine.map(r => {
+      const meta = CAT_META[r[2]] || { icon: '❓', cls: '' };
+      return `<div class="fault-card ${meta.cls}">
+        <div class="fault-icon">${meta.icon}</div>
+        <div class="fault-body">
+          <div class="fault-category">${r[2]||''}</div>
+          ${r[3] ? `<div class="fault-desc">${r[3]}</div>` : ''}
+          <div class="fault-time">${fmtTimestamp(r[0])}</div>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    el.innerHTML = `<div class="no-faults" style="background:var(--red-light);color:var(--red);border-color:#f5c0c0;">⚠️ Kunne ikke hente (${e.message})</div>`;
+  }
+}
+
 updateSubmitBtn();
 loadActiveFaults();
 </script>
