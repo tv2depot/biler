@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fejloverblik — TV 2 Depot</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --red: #CC0000;
+  --red-dark: #990000;
+  --red-light: #fff0f0;
+  --green: #2a8a4a;
+  --green-light: #e6f4ec;
+  --orange: #d47c00;
+  --orange-light: #fff4e0;
+  --blue: #1a6fc4;
+  --blue-light: #e8f1fb;
+  --gray: #6b7280;
+  --gray-light: #f4f4f2;
+  --gray-border: #e2e1dc;
+  --text: #1a1a18;
+  --text-muted: #6b7280;
+  --bg: #f7f6f2;
+  --bg-card: #ffffff;
+  --font: 'DM Sans', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--gray-border);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  height: 56px;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.logo-wrap { display: flex; align-items: center; gap: 10px; }
+.logo-circle {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--red);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.logo-circle svg { width: 18px; height: 18px; }
+.logo-text { font-size: 15px; font-weight: 600; }
+.logo-sub { font-size: 11px; color: var(--text-muted); }
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.badge-count {
+  background: var(--red);
+  color: white;
+  border-radius: 20px;
+  padding: 2px 9px;
+  font-size: 12px;
+  font-weight: 700;
+  min-width: 24px;
+  text-align: center;
+}
+
+/* ── TABS ── */
+.tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--gray-border);
+  background: var(--bg-card);
+  padding: 0 24px;
+}
+.tab {
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all 0.15s;
+}
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--red); border-bottom-color: var(--red); }
+
+/* ── BTN ── */
+.btn {
+  padding: 7px 14px; border-radius: var(--radius);
+  font-family: var(--font); font-size: 13px; font-weight: 500;
+  cursor: pointer; border: 1px solid var(--gray-border);
+  background: var(--bg-card); color: var(--text);
+  transition: all 0.15s;
+}
+.btn:hover { background: var(--gray-light); }
+.btn-primary { background: var(--red); color: white; border-color: var(--red); }
+.btn-primary:hover { background: var(--red-dark); }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.btn-green { background: var(--green-light); color: var(--green); border-color: #c3e8d0; }
+.btn-green:hover { background: #c3e8d0; }
+
+/* ── MAIN ── */
+.main { padding: 24px; max-width: 1200px; margin: 0 auto; }
+
+/* ── STATS ── */
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--gray-border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+.stat-num { font-size: 28px; font-weight: 700; font-family: var(--font-mono); }
+.stat-label { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.stat-card.red .stat-num { color: var(--red); }
+.stat-card.orange .stat-num { color: var(--orange); }
+.stat-card.blue .stat-num { color: var(--blue); }
+.stat-card.green .stat-num { color: var(--green); }
+
+/* ── FILTER ROW ── */
+.filter-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.filter-chip {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--gray-border);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  transition: all 0.15s;
+}
+.filter-chip:hover { background: var(--gray-light); }
+.filter-chip.active { background: var(--red-light); color: var(--red); border-color: var(--red); }
+.filter-chip.service.active { background: var(--orange-light); color: var(--orange); border-color: var(--orange); }
+.filter-chip.stenslag.active { background: var(--red-light); color: var(--red); border-color: var(--red); }
+.filter-chip.daektryk.active { background: var(--blue-light); color: var(--blue); border-color: var(--blue); }
+.filter-chip.andet.active { background: var(--gray-light); color: var(--gray); border-color: var(--gray); }
+
+/* ── TABLE ── */
+.table-wrap {
+  background: var(--bg-card);
+  border: 1px solid var(--gray-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+table { width: 100%; border-collapse: collapse; }
+th {
+  background: var(--gray-light);
+  padding: 10px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-align: left;
+  border-bottom: 1px solid var(--gray-border);
+}
+td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--gray-border);
+  font-size: 13px;
+  vertical-align: middle;
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--gray-light); }
+
+.cat-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.cat-badge.service  { background: var(--orange-light); color: var(--orange); }
+.cat-badge.stenslag { background: var(--red-light);    color: var(--red);    }
+.cat-badge.daektryk { background: var(--blue-light);   color: var(--blue);   }
+.cat-badge.andet    { background: var(--gray-light);   color: var(--gray);   }
+
+.car-code {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 13px;
+  background: var(--gray-light);
+  padding: 2px 7px;
+  border-radius: 5px;
+}
+
+.ts-cell { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+.desc-cell { color: var(--text-muted); font-style: italic; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ── EMPTY ── */
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--text-muted);
+}
+.empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+.empty-state p { font-size: 14px; }
+
+/* ── LOADING ── */
+.spinner {
+  display: inline-block;
+  width: 16px; height: 16px;
+  border: 2px solid var(--gray-border);
+  border-top-color: var(--red);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-row td { text-align: center; padding: 32px; color: var(--text-muted); }
+
+/* ── LOG VIEW ── */
+.log-row td { opacity: 0.7; }
+.kvit-by { font-size: 11px; color: var(--text-muted); }
+
+/* ── MODAL ── */
+.modal-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  max-width: 440px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+}
+.modal h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+.modal p { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+.modal-row { margin-bottom: 12px; }
+.modal-row label { font-size: 12px; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 4px; }
+.modal-row input {
+  width: 100%;
+  border: 1px solid var(--gray-border);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: var(--font-mono);
+  outline: none;
+}
+.modal-row input:focus { border-color: var(--red); }
+.modal-btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+
+/* ── CONFIG SECTION ── */
+.config-panel {
+  display: none;
+  background: var(--bg-card);
+  border: 1px solid var(--gray-border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.config-panel.show { display: block; }
+.config-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 16px;
+  margin-top: 12px;
+}
+.config-grid label { font-size: 12px; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 4px; }
+.config-grid input {
+  width: 100%;
+  border: 1px solid var(--gray-border);
+  border-radius: var(--radius);
+  padding: 7px 10px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  outline: none;
+}
+.config-grid input:focus { border-color: var(--red); }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: #1a1a18; color: white;
+  padding: 10px 20px; border-radius: 20px;
+  font-size: 13px; font-weight: 500;
+  opacity: 0; transition: opacity 0.2s;
+  pointer-events: none; z-index: 999;
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; }
+
+/* ── SCRIPT URL BOX ── */
+.script-url-box {
+  background: var(--gray-light);
+  border: 1px solid var(--gray-border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  word-break: break-all;
+  margin-top: 8px;
+}
+
+/* ── QR GRID ── */
+.qr-section { margin-top: 24px; }
+.qr-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+.qr-card {
+  background: var(--bg-card);
+  border: 1px solid var(--gray-border);
+  border-radius: var(--radius);
+  padding: 14px;
+  text-align: center;
+}
+.qr-car-id { font-family: var(--font-mono); font-weight: 700; font-size: 15px; margin-bottom: 8px; }
+.qr-img { width: 100%; max-width: 140px; height: auto; border-radius: 4px; }
+.qr-url { font-size: 10px; color: var(--text-muted); margin-top: 6px; word-break: break-all; }
+</style>
+</head>
+<body>
+
+<!-- ── TOPBAR ── -->
+<div class="topbar">
+  <div class="logo-wrap">
+    <div class="logo-circle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/>
+        <line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+    </div>
+    <div>
+      <div class="logo-text">TV 2 — Fejloverblik</div>
+      <div class="logo-sub">Depotpersonale</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <span id="active-count-badge" class="badge-count" style="display:none">0</span>
+    <button class="btn btn-sm" onclick="loadData()">↻ Opdater</button>
+    <button class="btn btn-sm" onclick="toggleConfig()">⚙ Indstillinger</button>
+  </div>
+</div>
+
+<!-- ── TABS ── -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('aktive')" id="tab-aktive">🔴 Aktive fejl</div>
+  <div class="tab" onclick="switchTab('log')" id="tab-log">📋 Log / Historik</div>
+  <div class="tab" onclick="switchTab('qr')" id="tab-qr">QR-koder</div>
+</div>
+
+<!-- ── MAIN ── -->
+<div class="main">
+
+  <!-- CONFIG PANEL -->
+  <div class="config-panel" id="config-panel">
+    <strong>⚙ Konfiguration</strong>
+    <div class="config-grid">
+      <div>
+        <label>Google Sheets ID</label>
+        <input id="cfg-sheet-id" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms">
+      </div>
+      <div>
+        <label>Google API-nøgle</label>
+        <input id="cfg-api-key" placeholder="AIzaSy...">
+      </div>
+      <div>
+        <label>Apps Script Webhook-URL (kvittering)</label>
+        <input id="cfg-script-url" placeholder="https://script.google.com/macros/s/.../exec">
+      </div>
+      <div>
+        <label>Fejlmelding-side URL (til QR)</label>
+        <input id="cfg-report-url" placeholder="https://mitsite.dk/fejlmelding.html">
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px;align-items:center;">
+      <button class="btn btn-primary btn-sm" onclick="saveConfig()">Gem</button>
+      <button class="btn btn-sm" onclick="toggleConfig()">Luk</button>
+      <span id="cfg-status" style="font-size:12px;color:var(--text-muted);"></span>
+    </div>
+    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--gray-border);">
+      <strong style="font-size:12px;">Apps Script kode til kvittering</strong>
+      <div class="script-url-box" id="script-hint">Indsæt nedenstående kode i et nyt Apps Script projekt knyttet til dit Google Sheet, og deploy som Web App (Alle kan tilgå)</div>
+      <button class="btn btn-sm" style="margin-top:8px;" onclick="showScriptCode()">Vis Apps Script kode</button>
+    </div>
+  </div>
+
+  <!-- STAT ROW -->
+  <div class="stat-row" id="stat-row">
+    <div class="stat-card red"><div class="stat-num" id="s-total">—</div><div class="stat-label">Aktive fejl</div></div>
+    <div class="stat-card orange"><div class="stat-num" id="s-service">—</div><div class="stat-label">Service</div></div>
+    <div class="stat-card red"><div class="stat-num" id="s-stenslag">—</div><div class="stat-label">Stenslag</div></div>
+    <div class="stat-card blue"><div class="stat-num" id="s-daektryk">—</div><div class="stat-label">Dæktryk</div></div>
+    <div class="stat-card green"><div class="stat-num" id="s-andet">—</div><div class="stat-label">Andet</div></div>
+  </div>
+
+  <!-- ── TAB: AKTIVE ── -->
+  <div id="view-aktive">
+    <div class="filter-row">
+      <div class="filter-chip active" onclick="filterCat(this,'alle')">Alle</div>
+      <div class="filter-chip service" onclick="filterCat(this,'Service')">🔧 Service</div>
+      <div class="filter-chip stenslag" onclick="filterCat(this,'Stenslag')">💥 Stenslag</div>
+      <div class="filter-chip daektryk" onclick="filterCat(this,'Dæktryk')">🔴 Dæktryk</div>
+      <div class="filter-chip andet" onclick="filterCat(this,'Andet')">📝 Andet</div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Bil</th>
+            <th>Kategori</th>
+            <th>Beskrivelse</th>
+            <th>Tidsstempel</th>
+            <th>Handling</th>
+          </tr>
+        </thead>
+        <tbody id="active-tbody">
+          <tr class="loading-row"><td colspan="5"><span class="spinner"></span>Indlæser…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── TAB: LOG ── -->
+  <div id="view-log" style="display:none;">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Bil</th>
+            <th>Kategori</th>
+            <th>Beskrivelse</th>
+            <th>Indmeldt</th>
+            <th>Kvitteret</th>
+            <th>Kvitteret af</th>
+          </tr>
+        </thead>
+        <tbody id="log-tbody">
+          <tr class="loading-row"><td colspan="6"><span class="spinner"></span>Indlæser…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── TAB: QR ── -->
+  <div id="view-qr" style="display:none;">
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">
+      QR-koder til montering på instrumentbræt. Sæt Fejlmelding-side URL i indstillinger, og tilføj bilnavne nedenfor.
+    </p>
+    <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center;">
+      <input id="qr-cars-input" placeholder="ENG101, ENG102, DL89230…" style="flex:1;border:1px solid var(--gray-border);border-radius:var(--radius);padding:7px 10px;font-size:13px;font-family:var(--font-mono);">
+      <button class="btn btn-primary btn-sm" onclick="generateQR()">Generer QR</button>
+    </div>
+    <div class="qr-grid" id="qr-grid"></div>
+    <p style="font-size:12px;color:var(--text-muted);margin-top:12px;">
+      Tip: Højreklik → "Gem billede" eller brug <code>Ctrl+P</code> til at printe siden.
+    </p>
+  </div>
+
+</div>
+
+<!-- ── KVITTER MODAL ── -->
+<div class="modal-overlay" id="kvit-modal">
+  <div class="modal">
+    <h3>✅ Kvittér fejlmelding</h3>
+    <p>Angiv dit navn/initialer og bekræft kvittering. Fejlmeldingen flyttes til loggen.</p>
+    <div class="modal-row">
+      <label>Kvitteret af</label>
+      <input type="text" id="kvit-name" placeholder="fx GV / Gert">
+    </div>
+    <div class="modal-row">
+      <label>Note (valgfri)</label>
+      <input type="text" id="kvit-note" placeholder="fx Bestilt tid hos mekaniker">
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-sm" onclick="closeKvitModal()">Annuller</button>
+      <button class="btn btn-primary btn-sm" onclick="confirmKvit()">Kvittér</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── SCRIPT CODE MODAL ── -->
+<div class="modal-overlay" id="script-modal">
+  <div class="modal" style="max-width:600px;">
+    <h3>📋 Apps Script kode</h3>
+    <p>Opret et nyt Apps Script projekt knyttet til dit Google Sheet og indsæt denne kode. Deploy som Web App (adgang: Alle).</p>
+    <textarea id="script-code-box" readonly style="width:100%;height:280px;font-size:11px;font-family:var(--font-mono);border:1px solid var(--gray-border);border-radius:var(--radius);padding:10px;background:var(--gray-light);resize:none;"></textarea>
+    <div class="modal-btns">
+      <button class="btn btn-sm" onclick="copyScriptCode()">📋 Kopiér kode</button>
+      <button class="btn btn-primary btn-sm" onclick="closeScriptModal()">Luk</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── KONFIGURATION (hardcodet) ────────────────────────────────────────────────
+const CFG = {
+  sheetId:   '16pClSqAXH0z22bSvqrll5FNLhw9NiHudU4HBCk0J41c',
+  apiKey:    'AIzaSyBnntcgnLNxS4nXq1xW-nbn619ImEXeDhg',
+  sheetName: 'Formularsvar 1',
+  scriptUrl: '', // Udfyldes efter Apps Script deploy
+  reportUrl: '', // Udfyldes med URL til fejlmelding.html
+};
+
+function loadConfig() { return CFG; }
+function saveConfig() {
+  CFG.scriptUrl  = document.getElementById('cfg-script-url').value.trim();
+  CFG.reportUrl  = document.getElementById('cfg-report-url').value.trim();
+  document.getElementById('cfg-status').textContent = '✓ Gemt';
+  setTimeout(() => document.getElementById('cfg-status').textContent = '', 2000);
+  loadData();
+}
+function toggleConfig() {
+  const p = document.getElementById('config-panel');
+  const showing = p.classList.toggle('show');
+  if (showing) {
+    document.getElementById('cfg-script-url').value = CFG.scriptUrl || '';
+    document.getElementById('cfg-report-url').value = CFG.reportUrl || '';
+  }
+}
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let allRows = [];       // { rowIndex, bil, kategori, beskrivelse, timestamp, status, kvitteretAf, kvitteretTs }
+let activeFilter = 'alle';
+let pendingKvitRow = null;
+
+// ─── DATA FRA GOOGLE SHEETS ──────────────────────────────────────────────────
+async function loadData() {
+  const cfg = loadConfig();
+  if (!cfg.sheetId || !cfg.apiKey) {
+    renderActiveTable([]);
+    renderLogTable([]);
+    updateStats([]);
+    showToast('Konfigurer Google Sheets i indstillinger');
+    return;
+  }
+
+  // Hent alle rækker fra "Formularrespons 1" (Google Forms default ark)
+  try {
+    const sheetName = encodeURIComponent(cfg.sheetName || 'Formularsvar 1');
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheetId}/values/${sheetName}?key=${cfg.apiKey}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const rows = (data.values || []);
+    if (!rows.length) { allRows = []; renderAll(); return; }
+
+    // Header: A=Tidsstempel | B=Mailadresse | C=Bil | D=Kategori | E=Beskrivelse | F=Status | G=Kvitteret_af | H=Kvitteret_tidspunkt | I=Note
+    allRows = rows.slice(1).map((r, i) => ({
+      rowIndex: i + 2,
+      timestamp: r[0] || '',
+      bil:       (r[2] || '').toUpperCase().trim(),
+      kategori:  r[3] || '',
+      beskrivelse: r[4] || '',
+      status:    (r[5] || '').toLowerCase(),
+      kvitteretAf: r[6] || '',
+      kvitteretTs: r[7] || '',
+    }));
+    renderAll();
+  } catch(e) {
+    showToast('Fejl ved hentning: ' + e.message);
+    renderActiveTable([]); renderLogTable([]); updateStats([]);
+  }
+}
+
+function renderAll() {
+  const aktive = allRows.filter(r => r.status !== 'kvitteret');
+  const log    = allRows.filter(r => r.status === 'kvitteret');
+  updateStats(aktive);
+  renderActiveTable(aktive);
+  renderLogTable(log);
+  const badge = document.getElementById('active-count-badge');
+  badge.textContent = aktive.length;
+  badge.style.display = aktive.length > 0 ? '' : 'none';
+}
+
+// ─── STATS ────────────────────────────────────────────────────────────────────
+function updateStats(aktive) {
+  document.getElementById('s-total').textContent    = aktive.length;
+  document.getElementById('s-service').textContent  = aktive.filter(r => r.kategori === 'Service').length;
+  document.getElementById('s-stenslag').textContent = aktive.filter(r => r.kategori === 'Stenslag').length;
+  document.getElementById('s-daektryk').textContent = aktive.filter(r => r.kategori === 'Dæktryk').length;
+  document.getElementById('s-andet').textContent    = aktive.filter(r => r.kategori === 'Andet').length;
+}
+
+// ─── CAT META ─────────────────────────────────────────────────────────────────
+const CAT_META = {
+  'Service':   { icon: '🔧', cls: 'service' },
+  'Stenslag':  { icon: '💥', cls: 'stenslag' },
+  'Dæktryk':   { icon: '🔴', cls: 'daektryk' },
+  'Andet':     { icon: '📝', cls: 'andet' },
+};
+function catBadge(cat) {
+  const m = CAT_META[cat] || { icon: '❓', cls: '' };
+  return `<span class="cat-badge ${m.cls}">${m.icon} ${cat}</span>`;
+}
+function fmtTs(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  if (isNaN(d)) return ts;
+  return d.toLocaleDateString('da-DK', { day:'2-digit', month:'short', year:'2-digit' })
+    + ' ' + d.toLocaleTimeString('da-DK', { hour:'2-digit', minute:'2-digit' });
+}
+
+// ─── RENDER AKTIVE ────────────────────────────────────────────────────────────
+function filterCat(el, cat) {
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  activeFilter = cat;
+  const aktive = allRows.filter(r => r.status !== 'kvitteret');
+  renderActiveTable(aktive);
+}
+
+function renderActiveTable(aktive) {
+  const filtered = activeFilter === 'alle' ? aktive : aktive.filter(r => r.kategori === activeFilter);
+  const tbody = document.getElementById('active-tbody');
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text-muted);">
+      ${aktive.length === 0 ? '✅ Ingen aktive fejlmeldinger' : '🔍 Ingen fejl i denne kategori'}
+    </td></tr>`;
+    return;
+  }
+  tbody.innerHTML = filtered.map(r => `
+    <tr>
+      <td><span class="car-code">${r.bil}</span></td>
+      <td>${catBadge(r.kategori)}</td>
+      <td class="desc-cell">${r.beskrivelse || '<i>—</i>'}</td>
+      <td class="ts-cell">${fmtTs(r.timestamp)}</td>
+      <td>
+        <button class="btn btn-sm btn-green" onclick="openKvitModal(${r.rowIndex})">✓ Kvittér</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// ─── RENDER LOG ───────────────────────────────────────────────────────────────
+function renderLogTable(log) {
+  const tbody = document.getElementById('log-tbody');
+  if (!log.length) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-muted);">Ingen kvitterede fejlmeldinger endnu</td></tr>`;
+    return;
+  }
+  // Nyeste øverst
+  const sorted = [...log].sort((a,b) => new Date(b.kvitteretTs) - new Date(a.kvitteretTs));
+  tbody.innerHTML = sorted.map(r => `
+    <tr class="log-row">
+      <td><span class="car-code">${r.bil}</span></td>
+      <td>${catBadge(r.kategori)}</td>
+      <td class="desc-cell">${r.beskrivelse || '<i>—</i>'}</td>
+      <td class="ts-cell">${fmtTs(r.timestamp)}</td>
+      <td class="ts-cell">${fmtTs(r.kvitteretTs)}</td>
+      <td class="kvit-by">${r.kvitteretAf || '—'}</td>
+    </tr>
+  `).join('');
+}
+
+// ─── KVITTER MODAL ────────────────────────────────────────────────────────────
+function openKvitModal(rowIndex) {
+  pendingKvitRow = rowIndex;
+  const row = allRows.find(r => r.rowIndex === rowIndex);
+  document.getElementById('kvit-name').value = localStorage.getItem('depotfej_lastKvitName') || '';
+  document.getElementById('kvit-note').value = '';
+  document.getElementById('kvit-modal').classList.add('open');
+}
+function closeKvitModal() {
+  document.getElementById('kvit-modal').classList.remove('open');
+  pendingKvitRow = null;
+}
+async function confirmKvit() {
+  const navn = document.getElementById('kvit-name').value.trim();
+  const note = document.getElementById('kvit-note').value.trim();
+  if (!navn) { document.getElementById('kvit-name').focus(); return; }
+  if (!pendingKvitRow) return;
+
+  localStorage.setItem('depotfej_lastKvitName', navn);
+  const cfg = loadConfig();
+
+  if (!cfg.scriptUrl) {
+    showToast('⚠ Konfigurer Apps Script webhook-URL for at kvittere');
+    closeKvitModal();
+    return;
+  }
+
+  const now = new Date().toLocaleString('da-DK');
+  const params = new URLSearchParams({
+    action: 'kvitter',
+    sheetId: cfg.sheetId,
+    rowIndex: pendingKvitRow,
+    kvitteretAf: navn,
+    note: note,
+    kvitteretTs: now,
+  });
+
+  try {
+    await fetch(cfg.scriptUrl + '?' + params.toString(), { mode: 'no-cors' });
+    showToast('✅ Kvitteret af ' + navn);
+    closeKvitModal();
+    // Optimistisk opdatering
+    const row = allRows.find(r => r.rowIndex === pendingKvitRow);
+    if (row) { row.status = 'kvitteret'; row.kvitteretAf = navn; row.kvitteretTs = now; }
+    renderAll();
+    setTimeout(loadData, 3000);
+  } catch(e) {
+    showToast('Fejl: ' + e.message);
+  }
+}
+
+// ─── TABS ────────────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  ['aktive','log','qr'].forEach(t => {
+    document.getElementById('view-' + t).style.display = t === tab ? '' : 'none';
+    document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+  });
+}
+
+// ─── QR-KODER ─────────────────────────────────────────────────────────────────
+function generateQR() {
+  const cfg = loadConfig();
+  const baseUrl = cfg.reportUrl || window.location.origin + '/fejlmelding.html';
+  const input = document.getElementById('qr-cars-input').value;
+  const cars = input.split(/[\s,;]+/).map(s => s.trim().toUpperCase()).filter(Boolean);
+  if (!cars.length) { showToast('Indtast bil-ID\'er ovenfor'); return; }
+
+  const grid = document.getElementById('qr-grid');
+  grid.innerHTML = cars.map(car => {
+    const url = baseUrl + '?bil=' + encodeURIComponent(car);
+    const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
+    return `
+      <div class="qr-card">
+        <div class="qr-car-id">${car}</div>
+        <img class="qr-img" src="${qrApi}" alt="QR ${car}" loading="lazy">
+        <div class="qr-url">${url}</div>
+        <div style="margin-top:8px;">
+          <a href="${url}" target="_blank" style="font-size:11px;color:var(--blue);">Test link ↗</a>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ─── APPS SCRIPT KODE ─────────────────────────────────────────────────────────
+const APPS_SCRIPT_CODE = `// ════════════════════════════════════════════════════════════
+// TV 2 Depot — Fejlmeldingssystem — Apps Script Webhook
+// Deploy som Web App: Udfør som mig, adgang: Alle
+// ════════════════════════════════════════════════════════════
+
+function doGet(e) {
+  const params = e.parameter;
+  
+  if (params.action === 'kvitter') {
+    return kvitter(params);
+  }
+  
+  return ContentService
+    .createTextOutput(JSON.stringify({ status: 'ok', msg: 'TV2 Depot Webhook aktiv' }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function kvitter(params) {
+  try {
+    const sheetId    = params.sheetId;
+    const rowIndex   = parseInt(params.rowIndex);
+    const kvitNavn   = params.kvitteretAf || '';
+    const note       = params.note || '';
+    const kvitTs     = params.kvitteretTs || new Date().toLocaleString('da-DK');
+    
+    const ss    = SpreadsheetApp.openById(sheetId);
+    const sheet = ss.getSheets()[0]; // Første ark (Formularrespons 1)
+    
+    // A=Tidsstempel | B=Mailadresse | C=Bil | D=Kategori | E=Beskrivelse
+    // F=6=Status | G=7=Kvitteret_af | H=8=Kvitteret_tidspunkt | I=9=Note
+    sheet.getRange(rowIndex, 6).setValue('Kvitteret');
+    sheet.getRange(rowIndex, 7).setValue(kvitNavn);
+    sheet.getRange(rowIndex, 8).setValue(kvitTs);
+    if (note) sheet.getRange(rowIndex, 9).setValue(note);
+    
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'ok', row: rowIndex }))
+      .setMimeType(ContentService.MimeType.JSON);
+      
+  } catch(err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'error', msg: err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}`;
+
+function showScriptCode() {
+  document.getElementById('script-code-box').value = APPS_SCRIPT_CODE;
+  document.getElementById('script-modal').classList.add('open');
+}
+function closeScriptModal() {
+  document.getElementById('script-modal').classList.remove('open');
+}
+function copyScriptCode() {
+  navigator.clipboard.writeText(APPS_SCRIPT_CODE).then(() => showToast('Kode kopieret til udklipsholder'));
+}
+
+// ─── TOAST ────────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ─── MODAL CLOSE ON OVERLAY ──────────────────────────────────────────────────
+document.getElementById('kvit-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('kvit-modal')) closeKvitModal();
+});
+document.getElementById('script-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('script-modal')) closeScriptModal();
+});
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+loadData();
+</script>
+</body>
+</html>
