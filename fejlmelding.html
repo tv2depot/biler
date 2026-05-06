@@ -19,22 +19,22 @@
   --radius: 10px; --radius-lg: 16px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body { font-family: var(--font); background: var(--bg); color: var(--text); font-size: 17px; line-height: 1.5; min-height: 100vh; padding-bottom: 60px; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.5; min-height: 100vh; padding-bottom: 60px; }
 
 .header { background: var(--red); color: white; padding: 20px 20px 28px; position: relative; overflow: hidden; }
 .header::after { content: ''; position: absolute; bottom: -20px; left: -10px; right: -10px; height: 40px; background: var(--bg); border-radius: 50% 50% 0 0 / 100% 100% 0 0; }
 .header-top { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
 .logo-circle { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .logo-circle svg { width: 20px; height: 20px; }
-.header-brand { font-size: 13px; font-weight: 600; opacity: 0.9; }
-.header-sub { font-size: 11px; opacity: 0.7; }
+.header-brand { font-size: 18px; font-weight: 700; opacity: 0.9; }
+.header-sub { font-size: 14px; opacity: 0.8; }
 .car-badge { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: var(--radius); padding: 10px 14px; display: flex; align-items: center; gap: 10px; }
 .car-badge-icon { font-size: 22px; }
 .car-badge-id { font-size: 22px; font-weight: 700; font-family: var(--font-mono); letter-spacing: 0.03em; }
 .car-badge-label { font-size: 11px; opacity: 0.75; }
 
 .content { padding: 28px 16px 0; }
-.section-title { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; }
+.section-title { font-size: 17px; font-weight: 700; letter-spacing: 0.02em; text-transform: none; color: var(--text); margin-bottom: 12px; }
 
 .active-faults { margin-bottom: 0; }
 .fault-card { background: #fff8f8; border: 1px solid #f5c0c0; border-radius: var(--radius); padding: 16px 18px; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 14px; }
@@ -47,9 +47,9 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 .fault-card.buler    { border-left: 4px solid #b45309;       background: #fffbf0; border-color: #f5dfa0; }
 .fault-icon { font-size: 26px; margin-top: 2px; flex-shrink: 0; }
 .fault-body { flex: 1; min-width: 0; }
-.fault-category { font-size: 18px; font-weight: 700; }
-.fault-desc { font-size: 16px; color: var(--text-muted); margin-top: 4px; }
-.fault-time { font-size: 13px; color: var(--text-muted); font-family: var(--font-mono); margin-top: 6px; }
+.fault-category { font-size: 16px; font-weight: 700; }
+.fault-desc { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+.fault-time { font-size: 12px; color: var(--text-muted); font-family: var(--font-mono); margin-top: 6px; }
 .fault-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
 .udbedret-btn {
   background: none; border: 1px solid var(--gray-border);
@@ -70,8 +70,8 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
   content: ''; flex: 1; height: 1px; background: var(--gray-border);
 }
 .section-divider-text {
-  font-size: 12px; font-weight: 700; letter-spacing: 0.08em;
-  text-transform: uppercase; color: var(--text-muted);
+  font-size: 16px; font-weight: 700; letter-spacing: 0.02em;
+  text-transform: none; color: var(--text);
   white-space: nowrap;
 }
 
@@ -79,7 +79,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 .form-title { font-size: 18px; font-weight: 700; margin-bottom: 18px; }
 
 .initialer-wrap { margin-bottom: 20px; }
-.initialer-wrap label { font-size: 16px; font-weight: 600; display: block; margin-bottom: 8px; }
+.initialer-wrap label { font-size: 14px; font-weight: 600; display: block; margin-bottom: 8px; }
 .initialer-wrap label span { color: var(--red); }
 .initialer-input { width: 100%; border: 1.5px solid var(--gray-border); border-radius: var(--radius); padding: 14px 16px; font-family: var(--font-mono); font-size: 20px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text); background: var(--bg); outline: none; transition: border-color 0.15s; }
 .initialer-input:focus { border-color: var(--red); }
@@ -109,13 +109,13 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 
 .fejl-icon { font-size: 26px; }
 .fejl-label-wrap { flex: 1; }
-.fejl-label { font-size: 17px; font-weight: 600; }
-.fejl-sublabel { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+.fejl-label { font-size: 15px; font-weight: 600; }
+.fejl-sublabel { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
 
 .fejl-subitems { display: none; padding: 0 16px 14px 58px; gap: 10px; flex-wrap: wrap; }
 .fejl-item.selected .fejl-subitems { display: flex; }
 .subitem-group-label { width: 100%; font-size: 13px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
-.subitem-btn { padding: 10px 16px; border-radius: 20px; border: 1.5px solid var(--gray-border); background: var(--bg); font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.15s; color: var(--text-muted); font-family: var(--font); }
+.subitem-btn { padding: 8px 14px; border-radius: 20px; border: 1.5px solid var(--gray-border); background: var(--bg); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; color: var(--text-muted); font-family: var(--font); }
 .subitem-btn:active { transform: scale(0.97); }
 .fejl-item.tankkort .subitem-btn.selected { background: var(--purple-light); border-color: var(--purple); color: var(--purple); }
 .fejl-item.ladebrik .subitem-btn.selected { background: var(--green-light);  border-color: var(--green);  color: var(--green);  }
@@ -123,13 +123,13 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 .fejl-desc-wrap { display: none; padding: 0 16px 14px; }
 .fejl-item.selected .fejl-desc-wrap { display: block; }
 .desc-hint { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
-.fejl-desc-input { width: 100%; border: 1px solid var(--gray-border); border-radius: var(--radius); padding: 12px 14px; font-family: var(--font); font-size: 16px; color: var(--text); background: var(--gray-light); resize: none; min-height: 80px; outline: none; transition: border-color 0.15s; }
+.fejl-desc-input { width: 100%; border: 1px solid var(--gray-border); border-radius: var(--radius); padding: 10px 12px; font-family: var(--font); font-size: 14px; color: var(--text); background: var(--gray-light); resize: none; min-height: 70px; outline: none; transition: border-color 0.15s; }
 .fejl-desc-input:focus { border-color: var(--red); background: white; }
 
 .fejl-item.selected.buler    { border-color: #b45309; }
 .submit-hint { text-align: center; font-size: 14px; color: var(--text-muted); margin-top: 10px; min-height: 20px; transition: color 0.2s; }
 .submit-hint.error { color: var(--red); font-weight: 600; }
-.submit-btn { width: 100%; background: var(--red); color: white; border: none; border-radius: var(--radius); padding: 20px; font-family: var(--font); font-size: 18px; font-weight: 700; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.submit-btn { width: 100%; background: var(--red); color: white; border: none; border-radius: var(--radius); padding: 16px; font-family: var(--font); font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
 .submit-btn:active { transform: scale(0.98); background: var(--red-dark); }
 .submit-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
 
