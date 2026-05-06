@@ -930,7 +930,7 @@ function afvisUdbedring(params) {
       .createTextOutput(JSON.stringify({ status: 'error', msg: err.toString() }))
       .setMimeType(ContentService.MimeType.JSON);
   }
-}`;  // <-- denne linje afslutter APPS_SCRIPT_CODE strengen
+}`;
 
 function showScriptCode() {
   document.getElementById('script-code-box').value = APPS_SCRIPT_CODE;
