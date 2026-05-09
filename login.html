@@ -139,6 +139,8 @@ async function doLogin() {
   try {
     const res = await fetch(API_URL, {
       method: 'POST',
+      mode: 'cors',
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({ action: 'login', username, password })
     });
     const data = await res.json();
