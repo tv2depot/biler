@@ -1,0 +1,3199 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Flådestyring — TV 2 Depot</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --red: #CC0000;
+  --red-dark: #990000;
+  --red-light: #fff0f0;
+  --blue: #1a6fc4;
+  --blue-light: #e8f1fb;
+  --green: #2a8a4a;
+  --green-light: #e6f4ec;
+  --orange: #d47c00;
+  --orange-light: #fff4e0;
+  --gray: #6b7280;
+  --gray-light: #f4f4f2;
+  --gray-border: #e2e1dc;
+  --text: #1a1a18;
+  --text-muted: #6b7280;
+  --bg: #f7f6f2;
+  --bg-card: #ffffff;
+  --font: 'DM Sans', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* LAYOUT */
+.app { display: flex; flex-direction: column; min-height: 100vh; }
+
+/* TOPBAR */
+.topbar {
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--gray-border);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  height: 56px;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo-wrap { display: flex; align-items: center; gap: 10px; }
+.logo-circle {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--red);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.logo-circle svg { width: 20px; height: 20px; }
+.logo-text { font-size: 15px; font-weight: 600; color: var(--text); }
+.logo-sub { font-size: 11px; color: var(--text-muted); }
+
+.topbar-nav { display: flex; gap: 4px; margin-left: 24px; }
+.nav-btn {
+  padding: 6px 14px; border-radius: var(--radius);
+  border: none; background: transparent;
+  font-family: var(--font); font-size: 13px; font-weight: 500;
+  color: var(--text-muted); cursor: pointer;
+  transition: all 0.15s;
+}
+.nav-btn:hover { background: var(--gray-light); color: var(--text); }
+.nav-btn.active { background: var(--red-light); color: var(--red); }
+
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.btn {
+  padding: 7px 16px; border-radius: var(--radius);
+  font-family: var(--font); font-size: 13px; font-weight: 500;
+  cursor: pointer; border: 1px solid var(--gray-border);
+  background: var(--bg-card); color: var(--text);
+  transition: all 0.15s;
+}
+.btn:hover { background: var(--gray-light); }
+.btn-primary { background: var(--red); color: white; border-color: var(--red); }
+.btn-primary:hover { background: var(--red-dark); border-color: var(--red-dark); }
+
+/* MAIN */
+.main { padding: 24px; max-width: 1400px; margin: 0 auto; width: 100%; }
+
+/* VIEWS */
+.view { display: none; }
+.view.active { display: block; }
+
+/* STAT CARDS */
+.stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+.stat-card {
+  background: var(--bg-card); border: 1px solid var(--gray-border);
+  border-radius: var(--radius-lg); padding: 16px 18px;
+}
+.stat-num { font-size: 28px; font-weight: 600; color: var(--text); line-height: 1; }
+.stat-label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+.stat-card.alert .stat-num { color: var(--red); }
+.stat-card.warning .stat-num { color: var(--orange); }
+.stat-card.info .stat-num { color: var(--blue); }
+
+/* OBS SECTION */
+.obs-section { margin-bottom: 20px; }
+.section-hdr { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+.obs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.obs-card {
+  background: var(--bg-card); border: 1px solid var(--gray-border);
+  border-radius: var(--radius-lg); padding: 12px 14px;
+  border-left: 3px solid var(--gray-border);
+  cursor: pointer; transition: box-shadow 0.15s;
+}
+.obs-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.obs-card.critical { border-left-color: var(--red); }
+.obs-card.warning { border-left-color: var(--orange); }
+.obs-card.info { border-left-color: var(--blue); }
+.obs-name { font-size: 14px; font-weight: 600; }
+.obs-detail { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.badge {
+  display: inline-block; font-size: 11px; font-weight: 500;
+  padding: 2px 8px; border-radius: 20px; margin-top: 7px;
+}
+.badge-critical { background: #fee2e2; color: #991b1b; }
+.badge-warning { background: #fef3c7; color: #92400e; }
+.badge-info { background: var(--blue-light); color: #1e40af; }
+.badge-success { background: var(--green-light); color: #166534; }
+.badge-gray { background: var(--gray-light); color: var(--gray); }
+.badge-orange { background: var(--orange-light); color: #7c2d12; }
+
+/* FILTER ROW */
+.filter-row { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
+.filter-chip {
+  padding: 5px 13px; border-radius: 20px;
+  border: 1px solid var(--gray-border);
+  background: var(--bg-card); color: var(--text-muted);
+  font-family: var(--font); font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: all 0.15s;
+}
+.filter-chip:hover { border-color: var(--red); color: var(--red); }
+.filter-chip.active { background: var(--red); color: white; border-color: var(--red); }
+.filter-sep { width: 1px; height: 20px; background: var(--gray-border); }
+
+/* CAR TABLE */
+.table-wrap { background: var(--bg-card); border: 1px solid var(--gray-border); border-radius: var(--radius-lg); overflow: hidden; }
+table.cars { width: 100%; border-collapse: collapse; }
+table.cars th {
+  text-align: left; padding: 10px 14px;
+  font-size: 11px; font-weight: 600; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--gray-border);
+  background: var(--gray-light);
+}
+table.cars th.sortable { cursor: pointer; user-select: none; }
+table.cars th.sortable:hover { color: var(--text); }
+table.cars th.sort-asc::after { content: ' ↑'; color: var(--red); }
+table.cars th.sort-desc::after { content: ' ↓'; color: var(--red); }
+table.cars td { padding: 11px 14px; border-bottom: 1px solid var(--gray-border); vertical-align: middle; }
+table.cars tr:last-child td { border-bottom: none; }
+table.cars tr.group-row td { background: #f0ede8; padding: 6px 14px; pointer-events: none; }
+table.cars tr.group-row .group-label-text { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+table.cars tr.paired-top td { border-bottom: none; background: #fffbf2; }
+table.cars tr.paired-bottom td { border-top: none; background: #fffbf2; }
+table.cars tr:hover td { background: #f0ede8; }
+table.cars tr.paired-top:hover td, table.cars tr.paired-bottom:hover td { background: #f5efd6; }
+table.cars td.ombyg-col { background: #fdfaf3; }
+table.cars tr:hover td.ombyg-col { background: #eee8c8; }
+table.cars tr.paired-top td.ombyg-col,
+table.cars tr.paired-bottom td.ombyg-col { background: #fdfaf3; }
+table.cars tr.paired-top:hover td.ombyg-col,
+table.cars tr.paired-bottom:hover td.ombyg-col { background: #eee8c8; }
+
+.car-name { font-size: 14px; font-weight: 600; font-family: var(--font-mono); }
+.car-model { font-size: 12px; color: var(--text-muted); }
+.loc-pill {
+  display: inline-block; font-size: 11px; font-weight: 500;
+  padding: 2px 8px; border-radius: 10px;
+}
+.loc-ode { background: var(--blue-light); color: var(--blue); }
+.loc-kbh { background: var(--green-light); color: var(--green); }
+.loc-ob  { background: #f3e8ff; color: #7c3aed; }
+
+.status-wrap { display: flex; align-items: center; gap: 6px; }
+.status-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.dot-active { background: var(--green); }
+.dot-building { background: var(--orange); }
+.dot-ordered { background: var(--blue); }
+.dot-expiring { background: var(--red); }
+.dot-planned { background: var(--gray); }
+.dot-extended { background: var(--orange); }
+.dot-dismount { background: #7c3aed; }
+.dot-ready { background: var(--green); }
+
+.days-chip { font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 10px; }
+.days-critical { background: #fee2e2; color: #991b1b; }
+.days-warning { background: #fef3c7; color: #92400e; }
+.days-ok { color: var(--text-muted); font-size: 12px; }
+
+.lease-status { font-size: 12px; font-weight: 500; }
+.note-snippet {
+  font-size: 11px; color: var(--text-muted); cursor: pointer;
+  transition: color 0.15s;
+}
+.note-snippet:hover { color: var(--text); }
+.note-edit-input {
+  font-size: 12px; width: 100%; border: 1px solid var(--red);
+  border-radius: var(--radius); padding: 4px 8px;
+  font-family: var(--font); color: var(--text); background: var(--bg-card);
+  outline: none;
+}
+
+/* QUICK EDIT POPUP */
+.qpop {
+  display: none; position: fixed; z-index: 300;
+  background: var(--bg-card); border: 1px solid var(--gray-border);
+  border-radius: var(--radius-lg); padding: 14px 16px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15); min-width: 260px;
+}
+.qpop.open { display: block; }
+.qpop-title { font-size: 13px; font-weight: 600; margin-bottom: 12px; color: var(--text); }
+.qpop .field { margin-bottom: 8px; }
+.qpop-btns { display: flex; gap: 6px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--gray-border); }
+
+/* NOTE MODAL */
+.note-modal {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.35); z-index: 400;
+  align-items: center; justify-content: center;
+}
+.note-modal.open { display: flex; }
+.note-modal-box {
+  background: var(--bg-card); border-radius: var(--radius-lg);
+  padding: 20px 24px; max-width: 480px; width: 90%;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+}
+.note-modal-name { font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+.note-modal-text { font-size: 14px; color: var(--text); line-height: 1.6; white-space: pre-wrap; }
+
+/* GANTT */
+.gantt-controls {
+  background: var(--bg-card); border: 1px solid var(--gray-border);
+  border-radius: var(--radius-lg); padding: 12px 16px;
+  display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap;
+}
+.gantt-wrap {
+  background: var(--bg-card); border: 1px solid var(--gray-border);
+  border-radius: var(--radius-lg); overflow: hidden;
+}
+.gantt-legend {
+  display: flex; gap: 16px; padding: 10px 16px;
+  border-bottom: 1px solid var(--gray-border); flex-wrap: wrap;
+}
+.leg-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-muted); }
+.leg-box { width: 14px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+.gantt-scroll { overflow-x: hidden; }
+.gantt-inner { width: 100%; }
+.gantt-months {
+  display: grid; border-bottom: 1px solid var(--gray-border);
+  background: var(--gray-light);
+}
+.gantt-month {
+  font-size: 11px; font-weight: 500; color: var(--text-muted);
+  padding: 6px 4px; text-align: center;
+  border-right: 1px solid var(--gray-border);
+}
+.gantt-month:last-child { border-right: none; }
+.gantt-row { display: flex; border-bottom: 1px solid var(--gray-border); min-height: 56px; }
+.gantt-row:last-child { border-bottom: none; }
+.gantt-row.paired-top { border-bottom: none; background: #fffbf2; box-shadow: inset 3px 0 0 #f59e0b; }
+.gantt-row.paired-bottom { border-top: 1px dashed #e8e0cc; background: #fffbf2; box-shadow: inset 3px 0 0 #f59e0b; }
+.gantt-label {
+  width: 130px; flex-shrink: 0; padding: 8px 12px;
+  border-right: 1px solid var(--gray-border);
+  display: flex; flex-direction: column; justify-content: center;
+  z-index: 3; background: inherit;
+}
+.gantt-name { font-size: 13px; font-weight: 600; font-family: var(--font-mono); }
+.gantt-sub { font-size: 11px; color: var(--text-muted); }
+.gantt-bars { flex: 1; position: relative; overflow: hidden; }
+.gantt-group-row {
+  background: #f0ede8; border-bottom: 1px solid var(--gray-border);
+  padding: 5px 12px; font-size: 11px; font-weight: 600;
+  color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em;
+  display: flex; align-items: center; gap: 6px;
+}
+.zoom-chip {
+  padding: 5px 10px; border-radius: var(--radius);
+  border: 1px solid var(--gray-border);
+  background: var(--bg-card); color: var(--text-muted);
+  font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+  cursor: pointer; transition: all 0.15s; letter-spacing: 0.02em;
+}
+.zoom-chip:hover { border-color: var(--red); color: var(--red); }
+.zoom-chip.active { background: var(--red); color: white; border-color: var(--red); }
+
+/* UDSKIFTNINGSPLAN */
+.udskift-builder { margin-bottom:20px; }
+.udskift-builder-hdr {
+  font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;
+  letter-spacing:.06em;padding:5px 12px;background:var(--gray-light);
+  border-radius:6px;margin-bottom:2px;display:flex;align-items:center;gap:8px;
+}
+.udskift-wrap { border:1px solid var(--gray-border);border-radius:var(--radius-lg);overflow:hidden; }
+.udskift-table { width:100%;border-collapse:collapse;table-layout:fixed; }
+.udskift-table th {
+  font-size:10px;font-weight:600;color:var(--text-muted);padding:5px 4px;
+  text-align:center;border-bottom:1px solid var(--gray-border);background:var(--gray-light);
+}
+.udskift-table th.u-name { text-align:left;padding-left:8px;min-width:95px;width:95px; }
+.udskift-table th.u-now { background:#fef2f2; }
+.udskift-table td { padding:0;border-bottom:1px solid var(--gray-border); }
+.udskift-table td.u-name { padding:5px 8px;border-right:1px solid var(--gray-border);vertical-align:middle;width:95px; }
+.udskift-table tr.u-old td { background:#fffbf2;box-shadow:inset 3px 0 0 #f59e0b; }
+.udskift-table tr.u-new td { background:#fffbf2;box-shadow:inset 3px 0 0 #f59e0b;border-top:1px dashed #e8d9b0; }
+.udskift-table tr.u-sep td { background:var(--gray-light);height:6px;padding:0; }
+.udskift-table tr:last-child td { border-bottom:none; }
+.udskift-table tr:hover td { filter:brightness(.97); }
+.u-bar-cell { position:relative;height:46px; }
+.u-bar { position:absolute;border-radius:3px;display:flex;align-items:center;padding:0 6px;font-size:9px;font-weight:500;white-space:nowrap;overflow:hidden;cursor:pointer; }
+.u-bar:hover { opacity:.85; }
+.u-lease-thin { height:8px;top:3px;opacity:.5; }
+.u-action-thick { height:16px;top:26px; }
+.u-action-thick-top { height:16px;top:4px; }
+.u-lease-thin-bot { height:8px;top:36px;opacity:.5; }
+.u-today { position:absolute;top:0;bottom:0;width:2px;background:rgba(204,0,0,.35);z-index:5;pointer-events:none; }
+.u-name-tag { font-size:12px;font-weight:500;color:var(--text);cursor:pointer; }
+.u-name-tag:hover { color:var(--red); }
+.u-name-sub { font-size:10px;color:var(--text-muted); }
+.u-badge { display:inline-block;font-size:9px;font-weight:500;padding:1px 6px;border-radius:8px;margin-left:4px;vertical-align:middle; }
+.u-badge.old { background:#fff3cc;color:#7a4f00; }
+.u-badge.new { background:#dbeafe;color:#1e40af; }
+.period-btn {
+  padding: 5px 12px; border-radius: var(--radius);
+  border: 1px solid var(--gray-border); background: var(--bg-card);
+  font-family: var(--font-mono); font-size: 12px; font-weight: 500;
+  color: var(--text-muted); cursor: pointer; transition: all 0.15s;
+}
+.period-btn:hover { border-color: var(--red); color: var(--red); }
+.period-btn.active { background: var(--red-light); color: var(--red); border-color: var(--red); }
+.g-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+/* bars */
+.g-bar {
+  position: absolute; height: 18px; top: 72%; transform: translateY(-50%);
+  border-radius: 3px; display: flex; align-items: center;
+  padding: 0 7px; font-size: 10px; font-weight: 500;
+  white-space: nowrap; overflow: hidden; cursor: pointer;
+  transition: opacity 0.15s; z-index: 4;
+  text-overflow: ellipsis;
+}
+.g-bar span.bar-label {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  min-width: 0;
+}
+.g-bar:hover { opacity: 0.85; }
+.g-bar.active { background: #1a6fc4; color: white; }
+.g-bar.extended { background: #f0b429; color: #5c3d00; }
+.g-bar.warning { background: #f0b429; color: #5c3d00; }
+.g-bar.building { background: #e07840; color: white; }
+.g-bar.dismount { background: #7c3aed; color: white; }
+.g-bar.planned { background: #9ca3af; color: white; }
+.g-bar.returned { background: #6b7280; color: white; }
+.g-bar.expiring { background: #c0392b; color: white; }
+.g-bar.ready { background: #2a8a4a; color: white; }
+
+.today-line {
+  position: absolute; top: 0; bottom: 0; width: 2px;
+  background: rgba(204,0,0,0.25); z-index: 2; pointer-events: none;
+}
+.today-label {
+  position: absolute; top: 0; width: 2px;
+  background: var(--red); z-index: 10; pointer-events: none;
+}
+.today-label::after {
+  content: 'I dag';
+  position: absolute; top: 2px; left: 4px;
+  font-size: 10px; font-weight: 600; color: var(--red);
+  white-space: nowrap; background: var(--bg-card);
+  padding: 0 3px; border-radius: 2px;
+}
+.month-line {
+  position: absolute; top: 0; bottom: 0; width: 1px;
+  background: rgba(0,0,0,0.10); pointer-events: none; z-index: 3;
+}
+.overlap-stripe {
+  position: absolute; top: 0; bottom: 0;
+  background: repeating-linear-gradient(
+    90deg, transparent 0px, transparent 3px,
+    rgba(204,0,0,0.2) 3px, rgba(204,0,0,0.2) 4px
+  );
+  pointer-events: none; z-index: 2;
+}
+
+/* MODAL */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.4); z-index: 200;
+  align-items: center; justify-content: center; padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--bg-card); border-radius: var(--radius-lg);
+  padding: 24px; width: 100%; max-width: 680px;
+  max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+.modal-hdr { display: flex; align-items: center; margin-bottom: 20px; }
+.modal-title { font-size: 17px; font-weight: 600; }
+.modal-close { margin-left: auto; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted); padding: 0 4px; }
+.modal-close:hover { color: var(--text); }
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-grid.full { grid-template-columns: 1fr; }
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label { font-size: 12px; font-weight: 500; color: var(--text-muted); }
+.field input, .field select, .field textarea {
+  padding: 8px 10px; border: 1px solid var(--gray-border);
+  border-radius: var(--radius); font-family: var(--font); font-size: 13px;
+  color: var(--text); background: var(--bg-card);
+  transition: border-color 0.15s;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline: none; border-color: var(--red);
+}
+.field textarea { resize: vertical; min-height: 70px; }
+.field .hint { font-size: 11px; color: var(--text-muted); }
+
+.form-section-title { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; }
+
+.modal-footer { display: flex; gap: 8px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--gray-border); justify-content: flex-end; }
+
+/* GANTT EDIT POPUP */
+.gantt-popup {
+  display: none; position: fixed; z-index: 300;
+  background: var(--bg-card); border: 1px solid var(--gray-border);
+  border-radius: var(--radius-lg); padding: 14px 16px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15); min-width: 240px;
+}
+.gantt-popup.open { display: block; }
+.gantt-popup-title { font-size: 13px; font-weight: 600; margin-bottom: 10px; }
+.gantt-popup .field { margin-bottom: 8px; }
+.gantt-popup-btns { display: flex; gap: 6px; margin-top: 10px; }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--text); color: white;
+  padding: 10px 18px; border-radius: var(--radius);
+  font-size: 13px; font-weight: 500;
+  transform: translateY(60px); opacity: 0;
+  transition: all 0.25s; z-index: 500;
+  pointer-events: none;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+
+/* MODAL TABS */
+.modal-tabs { display: flex; gap: 0; margin-bottom: 16px; border-bottom: 2px solid var(--gray-border); }
+.modal-tab {
+  padding: 8px 18px; font-family: var(--font); font-size: 13px; font-weight: 500;
+  border: none; background: none; color: var(--text-muted); cursor: pointer;
+  border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.15s;
+}
+.modal-tab:hover { color: var(--text); }
+.modal-tab.active { color: var(--red); border-bottom-color: var(--red); }
+.tab-panel { display: none; height: 380px; overflow-y: auto; }
+.tab-panel.active { display: block; }
+.form-section { margin: 0 0 10px; padding-top: 14px; border-top: 1px solid var(--gray-border); }
+.tab-panel .form-section:first-child { border-top: none !important; padding-top: 0 !important; margin-top: 0 !important; }
+#leasing-section .form-section:first-child { border-top: none !important; padding-top: 0 !important; margin-top: 0 !important; }
+#owned-section .form-section { border-top: none !important; padding-top: 0 !important; }
+
+/* CARD ROW */
+.card-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: end; margin-bottom: 10px; }
+.card-row.fuel-card-row { grid-template-columns: 1fr 1fr 1fr auto; }
+.card-row .remove-btn {
+  padding: 8px 10px; border: 1px solid #fca5a5; border-radius: var(--radius);
+  background: none; color: #ef4444; cursor: pointer; font-size: 14px; line-height: 1;
+}
+.card-row .remove-btn:hover { background: #fee2e2; }
+
+/* Tankkort alert */
+.fuel-alert {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; border-radius: 50%;
+  font-size: 12px; font-weight: 700; cursor: default;
+  vertical-align: middle; flex-shrink: 0;
+}
+.fuel-alert.pending { background: #fef3c7; color: #92400e; border: 1px solid #f59e0b; }
+.fuel-alert.overdue { background: #fee2e2; color: #991b1b; border: 1px solid #ef4444; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.15} }
+.fuel-alert.overdue { animation: blink 1s ease-in-out infinite; }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo-wrap">
+    <div class="logo-circle">
+      <svg viewBox="0 0 40 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <text x="1" y="25" font-size="26" font-weight="800" fill="white" font-family="Georgia,serif">v2</text>
+      </svg>
+    </div>
+    <div>
+      <div class="logo-text">Flådestyring</div>
+      <div class="logo-sub">TV 2 Depot</div>
+    </div>
+  </div>
+  <nav class="topbar-nav">
+    <button class="nav-btn active" onclick="showView('dashboard')">Oversigt</button>
+    <button class="nav-btn" onclick="showView('gantt')">Gantt-kort</button>
+  </nav>
+  <div class="topbar-right">
+    <div id="user-display" style="font-size:12px;color:var(--text-muted);display:none;align-items:center;gap:6px;">
+      <span id="user-name"></span>
+      <button onclick="doLogout()" style="font-size:11px;padding:3px 8px;border:1px solid var(--gray-border);border-radius:var(--radius);background:none;cursor:pointer;color:var(--text-muted);">Log ud</button>
+    </div>
+    <button class="btn btn-primary" onclick="openModal()">+ Tilføj bil</button>
+    <button class="btn" onclick="openSettings()" style="padding:6px 10px;" title="Indstillinger">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"></circle>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- DASHBOARD VIEW -->
+  <div id="view-dashboard" class="view active">
+    <div class="stat-grid" id="stat-grid"></div>
+    <div class="obs-section">
+      <div class="section-hdr">Leasing udløb</div>
+      <div class="obs-grid" id="obs-grid"></div>
+    </div>
+    <div class="obs-section">
+      <div class="section-hdr">Fejlmeldinger</div>
+      <div class="obs-grid" id="fault-grid">
+        <div style="color:var(--text-muted);font-size:13px;padding:8px 0;">Ingen aktive fejlmeldinger — funktionen konfigureres i fejlmeldingssystemet.</div>
+      </div>
+    </div>
+    <div class="section-hdr">Alle biler</div>
+    <div class="filter-row" id="dash-filters" style="align-items:center;">
+      <div style="margin-left:auto;position:relative;">
+        <span style="position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:12px;pointer-events:none;">🔍</span>
+        <input type="text" id="car-search" placeholder="Søg..."
+          oninput="renderDashboard();document.getElementById('search-clear').style.display=this.value?'flex':'none';"
+          style="width:200px;padding:5px 26px 5px 26px;border:1px solid var(--gray-border);border-radius:20px;font-size:12px;background:var(--bg-card);color:var(--text);">
+        <button id="search-clear" onclick="document.getElementById('car-search').value='';document.getElementById('search-clear').style.display='none';renderDashboard();"
+          style="display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:13px;line-height:1;padding:0;">✕</button>
+      </div>
+    </div>
+    <div class="table-wrap"><table class="cars" id="dash-table"><thead><tr>
+      <th style="width:32px;"></th>
+      <th style="width:70px;" class="sortable" onclick="sortTable('location')">Lok.</th>
+      <th class="sortable" onclick="sortTable('name')">Navn</th>
+      <th class="sortable" onclick="sortTable('leasingstatus')">Leasingstatus</th>
+      <th class="ombyg-col sortable" onclick="sortTable('buildStatus')">Udskiftningsstatus</th>
+      <th class="ombyg-col sortable" onclick="sortTable('workloc')">Arbejdslokation</th>
+      <th class="sortable" onclick="sortTable('lessor')">Leasingselskab</th>
+      <th class="sortable" onclick="sortTable('end')">Leasing slut</th>
+      <th>Note</th>
+    </tr></thead><tbody id="dash-tbody"></tbody></table></div>
+  </div>
+
+  <!-- CARS VIEW — hidden, kept for filter compatibility -->
+  <div id="view-cars" class="view" style="display:none;"></div>
+
+  <!-- GANTT VIEW -->
+  <div id="view-gantt" class="view">
+    <!-- MODE TOGGLE -->
+    <div style="display:flex;gap:0;margin-bottom:14px;border-bottom:2px solid var(--gray-border);">
+      <button class="modal-tab active" id="gantt-mode-lease" onclick="setGanttMode('leasing',this)" style="font-size:14px;">Leasingperioder</button>
+      <button class="modal-tab" id="gantt-mode-udskift" onclick="setGanttMode('udskiftning',this)" style="font-size:14px;">Udskiftningsplan</button>
+    </div>
+
+    <!-- LEASINGPERIODER -->
+    <div id="gantt-leasing-panel">
+    <div class="gantt-controls" style="flex-direction:column;align-items:flex-start;gap:8px;">
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;width:100%;">
+        <button class="filter-chip active" id="gf-all" onclick="setGanttFilter('all',this)">Alle</button>
+        <button class="filter-chip" id="gf-ode" onclick="setGanttFilter('Odense',this)">Odense</button>
+        <button class="filter-chip" id="gf-kbh" onclick="setGanttFilter('København',this)">København</button>
+        <button class="filter-chip" id="gf-ob" onclick="setGanttFilter('OB Garage',this)">OB Garage</button>
+        <button class="filter-chip" id="gf-udskiftning" onclick="setGanttFilter('udskiftning',this)">Under udskiftning</button>
+        <div style="margin-left:auto;position:relative;">
+          <span style="position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:12px;pointer-events:none;">🔍</span>
+          <input type="text" id="gantt-search" placeholder="Søg..."
+            oninput="renderGantt();document.getElementById('gantt-search-clear').style.display=this.value?'flex':'none';"
+            style="width:180px;padding:5px 26px 5px 26px;border:1px solid var(--gray-border);border-radius:20px;font-size:12px;background:var(--bg-card);color:var(--text);">
+          <button id="gantt-search-clear" onclick="document.getElementById('gantt-search').value='';document.getElementById('gantt-search-clear').style.display='none';renderGantt();"
+            style="display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:13px;line-height:1;padding:0;">✕</button>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <button class="zoom-chip" id="gz-6" onclick="setGanttZoom(6,this)">6 mdr</button>
+        <button class="zoom-chip active" id="gz-12" onclick="setGanttZoom(12,this)">12 mdr</button>
+        <button class="zoom-chip" id="gz-24" onclick="setGanttZoom(24,this)">24 mdr</button>
+        <button class="zoom-chip" id="gz-36" onclick="setGanttZoom(36,this)">36 mdr</button>
+        <button class="zoom-chip" id="gz-48" onclick="setGanttZoom(48,this)">48 mdr</button>
+        <button class="zoom-chip" id="gz-60" onclick="setGanttZoom(60,this)">60 mdr</button>
+        <div style="width:1px;height:20px;background:var(--gray-border);margin:0 4px;"></div>
+        <button class="btn" onclick="scrollToToday()" style="font-size:12px;">&#9679; I dag</button>
+      </div>
+    </div>
+    <div class="gantt-wrap">
+      <div class="gantt-legend">
+        <div class="leg-item"><div class="leg-box" style="background:#1a6fc4;"></div>Aktiv leasing</div>
+        <div class="leg-item"><div class="leg-box" style="background:#f0b429;"></div>Forlænget / udløber &lt;7 mdr</div>
+        <div class="leg-item"><div class="leg-box" style="background:#c0392b;"></div>Udløber &lt;30 dage</div>
+        <div class="leg-item"><div class="leg-box" style="background:#e07840;"></div>Ombygning</div>
+        <div class="leg-item"><div class="leg-box" style="background:#7c3aed;"></div>Afmontering</div>
+        <div class="leg-item"><div class="leg-box" style="background:#9ca3af;"></div>Planlagt/bestilt</div>
+        <div class="leg-item"><div class="leg-box" style="background:#2a8a4a;"></div>Klar til prod.</div>
+        <div class="leg-item" style="gap:4px;">
+          <div style="width:14px;height:10px;background:repeating-linear-gradient(90deg,transparent 0,transparent 3px,rgba(204,0,0,0.25) 3px,rgba(204,0,0,0.25) 4px);border-radius:2px;"></div>
+          Overlapsperiode (gl./ny)</div>
+      </div>
+      <div class="gantt-scroll" id="gantt-scroll">
+        <div class="gantt-inner" id="gantt-inner">
+          <div class="gantt-months" id="gantt-months"></div>
+          <div id="gantt-rows"></div>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <!-- UDSKIFTNINGSPLAN -->
+    <div id="gantt-udskift-panel" style="display:none;">
+      <div id="udskift-controls" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center;">
+        <button class="zoom-chip" id="uz-6" onclick="setUdskiftZoom(6,this)">6 uger</button>
+        <button class="zoom-chip active" id="uz-12" onclick="setUdskiftZoom(12,this)">12 uger</button>
+        <button class="zoom-chip" id="uz-24" onclick="setUdskiftZoom(24,this)">24 uger</button>
+        <button class="zoom-chip" id="uz-52" onclick="setUdskiftZoom(52,this)">52 uger</button>
+        <div style="width:1px;height:20px;background:var(--gray-border);margin:0 4px;"></div>
+        <span style="font-size:12px;color:var(--text-muted);">Sortér:</span>
+        <button class="zoom-chip active" id="us-build" onclick="setUdskiftSort('buildStart',this)">Ombygning start</button>
+        <button class="zoom-chip" id="us-afmont" onclick="setUdskiftSort('buildEnd',this)">Afmontering start</button>
+        <button class="zoom-chip" id="us-end" onclick="setUdskiftSort('end',this)">Leasingudløb</button>
+        <button class="zoom-chip" id="us-name" onclick="setUdskiftSort('name',this)">Bilnavn</button>
+      </div>
+      <div id="udskift-legend" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
+        <div class="leg-item"><div class="leg-box" style="background:#1a6fc4;opacity:.4;"></div>Leasing (kontekst)</div>
+        <div class="leg-item"><div class="leg-box" style="background:#f0b429;opacity:.4;"></div>Forlænget (kontekst)</div>
+        <div class="leg-item"><div class="leg-box" style="background:#7c3aed;"></div>Afmontering</div>
+        <div class="leg-item"><div class="leg-box" style="background:#e07840;"></div>Ombygning</div>
+      </div>
+      <div id="udskift-content"></div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ADD/EDIT MODAL -->
+<div class="modal-overlay" id="modal">
+<div class="modal">
+  <div class="modal-hdr">
+    <div class="modal-title" id="modal-title">Tilføj bil</div>
+    <button class="modal-close" onclick="safeCloseModal()">×</button>
+  </div>
+  <div class="modal-tabs">
+    <button class="modal-tab active" onclick="switchTab('bildata',this)">Bildata</button>
+    <button class="modal-tab" onclick="switchTab('leasing',this)">Leasing &amp; udskiftning</button>
+    <button class="modal-tab" onclick="switchTab('kort',this)">Kort &amp; brikker</button>
+    <button class="modal-tab" onclick="switchTab('forsikring',this)">Forsikring &amp; vejhjælp</button>
+    <button class="modal-tab" onclick="switchTab('tjekliste',this)">Udskiftning</button>
+  </div>
+
+  <!-- TAB: BILDATA -->
+  <div id="tab-bildata" class="tab-panel active">
+    <div class="form-section" style="border-top:none;padding-top:0;margin-top:0;"><div class="form-section-title">Identifikation</div>
+      <div class="form-grid">
+        <div class="field" style="grid-column:span 2;"><label style="font-size:13px;font-weight:600;color:var(--text);">Lokation</label>
+          <select id="f-location" style="font-size:14px;font-weight:500;border-color:var(--red);">
+            <option value="">Vælg lokation...</option><option>Odense</option><option>København</option><option>OB Garage</option>
+          </select>
+        </div>
+        <div class="field" style="grid-column:span 2;"><label style="font-size:13px;font-weight:600;color:var(--text);">Ejerskab</label>
+          <select id="f-ownership" style="font-size:14px;font-weight:500;" onchange="toggleOwnership(this.value)">
+            <option value="leasing">Leasing</option>
+            <option value="ejet">Ejet</option>
+          </select>
+        </div>
+        <div class="field"><label>Navn (lokalt, fx ENG103)</label><input type="text" id="f-name" placeholder="ENG103"></div>
+        <div class="field"><label>Nummerplade</label>
+          <div style="display:flex;gap:6px;">
+            <input type="text" id="f-plate" placeholder="ES43756" style="flex:1;text-transform:uppercase;">
+            <button class="btn" onclick="lookupDMR()" style="font-size:12px;white-space:nowrap;">Hent data</button>
+          </div>
+          <span class="hint">Nummerplade eller stelnummer → "Hent data"</span>
+        </div>
+        <div class="field"><label>Mærke</label><input type="text" id="f-make" placeholder="Volkswagen"></div>
+        <div class="field"><label>Model</label><input type="text" id="f-model" placeholder="ID. Buzz"></div>
+        <div class="field"><label>Variant</label><input type="text" id="f-variant" placeholder="People 286hk"></div>
+        <div class="field"><label>Stelnummer (VIN)</label><input type="text" id="f-vin" placeholder="WV1ZZZ2CZPP000001" style="font-family:var(--font-mono);font-size:12px;text-transform:uppercase;"></div>
+        <div class="field"><label>Køretøjskategori</label>
+          <select id="f-category">
+            <option value="">—</option>
+            <option value="M1">M1 — Personbil (under 3.500 kg)</option>
+            <option value="N1">N1 — Varebil (under 3.500 kg)</option>
+            <option value="N2">N2 — Lastbil (3.500–12.000 kg)</option>
+            <option value="N3">N3 — Lastbil (over 12.000 kg)</option>
+            <option value="M2">M2 — Bus (under 5.000 kg)</option>
+            <option value="M3">M3 — Bus (over 5.000 kg)</option>
+          </select>
+          <span class="hint">Hentes automatisk fra motorregistret</span>
+        </div>
+        <div class="field"><label>Drivkraft</label>
+          <select id="f-fuel"><option value="">Vælg...</option><option>El</option><option>Benzin</option><option>Diesel</option><option>Plug-in hybrid</option><option>Hybrid</option></select>
+        </div>
+      </div>
+    </div>
+    <div class="form-section"><div class="form-section-title">Teknisk</div>
+      <div class="form-grid">
+        <div class="field"><label>Køreklar vægt (kg)</label><input type="number" id="f-weight-ready" placeholder="2100"></div>
+        <div class="field"><label>Totalvægt (kg)</label><input type="number" id="f-weight-total" placeholder="3500"></div>
+        <div class="field"><label>Miljøklasse</label><input type="text" id="f-envclass" placeholder="Euro 6d"></div>
+        <div class="field"><label>CO₂ udledning (g/km)</label><input type="number" id="f-co2" placeholder="0"></div>
+      </div>
+    </div>
+    <div class="form-section" style="border-top:1px solid var(--gray-border);margin-top:8px;">
+      <div class="form-section-title">Noter</div>
+      <div class="form-grid full"><div class="field"><textarea id="f-notes-bildata" placeholder="Fri tekst..." rows="3" oninput="syncNotes(this.value)"></textarea></div></div>
+    </div>
+  </div>
+
+  <!-- TAB: LEASING & UDSKIFTNING (merged) -->
+  <div id="tab-leasing" class="tab-panel">
+    <!-- Ejet bil: indkøbsdato -->
+    <div id="owned-section" style="display:none;">
+      <div class="form-section"><div class="form-section-title">Ejet bil</div>
+        <div class="form-grid">
+          <div class="field"><label>Indkøbsdato</label><input type="date" id="f-purchase-date"></div>
+          <div class="field"><label>Indkøbspris (kr.)</label><input type="number" id="f-purchase-price" placeholder="0"></div>
+        </div>
+      </div>
+    </div>
+    <!-- Leasingbil: alle leasingfelter -->
+    <div id="leasing-section">
+      <div class="form-section"><div class="form-section-title">Leasingaftale</div>
+        <div class="form-grid">
+          <div class="field"><label>Leasingselskab</label><input type="text" id="f-lessor" placeholder="LeasePlan Danmark"></div>
+          <div class="field"><label>Kontraktnummer</label><input type="text" id="f-contract" placeholder="LP-2024-00123"></div>
+          <div class="field"><label>Leasingstart</label><input type="date" id="f-start" onchange="autoCalcEnd()"></div>
+          <div class="field"><label>Ordrenummer</label><input type="text" id="f-orderno" placeholder="ORD-2024-00456"></div>
+          <div class="field"><label>Leasingslut (original)</label><input type="date" id="f-end"></div>
+          <div class="field"><label>Leasingslut (forlænget)</label><input type="date" id="f-endext"></div>
+          <div class="field"><label>Forventet leveringsdato</label><input type="date" id="f-delivery"></div>
+        </div>
+      </div>
+    </div>
+    <div class="form-section" style="border-top:1px solid var(--gray-border);margin-top:8px;">
+      <div class="form-section-title">Noter</div>
+      <div class="form-grid full"><div class="field"><textarea id="f-notes-leasing" placeholder="Fri tekst..." rows="3" oninput="syncNotes(this.value)"></textarea></div></div>
+    </div>
+  </div>
+
+  <!-- TAB: KORT & BRIKKER -->
+  <div id="tab-kort" class="tab-panel">
+    <div class="form-section" style="border-top:none;padding-top:0;margin-top:0;">
+      <div class="form-section-title">Ladebrikker</div>
+      <div id="charge-cards-list"></div>
+      <button class="btn" onclick="addCard('charge')" style="font-size:12px;margin-top:6px;">+ Tilføj ladebrik</button>
+    </div>
+    <div class="form-section">
+      <div class="form-section-title">Tankkort</div>
+      <div id="fuel-cards-list"></div>
+      <button class="btn" onclick="addCard('fuel')" style="font-size:12px;margin-top:6px;">+ Tilføj tankkort</button>
+    </div>
+    <div class="form-section" style="border-top:1px solid var(--gray-border);margin-top:8px;">
+      <div class="form-section-title">Noter</div>
+      <div class="form-grid full"><div class="field"><textarea id="f-notes-kort" placeholder="Fri tekst..." rows="3" oninput="syncNotes(this.value)"></textarea></div></div>
+    </div>
+  </div>
+
+  <!-- TAB: FORSIKRING & VEJHJÆLP -->
+  <div id="tab-forsikring" class="tab-panel">
+    <div class="form-section" style="border-top:none;padding-top:0;margin-top:0;">
+      <div class="form-section-title">Forsikring</div>
+      <div class="form-grid">
+        <div class="field"><label>Forsikringsselskab</label><input type="text" id="f-insurer" placeholder="Alm. Brand, Tryg, Gjensidige..."></div>
+        <div class="field"><label>Policenummer</label><input type="text" id="f-policy" placeholder="DK-XXXX-XXXX" style="font-family:var(--font-mono);"></div>
+      </div>
+    </div>
+    <div class="form-section">
+      <div class="form-section-title">Vejhjælp</div>
+      <div class="form-grid">
+        <div class="field"><label>Vejhjælpsselskab</label><input type="text" id="f-roadside-company" placeholder="Falck, SOS International..."></div>
+        <div class="field"><label>Medlems-/kortnummer</label><input type="text" id="f-roadside-num" placeholder="XXXX XXXX" style="font-family:var(--font-mono);"></div>
+      </div>
+    </div>
+    <div class="form-section" style="border-top:1px solid var(--gray-border);margin-top:8px;">
+      <div class="form-section-title">Noter</div>
+      <div class="form-grid full"><div class="field"><textarea id="f-notes-forsikring" placeholder="Fri tekst..." rows="3" oninput="syncNotes(this.value)"></textarea></div></div>
+    </div>
+  </div>
+
+  <!-- TAB: UDSKIFTNING -->
+  <div id="tab-tjekliste" class="tab-panel">
+    <div class="form-section" style="border-top:none;padding-top:0;margin-top:0;">
+      <div class="form-section-title">Ombygning</div>
+      <div class="form-grid">
+        <div class="field"><label>Udskiftningsstatus</label>
+          <select id="f-status">
+            <option value="">— ingen —</option>
+            <optgroup label="Indgående"><option>Planlægges</option><option>Bestilt</option><option>Leveringsdato modtaget</option><option>Leveret til ombygning</option><option>Færdigbygget</option><option>I produktion</option></optgroup>
+            <optgroup label="Udgående"><option>Afmonteres</option><option>Afventer afhentning</option></optgroup>
+          </select>
+        </div>
+        <div class="field"><label>Arbejdslokation</label>
+          <select id="f-workloc"><option value="">—</option><option>Haarby Karosseri</option><option>SIEB Teknik</option><option>Work System</option><option>TV 2 Odense</option><option>TV 2 København</option><option>Leasingselskab</option><option>Andet</option></select>
+        </div>
+        <div class="field"><label>Opbygger</label>
+          <select id="f-builder"><option value="">—</option><option>Haarby Karosseri</option><option>SIEB Teknik</option><option>Work System</option><option>TV 2 intern</option><option>Andet</option></select>
+        </div>
+        <div class="field"></div>
+        <div class="field"><label>Ombygning start</label><input type="date" id="f-build-start"></div>
+        <div class="field"><label>Ombygning slut (forventet)</label><input type="date" id="f-build-end"></div>
+        <div class="field" style="grid-column:span 2;" id="copy-build-dates-wrap">
+          <button type="button" class="btn" onclick="copyBuildDatesToPartner()"
+            style="font-size:12px;color:var(--blue);border-color:var(--blue);">
+            ↔ Kopiér ombygningsdatoer til makker
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="form-section">
+      <div class="form-section-title">Tjekliste</div>
+      <div id="checklist-content"></div>
+    </div>
+  </div>
+
+  <!-- Skjult master noter-felt -->
+  <textarea id="f-notes" style="display:none;"></textarea>
+
+  <div class="modal-footer">
+    <button class="btn delete-confirm" id="btn-delete" onclick="deleteCar()" style="display:none;">Slet bil</button>
+    <button class="btn" id="btn-replacement" onclick="openReplacementModal()" style="display:none;">+ Ny erstatning</button>
+    <button class="btn" onclick="safeCloseModal()">Annuller</button>
+    <button class="btn btn-primary" onclick="saveCar()">Gem bil</button>
+  </div>
+</div>
+</div>
+
+<!-- GANTT EDIT POPUP -->
+<div class="gantt-popup" id="gantt-popup">
+  <div class="gantt-popup-title" id="gpop-title">Rediger datoer</div>
+  <div class="field"><label>Leasingstart</label><input type="date" id="gpop-start"></div>
+  <div class="field"><label>Leasingslut (original)</label><input type="date" id="gpop-end"></div>
+  <div class="field"><label>Leasingslut (forlænget)</label><input type="date" id="gpop-endext"></div>
+  <div class="field"><label>Ombygning start</label><input type="date" id="gpop-build-start"></div>
+  <div class="field"><label>Ombygning slut</label><input type="date" id="gpop-build-end"></div>
+  <div class="gantt-popup-btns">
+    <button class="btn btn-primary" onclick="saveGanttPopup()" style="font-size:12px;">Gem</button>
+    <button class="btn" onclick="closeGanttPopup()" style="font-size:12px;">Luk</button>
+    <button class="btn" onclick="openModalForCar(currentGanttCarId)" style="font-size:12px;margin-left:auto;">Åbn bil ›</button>
+  </div>
+</div>
+
+<!-- QUICK EDIT POPUP -->
+<div class="qpop" id="qpop">
+  <div class="qpop-title" id="qpop-title">Hurtig redigering</div>
+  <div class="field"><label>Udskiftningsstatus</label>
+    <select id="qpop-buildstatus" onchange="autoSaveQuickEdit()">
+      <option value="">— ingen —</option>
+      <option>Planlægges</option>
+      <option>Bestilt</option>
+      <option>Leveringsdato modtaget</option>
+      <option>Leveret til ombygning</option>
+      <option>Færdigbygget</option>
+      <option>I produktion</option>
+      <option>Afmonteres</option>
+      <option>Afventer afhentning</option>
+    </select>
+  </div>
+  <div class="field"><label>Arbejdslokation</label>
+    <select id="qpop-workloc" onchange="autoSaveQuickEdit()">
+      <option value="">—</option>
+      <option>Haarby Karosseri</option>
+      <option>SIEB Teknik</option>
+      <option>TV 2 Odense</option>
+      <option>TV 2 København</option>
+      <option>Leasingselskab</option>
+      <option>Andet</option>
+    </select>
+  </div>
+  <div style="margin-top:8px;font-size:11px;color:var(--text-muted);text-align:center;" id="qpop-saved"></div>
+  <div class="qpop-btns">
+    <button class="btn" onclick="openModalForCar(currentQPopId);closeQuickEdit()" style="font-size:12px;width:100%;">Åbn alle detaljer →</button>
+  </div>
+</div>
+
+<!-- NOTE POPUP -->
+<div class="qpop" id="npop" style="min-width:300px;">
+  <div class="qpop-title" id="npop-title">Note</div>
+  <div class="field">
+    <textarea id="npop-text" rows="4" style="width:100%;font-family:var(--font);font-size:13px;padding:8px 10px;border:1px solid var(--gray-border);border-radius:var(--radius);resize:vertical;color:var(--text);" placeholder="Skriv note her..."></textarea>
+  </div>
+  <div style="font-size:11px;color:var(--text-muted);margin-top:4px;" id="npop-saved"></div>
+  <div class="qpop-btns" style="margin-top:8px;">
+    <button class="btn btn-primary" onclick="saveNotePopup();closeNotePopup()" style="font-size:12px;">Gem</button>
+    <button class="btn" onclick="closeNotePopup()" style="font-size:12px;">Luk</button>
+  </div>
+</div>
+
+<!-- REPLACEMENT MODAL -->
+<div class="modal-overlay" id="replacement-modal">
+<div class="modal" style="max-width:560px;">
+  <div class="modal-hdr">
+    <div class="modal-title">Ny erstatning</div>
+    <button class="modal-close" onclick="closeReplacementModal()">×</button>
+  </div>
+
+  <div class="form-section"><div class="form-section-title">Ny erstatningsbil — identifikation</div>
+    <div class="form-grid">
+      <div class="field" style="grid-column:span 2;">
+        <label>Navn på ny bil</label>
+        <input type="text" id="r-name" placeholder="Samme navn som original">
+        <span class="hint">Beholdes uændret → parres automatisk med den gamle bil</span>
+      </div>
+      <div class="field"><label>Nummerplade (hvis kendt)</label>
+        <input type="text" id="r-plate" placeholder="Kan udfyldes senere" style="text-transform:uppercase;">
+      </div>
+      <div class="field"><label>Stelnummer (hvis kendt)</label>
+        <input type="text" id="r-vin" placeholder="Kan udfyldes senere" style="font-family:var(--font-mono);font-size:12px;">
+      </div>
+      <div class="field"><label>Lokation</label>
+        <select id="r-location">
+          <option value="">Vælg...</option>
+          <option>Odense</option><option>København</option><option>OB Garage</option>
+        </select>
+      </div>
+      <div class="field"><label>Leasingselskab</label>
+        <input type="text" id="r-lessor" placeholder="LeasePlan Danmark">
+      </div>
+    </div>
+  </div>
+
+  <div class="form-section"><div class="form-section-title">Status efter oprettelse</div>
+    <div class="form-grid">
+      <div class="field">
+        <label>Ny bil — status</label>
+        <select id="r-new-status">
+          <option value="Planlægges">Planlægges</option>
+          <option value="Bestilt">Bestilt</option>
+          <option value="Leveringsdato modtaget">Leveringsdato modtaget</option>
+          <option value="Leveret til ombygning">Leveret til ombygning</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Gammel bil — status</label>
+        <select id="r-old-status">
+          <option value="">Forbliver uændret</option>
+          <option value="Forlænget">Forlænget leasing</option>
+          <option value="Afmonteres">Afmonteres</option>
+          <option value="Afventer afhentning">Afventer afhentning</option>
+        </select>
+      </div>
+      <div class="field" id="r-endext-wrap" style="display:none;">
+        <label>Forlænget til</label>
+        <input type="date" id="r-endext">
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button class="btn" onclick="closeReplacementModal()">Annuller</button>
+    <button class="btn btn-primary" onclick="createReplacement()">Opret ny erstatning</button>
+  </div>
+</div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<input type="file" id="csv-import" accept=".csv" style="display:none;" onchange="importCSV(this)">
+<div class="modal-overlay" id="settings-modal">
+<div class="modal" style="max-width:500px;">
+  <div class="modal-hdr">
+    <div class="modal-title">⚙ Indstillinger</div>
+    <button class="modal-close" onclick="closeSettings()">×</button>
+  </div>
+
+  <div class="form-section"><div class="form-section-title">Motorregistret API</div>
+    <div class="field">
+      <label>API-nøgle (X-AUTH-TOKEN fra v1.motorapi.dk)</label>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <input type="password" id="s-dmr-key" placeholder="Din API-nøgle..." style="flex:1;font-family:var(--font-mono);font-size:12px;">
+        <button class="btn" onclick="toggleApiKeyVisibility()" id="eye-btn" style="font-size:14px;padding:7px 10px;" title="Vis/skjul">👁</button>
+      </div>
+      <span class="hint">Opret gratis konto på <a href="https://v1.motorapi.dk" target="_blank" style="color:var(--red);">v1.motorapi.dk</a> · 100 gratis opslag/dag</span>
+    </div>
+    <div id="dmr-status" style="font-size:12px;margin-top:8px;"></div>
+    <button class="btn" onclick="testDMRKey()" style="font-size:12px;margin-top:4px;">Test forbindelse</button>
+  </div>
+
+  <div class="form-section" id="users-section" style="display:none;">
+    <div class="form-section-title">Brugere</div>
+    <div id="users-list" style="margin-bottom:10px;"></div>
+    <button class="btn" onclick="showAddUser()" style="font-size:12px;">+ Tilføj bruger</button>
+    <div id="add-user-form" style="display:none;margin-top:12px;padding:12px;background:var(--gray-light);border-radius:var(--radius);">
+      <div class="form-grid">
+        <div class="field"><label>Brugernavn</label><input type="text" id="nu-username" placeholder="gewi"></div>
+        <div class="field"><label>Fulde navn</label><input type="text" id="nu-name" placeholder="Gert Winther"></div>
+        <div class="field"><label>Kodeord</label><input type="password" id="nu-password" placeholder="Min. 6 tegn"></div>
+        <div class="field"><label>Rolle</label>
+          <select id="nu-role"><option value="Bruger">Bruger</option><option value="Admin">Admin</option></select>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button class="btn btn-primary" onclick="createUser()" style="font-size:12px;">Opret bruger</button>
+        <button class="btn" onclick="document.getElementById('add-user-form').style.display='none'" style="font-size:12px;">Annuller</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-section"><div class="form-section-title">Skift kodeord</div>
+    <div class="form-grid">
+      <div class="field"><label>Nuværende kodeord</label><input type="password" id="s-old-pw" placeholder="••••••••"></div>
+      <div class="field"><label>Nyt kodeord</label><input type="password" id="s-new-pw" placeholder="Min. 6 tegn"></div>
+    </div>
+    <button class="btn" onclick="doChangePassword()" style="font-size:12px;margin-top:4px;">Skift kodeord</button>
+  </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn" onclick="exportCSV();closeSettings()" style="font-size:12px;">↓ Eksporter CSV</button>
+      <button class="btn" onclick="closeSettings();setTimeout(()=>document.getElementById('csv-import').click(),100)" style="font-size:12px;">↑ Importer CSV</button>
+      <button class="btn delete-confirm" onclick="clearAllData()" style="font-size:12px;">Slet alle biler</button>
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button class="btn" onclick="closeSettings()">Luk</button>
+    <button class="btn btn-primary" onclick="saveSettings()">Gem indstillinger</button>
+  </div>
+</div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'tv2_fleet_v1';
+const API_URL = 'https://script.google.com/macros/s/AKfycbx63HNv4mbydpHVW2eMCK89zvT-iocHXWyXGOr90oiCkoUrxgyUCiVe0jWwOaqTGXxirA/exec'; // Indsæt deploy URL efter publicering
+const USE_API = API_URL !== 'https://script.google.com/macros/s/AKfycbx63HNv4mbydpHVW2eMCK89zvT-iocHXWyXGOr90oiCkoUrxgyUCiVe0jWwOaqTGXxirA/exec';
+
+// ─── AUTH ─────────────────────────────────────────────────────────────────────
+const Auth = {
+  getToken: () => localStorage.getItem('tv2_token'),
+  getUser: () => { try { return JSON.parse(localStorage.getItem('tv2_user')||'null'); } catch(e) { return null; } },
+  isLoggedIn: () => !!localStorage.getItem('tv2_token') && new Date(localStorage.getItem('tv2_token_expires')||0) > new Date(),
+  isAdmin: () => { const u = Auth.getUser(); return u && u.role === 'Admin'; },
+  clearSession: () => { ['tv2_token','tv2_user','tv2_token_expires'].forEach(k => localStorage.removeItem(k)); }
+};
+
+if (USE_API && !Auth.isLoggedIn()) window.location.href = 'login.html';
+
+async function apiCall(action, data = {}) {
+  if (!USE_API) return null;
+  try {
+    const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action, token: Auth.getToken(), ...data }) });
+    const json = await res.json();
+    if (json.error === 'Ugyldig session - log ind igen') { Auth.clearSession(); window.location.href = 'login.html'; return null; }
+    return json;
+  } catch(e) { console.error('API fejl:', e); return null; }
+}
+
+let cars = [];
+let editingId = null;
+let currentGanttCarId = null;
+let ganttFilter = 'all';
+let ganttMonths = 12;
+let dashFilter = 'all';
+let carsFilter = 'all';
+
+async function loadData() {
+  if (USE_API) {
+    showToast('Henter data...');
+    const result = await apiCall('getCars');
+    if (result && result.cars) {
+      cars = result.cars;
+      showToast('Data hentet — ' + cars.length + ' biler');
+      return;
+    }
+  }
+  // Fallback til localStorage
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) cars = JSON.parse(raw);
+    else cars = getSampleData();
+  } catch(e) { cars = getSampleData(); }
+}
+
+async function saveData() {
+  // Gem altid lokalt som backup
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(cars));
+}
+
+async function saveCarToAPI(car) {
+  if (!USE_API) return;
+  const result = await apiCall('saveCar', { car });
+  if (result && result.error) showToast('API fejl: ' + result.error);
+}
+
+async function deleteCarFromAPI(id, name) {
+  if (!USE_API) return;
+  const result = await apiCall('deleteCar', { id, name });
+  if (result && result.error) showToast('API fejl: ' + result.error);
+}
+
+function getSampleData() {
+  const y = new Date().getFullYear();
+  return [
+    { id: '1', name: 'ENG101', make: 'Mercedes', model: 'Sprinter', variant: '315 CDI', fuel: 'Diesel', plate: 'AB12345', location: 'Odense', buildStatus: '', workloc: '', start: y+'-01-01', end: y+'-04-30', endext: y+'-07-31', lessor: 'LeasePlan', contract: 'LP-2022-001', notes: '', co2:'172', envclass:'Euro 6d', weightReady:'2100', weightTotal:'3500', chargeCompany:'', chargeNum:'', fuelCompany:'Circle K', fuelNum:'9876', builder:'', buildStart:'', buildEnd:'', delivery:'' },
+    { id: '2', name: 'ENG103', make: 'VW', model: 'Transporter', variant: 'T6.1 2.0 TDI', fuel: 'Diesel', plate: 'CD23456', location: 'Odense', buildStatus: 'Afmonteres', workloc: 'Haarby Karosseri', start: y+'-01-01', end: y+'-05-15', endext: '', lessor: 'Nordania', contract: 'NA-2021-042', notes: 'Gammel ENG103 — afventer afhentning efter afmontering', co2:'185', envclass:'Euro 6d', weightReady:'1850', weightTotal:'3200', chargeCompany:'', chargeNum:'', fuelCompany:'Circle K', fuelNum:'5543', builder:'Haarby Karosseri', buildStart:'', buildEnd:'', delivery:'' },
+    { id: '3', name: 'ENG103', make: 'VW', model: 'ID. Buzz', variant: 'People 286hk', fuel: 'El', plate: 'ES43756', location: 'Odense', buildStatus: 'Leveret til ombygning', workloc: 'Haarby Karosseri', start: y+'-04-20', end: (y+3)+'-04-20', endext: '', lessor: 'LeasePlan', contract: 'LP-2025-103', notes: 'Ny ENG103 — udskiftning hos Haarby Karosseri', co2:'0', envclass:'El', weightReady:'2585', weightTotal:'3500', chargeCompany:'Clever', chargeNum:'DK-1234-5678', fuelCompany:'', fuelNum:'', builder:'Haarby Karosseri', buildStart: y+'-04-20', buildEnd: y+'-06-01', delivery: y+'-04-18' },
+    { id: '4', name: 'ENG105', make: 'Mercedes', model: 'Vito', variant: '116 CDI', fuel: 'Diesel', plate: 'EF34567', location: 'Odense', buildStatus: '', workloc: '', start: y+'-03-01', end: (y+2)+'-03-01', endext: '', lessor: 'LeasePlan', contract: 'LP-2023-105', notes: '', co2:'168', envclass:'Euro 6d', weightReady:'1900', weightTotal:'3200', chargeCompany:'', chargeNum:'', fuelCompany:'Shell', fuelNum:'2211', builder:'', buildStart:'', buildEnd:'', delivery:'' },
+    { id: '5', name: 'ENG106', make: 'VW', model: 'ID. Buzz', variant: 'Cargo 204hk', fuel: 'El', plate: '', location: 'Odense', buildStatus: 'Bestilt', workloc: '', start: '', end: (y+3)+'-06-01', endext: '', lessor: 'LeasePlan', contract: 'LP-2025-106', notes: 'Leveringsdato rykket 2x — nu forventet 1. jun', co2:'0', envclass:'El', weightReady:'', weightTotal:'3500', chargeCompany:'', chargeNum:'', fuelCompany:'', fuelNum:'', builder:'SIEB Teknik', buildStart:'', buildEnd:'', delivery: y+'-06-01' },
+    { id: '6', name: 'ENG107', make: 'Mercedes', model: 'Vito', variant: '114 CDI', fuel: 'Diesel', plate: 'GH45678', location: 'København', buildStatus: '', workloc: '', start: y+'-01-01', end: y+'-05-22', endext: '', lessor: 'Nordania', contract: 'NA-2022-007', notes: 'Ingen erstatning bestilt endnu!', co2:'178', envclass:'Euro 6', weightReady:'1880', weightTotal:'3100', chargeCompany:'', chargeNum:'', fuelCompany:'Circle K', fuelNum:'7788', builder:'', buildStart:'', buildEnd:'', delivery:'' },
+    { id: '7', name: 'ENG109', make: 'Mercedes', model: 'Sprinter', variant: '319 CDI', fuel: 'Diesel', plate: 'IJ56789', location: 'København', buildStatus: '', workloc: '', start: y+'-02-01', end: (y+2)+'-02-01', endext: '', lessor: 'LeasePlan', contract: 'LP-2023-109', notes: '', co2:'198', envclass:'Euro 6d', weightReady:'2200', weightTotal:'3500', chargeCompany:'', chargeNum:'', fuelCompany:'Shell', fuelNum:'3344', builder:'', buildStart:'', buildEnd:'', delivery:'' },
+  ];
+}
+
+// ─── UTILS ──────────────────────────────────────────────────────────────────
+function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+
+function today() { return new Date().toISOString().slice(0,10); }
+
+function daysUntil(dateStr) {
+  if (!dateStr) return null;
+  const d = Math.ceil((new Date(dateStr) - new Date(today())) / 86400000);
+  return d;
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  const dt = new Date(d);
+  return dt.toLocaleDateString('da-DK', { day:'numeric', month:'short', year:'numeric' });
+}
+
+function toggleOwnership(val) {
+  document.getElementById('owned-section').style.display = val === 'ejet' ? 'block' : 'none';
+  document.getElementById('leasing-section').style.display = val === 'ejet' ? 'none' : 'block';
+}
+
+// LEASING STATUS — automatic, based on dates
+function leasingStatus(car) {
+  if (car.ownership === 'ejet') return { key: 'owned', label: 'Ejet', color: '#2a8a4a' };
+  const d = daysUntil(effectiveEnd(car));
+  if (car.endext) return { key: 'extended', label: 'Forlænget', color: '#d47c00' };
+  if (d !== null && d < 0) return { key: 'returned', label: 'Returneret', color: '#6b7280' };
+  if (d !== null && d <= 30) return { key: 'critical', label: 'Udløber snart', color: '#CC0000' };
+  if (d !== null && d <= 210) return { key: 'warning', label: `Udløber om ${d} dage`, color: '#d4a000' };
+  if (!car.start && !car.end) return { key: 'planned', label: 'Ikke startet', color: '#9ca3af' };
+  return { key: 'active', label: 'Aktiv', color: '#2a8a4a' };
+}
+
+// BUILD STATUS — manual, badge with color
+function buildStatusBadge(buildStatus) {
+  if (!buildStatus) return '';
+  const map = {
+    'Planlægges':               { bg: '#f1f5f9', color: '#475569' },
+    'Bestilt':                  { bg: '#dbeafe', color: '#1e40af' },
+    'Leveringsdato modtaget':   { bg: '#e0e7ff', color: '#3730a3' },
+    'Leveret til ombygning':    { bg: '#ffedd5', color: '#9a3412' },
+    'Færdigbygget':             { bg: '#fef9c3', color: '#854d0e' },
+    'I produktion':      { bg: '#dcfce7', color: '#166534' },
+    'Afmonteres':               { bg: '#fee2e2', color: '#991b1b' },
+    'Afventer afhentning':      { bg: '#fce7f3', color: '#9d174d' },
+  };
+  const s = map[buildStatus] || { bg: '#f3f4f6', color: '#374151' };
+  return `<span style="display:inline-block;font-size:11px;font-weight:500;padding:2px 9px;border-radius:20px;background:${s.bg};color:${s.color};">${buildStatus}</span>`;
+}
+
+function effectiveEnd(car) { return car.endext || car.end || ''; }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ─── VIEWS ──────────────────────────────────────────────────────────────────
+function showView(v) {
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(el => {
+    if (el.textContent.toLowerCase().includes(v === 'dashboard' ? 'oversigt' : 'gantt')) el.classList.add('active');
+  });
+  if (v === 'dashboard') renderDashboard();
+  if (v === 'gantt') {
+    if (ganttMode === 'leasing') renderGantt();
+    else renderUdskiftningsplan();
+  }
+}
+
+let sortCol = 'location';
+let sortDir = 1; // 1 = asc, -1 = desc
+
+function sortTable(col) {
+  if (sortCol === col) sortDir *= -1;
+  else { sortCol = col; sortDir = 1; }
+  // Update header indicators
+  document.querySelectorAll('table.cars th').forEach(th => {
+    th.classList.remove('sort-asc','sort-desc');
+  });
+  document.querySelectorAll('table.cars th.sortable').forEach(th => {
+    if (th.getAttribute('onclick') && th.getAttribute('onclick').includes("'"+col+"'")) {
+      th.classList.add(sortDir === 1 ? 'sort-asc' : 'sort-desc');
+    }
+  });
+  renderDashboard();
+}
+
+function getSortValue(c, col) {
+  if (col === 'leasingstatus') return leasingStatus(c).label;
+  if (col === 'location') {
+    const order = ['Odense','København','OB Garage'];
+    return order.indexOf(c.location);
+  }
+  if (col === 'end') return effectiveEnd(c) || 'zzzz';
+  return (c[col] || '').toLowerCase();
+}
+// ─── GANTT MODE ──────────────────────────────────────────────────────────────
+let ganttMode = 'leasing';
+let udskiftWeeks = 12;
+let udskiftSort = 'buildStart';
+
+function setGanttMode(mode, btn) {
+  ganttMode = mode;
+  document.querySelectorAll('#gantt-mode-lease,#gantt-mode-udskift').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('gantt-leasing-panel').style.display = mode === 'leasing' ? '' : 'none';
+  document.getElementById('gantt-udskift-panel').style.display = mode === 'udskiftning' ? '' : 'none';
+  if (mode === 'udskiftning') renderUdskiftningsplan();
+}
+
+function setUdskiftZoom(w, btn) {
+  udskiftWeeks = w;
+  document.querySelectorAll('[id^="uz-"]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderUdskiftningsplan();
+}
+
+function setUdskiftSort(s, btn) {
+  udskiftSort = s;
+  document.querySelectorAll('[id^="us-"]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderUdskiftningsplan();
+}
+
+function weekNum(d) {
+  const date = new Date(d); date.setHours(0,0,0,0);
+  date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+  const week1 = new Date(date.getFullYear(), 0, 4);
+  return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+}
+
+function renderUdskiftningsplan() {
+  const container = document.getElementById('udskift-content');
+
+  const inProgress = cars.filter(c =>
+    c.buildStatus !== 'Returneret' &&
+    (c.buildStatus && !['','I produktion'].includes(c.buildStatus) ||
+     cars.some(o => o.id !== c.id && o.name === c.name && o.location === c.location && o.buildStatus !== 'Returneret'))
+  );
+
+  if (!inProgress.length) {
+    container.innerHTML = '<div style="padding:20px;color:var(--text-muted);font-size:13px;">Ingen biler under udskiftning.</div>';
+    return;
+  }
+
+  // Group pairs
+  const pairMap = {};
+  inProgress.forEach(c => {
+    const key = c.name + '|' + c.location;
+    if (!pairMap[key]) pairMap[key] = [];
+    if (!pairMap[key].find(x => x.id === c.id)) pairMap[key].push(c);
+  });
+
+  // Sort pairs by chosen criteria
+  const pairList = Object.values(pairMap).map(pair => {
+    pair.sort((a,b) => (a.start||'').localeCompare(b.start||''));
+    const sortVal = pair[0][udskiftSort] || pair[0].start || '';
+    return { pair, sortVal };
+  });
+  pairList.sort((a,b) => (a.sortVal||'zzz').localeCompare(b.sortVal||'zzz'));
+
+  // Group by builder
+  const builders = {};
+  pairList.forEach(({pair}) => {
+    const builder = pair.find(c => c.builder)?.builder ||
+                    pair.find(c => c.workloc && ['Haarby Karosseri','SIEB Teknik'].includes(c.workloc))?.workloc ||
+                    'Ingen opbygger registreret';
+    if (!builders[builder]) builders[builder] = [];
+    builders[builder].push(pair);
+  });
+
+  // Week range
+  const now = new Date(); now.setHours(0,0,0,0);
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - ((now.getDay() + 6) % 7)); // monday
+  const endDate = new Date(startOfWeek);
+  endDate.setDate(startOfWeek.getDate() + udskiftWeeks * 7);
+
+  function pct(dateStr) {
+    if (!dateStr) return null;
+    const d = new Date(dateStr);
+    const total = endDate - startOfWeek;
+    return Math.max(-5, Math.min(105, ((d - startOfWeek) / total) * 100));
+  }
+
+  const todayPct = ((now - startOfWeek) / (endDate - startOfWeek)) * 100;
+
+  const weeks = [];
+  for (let i = 0; i < udskiftWeeks; i++) {
+    const d = new Date(startOfWeek);
+    d.setDate(startOfWeek.getDate() + i * 7);
+    weeks.push({ wn: weekNum(d), isNow: i === 0 });
+  }
+
+  const builderColors = { 'Haarby Karosseri': '#1a3a6b', 'SIEB Teknik': '#5a2a00', 'Work System': '#14532d' };
+  let html = '';
+
+  Object.entries(builders).forEach(([builder, pairs]) => {
+    const dotColor = builderColors[builder] || '#6b7280';
+    html += `<div class="udskift-builder">
+      <div class="udskift-builder-hdr">
+        <div style="width:8px;height:8px;border-radius:50%;background:${dotColor};flex-shrink:0;"></div>
+        ${builder} — ${pairs.length} bil${pairs.length !== 1 ? 'er' : ''} i kø
+      </div>
+      <div class="udskift-wrap">
+      <table class="udskift-table">
+        <thead><tr>
+          <th class="u-name">Bil</th>
+          ${weeks.map(w => `<th${w.isNow?' class="u-now"':''}>u${w.wn}</th>`).join('')}
+        </tr></thead><tbody>`;
+
+    pairs.forEach((pair, pairIdx) => {
+      const old = pair[0];
+      const newCar = pair[1];
+
+      if (pairIdx > 0) html += `<tr class="u-sep"><td colspan="${udskiftWeeks+1}"></td></tr>`;
+
+      // OLD car: leasing thin top, afmontering thick bottom
+      if (old) {
+        const lp = pct(old.start), lep = pct(effectiveEnd(old));
+        const ap = pct(old.buildStart), aep = pct(old.buildEnd);
+        const lc = leasingStatus(old).key === 'critical' ? '#c0392b' : leasingStatus(old).key === 'extended' || leasingStatus(old).key === 'warning' ? '#f0b429' : '#1a6fc4';
+        html += `<tr class="u-old">
+          <td class="u-name">
+            <div class="u-name-tag" onclick="openModalForCar('${old.id}')">${old.name} <span class="u-badge old">gl.</span></div>
+            <div class="u-name-sub">${old.make||''} ${old.model||''}</div>
+          </td>
+          <td colspan="${udskiftWeeks}" class="u-bar-cell">
+            ${todayPct>=0&&todayPct<=100?`<div class="u-today" style="left:${todayPct}%"></div>`:''}
+            ${Array.from({length:udskiftWeeks-1},(_,i)=>{
+              const p=((i+1)/udskiftWeeks)*100;
+              return `<div style="position:absolute;top:0;bottom:0;left:${p}%;width:1px;background:rgba(0,0,0,0.07);pointer-events:none;z-index:1;"></div>`;
+            }).join('')}
+            ${lp!==null&&lep!==null?`<div class="u-bar u-lease-thin" style="left:${Math.max(0,lp)}%;width:${Math.min(100,lep)-Math.max(0,lp)}%;background:${lc};" title="Leasing ${fmtDate(old.start)}–${fmtDate(effectiveEnd(old))}"></div>`:''}
+            ${ap!==null?`<div class="u-bar u-action-thick" style="left:${Math.max(0,ap)}%;width:${aep!==null?Math.min(100,aep)-Math.max(0,ap):8}%;background:#7c3aed;color:white;cursor:pointer;" onclick="openModalOnTab('${old.id}','leasing')" title="Afmontering ${fmtDate(old.buildStart)}${old.buildEnd?'–'+fmtDate(old.buildEnd):''}">Afmontering${aep!==null&&(aep-ap)>8?' '+fmtDate(old.buildStart)+'–'+fmtDate(old.buildEnd):''}</div>`:''}
+          </td>
+        </tr>`;
+      }
+
+      // NEW car: ombygning thick top, leasing thin bottom
+      if (newCar) {
+        const lp = pct(newCar.start), lep = pct(effectiveEnd(newCar));
+        const bp = pct(newCar.buildStart), bep = pct(newCar.buildEnd);
+        html += `<tr class="u-new">
+          <td class="u-name">
+            <div class="u-name-tag" onclick="openModalForCar('${newCar.id}')">${newCar.name} <span class="u-badge new">ny</span></div>
+            <div class="u-name-sub">${newCar.make||''} ${newCar.model||''}</div>
+          </td>
+          <td colspan="${udskiftWeeks}" class="u-bar-cell">
+            ${todayPct>=0&&todayPct<=100?`<div class="u-today" style="left:${todayPct}%"></div>`:''}
+            ${Array.from({length:udskiftWeeks-1},(_,i)=>{
+              const p=((i+1)/udskiftWeeks)*100;
+              return `<div style="position:absolute;top:0;bottom:0;left:${p}%;width:1px;background:rgba(0,0,0,0.07);pointer-events:none;z-index:1;"></div>`;
+            }).join('')}
+            ${bp!==null?`<div class="u-bar u-action-thick-top" style="left:${Math.max(0,bp)}%;width:${bep!==null?Math.min(100,bep)-Math.max(0,bp):8}%;background:#e07840;color:white;cursor:pointer;" onclick="openModalOnTab('${newCar.id}','leasing')" title="Ombygning ${fmtDate(newCar.buildStart)}${newCar.buildEnd?'–'+fmtDate(newCar.buildEnd):''}">Ombygning${bep!==null&&(bep-bp)>8?' '+fmtDate(newCar.buildStart)+'–'+fmtDate(newCar.buildEnd):''}</div>`:''}
+            ${lp!==null&&lep!==null?`<div class="u-bar u-lease-thin-bot" style="left:${Math.max(0,lp)}%;width:${Math.min(100,lep)-Math.max(0,lp)}%;background:#1a6fc4;cursor:pointer;" onclick="openModalOnTab('${newCar.id}','leasing')" title="Leasing ${fmtDate(newCar.start)}–${fmtDate(effectiveEnd(newCar))}"></div>`:''}
+          </td>
+        </tr>`;
+      }
+    });
+
+    html += `</tbody></table></div></div>`;
+  });
+
+  container.innerHTML = html;
+}
+
+// ─── DASHBOARD ──────────────────────────────────────────────────────────────
+function renderDashboard() {
+  const activeCars = cars.filter(c => c.buildStatus !== 'Returneret');
+  const expiring = activeCars.filter(c => { const d = daysUntil(effectiveEnd(c)); return d !== null && d <= 210 && d >= 0; });
+  const building = activeCars.filter(c => c.buildStatus && !['','I produktion'].includes(c.buildStatus));
+  const ordered  = activeCars.filter(c => ['Bestilt','Leveringsdato modtaget','Planlægges'].includes(c.buildStatus));
+  const archived = cars.filter(c => c.buildStatus === 'Returneret');
+
+  // Unikke biler = biler uden par + kun én pr. par (tæl unikke navn+lokation kombinationer)
+  const nameLocSet = new Set();
+  const uniqueCount = activeCars.filter(c => {
+    const key = c.name + '|' + c.location;
+    if (nameLocSet.has(key)) return false;
+    nameLocSet.add(key); return true;
+  }).length;
+  const totalCount = activeCars.length;
+  const countHtml = uniqueCount === totalCount
+    ? `${totalCount}`
+    : `${uniqueCount} <span style="font-size:16px;font-weight:400;color:var(--text-muted);">(${totalCount})</span>`;
+
+  document.getElementById('stat-grid').innerHTML = `
+    <div class="stat-card"><div class="stat-num">${countHtml}</div><div class="stat-label">Biler i alt</div></div>
+    <div class="stat-card alert"><div class="stat-num">${expiring.length}</div><div class="stat-label">Udløber inden 7 mdr</div></div>
+    <div class="stat-card warning"><div class="stat-num">${building.length}</div><div class="stat-label">Under udskiftning</div></div>
+    <div class="stat-card info"><div class="stat-num">${ordered.length}</div><div class="stat-label">Bestilt / planlagt</div></div>
+  `;
+
+  const obsGrid = document.getElementById('obs-grid');
+  const obsCars = activeCars.filter(c => {
+    const d = daysUntil(effectiveEnd(c));
+    if (d !== null && d <= 210 && d >= 0) return true;
+    if (c.notes && c.notes.toLowerCase().includes('rykket')) return true;
+    if (['Afventer afhentning', 'Afmonteres'].includes(c.buildStatus)) return true;
+    return false;
+  });
+  const uniqueObs = [...new Map(obsCars.map(c => [c.id, c])).values()];
+
+  obsGrid.innerHTML = uniqueObs.length ? uniqueObs.map(c => {
+    const d = daysUntil(effectiveEnd(c));
+    let cls = 'info', badgeCls = 'badge-info', badgeText = '';
+    if (['Afventer afhentning','Afmonteres'].includes(c.buildStatus) && (d === null || d > 60)) {
+      cls = 'warning'; badgeCls = 'badge-warning'; badgeText = c.buildStatus;
+    } else if (d !== null && d <= 14) { cls = 'critical'; badgeCls = 'badge-critical'; badgeText = d + ' dage'; }
+    else if (d !== null && d <= 210) { cls = 'warning'; badgeCls = 'badge-warning'; badgeText = d + ' dage'; }
+    else if (c.notes && c.notes.toLowerCase().includes('rykket')) { badgeText = 'Dato rykket'; badgeCls = 'badge-info'; }
+    const detailLine = ['Afventer afhentning','Afmonteres'].includes(c.buildStatus)
+      ? c.buildStatus + (effectiveEnd(c) ? ' · udløb ' + fmtDate(effectiveEnd(c)) : '')
+      : effectiveEnd(c) ? 'Udløber ' + fmtDate(effectiveEnd(c)) : c.buildStatus||'';
+    return `<div class="obs-card ${cls}">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
+        <div onclick="openModalForCar('${c.id}')" style="cursor:pointer;flex:1;">
+          <div class="obs-name">${c.name}</div>
+          <div class="obs-detail">${c.make} ${c.model}</div>
+          <div class="obs-detail">${detailLine}</div>
+          ${badgeText ? `<span class="badge ${badgeCls}">${badgeText}</span>` : ''}
+        </div>
+        <button onclick="markReturned('${c.id}')" title="${c.ownership==='ejet'?'Markér som solgt':'Markér som afhentet'}"
+          style="flex-shrink:0;padding:4px 8px;font-size:11px;border:1px solid #d1d5db;border-radius:var(--radius);background:white;cursor:pointer;color:var(--text-muted);white-space:nowrap;"
+          onmouseover="this.style.background='#f0fdf4';this.style.color='#166534';this.style.borderColor='#86efac';"
+          onmouseout="this.style.background='white';this.style.color='var(--text-muted)';this.style.borderColor='#d1d5db';">
+          ${c.ownership==='ejet' ? '✓ Solgt' : '✓ Afhentet'}
+        </button>
+      </div>
+    </div>`;
+  }).join('') : '<div style="color:var(--text-muted);font-size:13px;padding:8px 0;">Ingen biler kræver øjeblikkelig opmærksomhed.</div>';
+
+  renderFilters('dash-filters', dashFilter, f => { dashFilter = f; renderDashboard(); }, archived.length);
+  renderCarTable('dash-tbody', dashFilter);
+  renderFaultGrid();
+}
+
+function renderFilters(containerId, active, cb, archivedCount) {
+  const activeCars = cars.filter(c => c.buildStatus !== 'Returneret');
+  const ode = activeCars.filter(c => c.location === 'Odense').length;
+  const kbh = activeCars.filter(c => c.location === 'København').length;
+  const obg = activeCars.filter(c => c.location === 'OB Garage').length;
+  const bld = activeCars.filter(c => c.buildStatus && !['','I produktion'].includes(c.buildStatus)).length;
+  const arc = archivedCount || cars.filter(c => c.buildStatus === 'Returneret').length;
+  const chips = [
+    `<button class="filter-chip ${active==='all'?'active':''}" onclick="(${cb.toString()})('all')">Alle (${activeCars.length})</button>`,
+    `<button class="filter-chip ${active==='Odense'?'active':''}" onclick="(${cb.toString()})('Odense')">Odense (${ode})</button>`,
+    `<button class="filter-chip ${active==='København'?'active':''}" onclick="(${cb.toString()})('København')">København (${kbh})</button>`,
+    `<button class="filter-chip ${active==='OB Garage'?'active':''}" onclick="(${cb.toString()})('OB Garage')">OB Garage (${obg})</button>`,
+    `<button class="filter-chip ${active==='building'?'active':''}" onclick="(${cb.toString()})('building')">Under udskiftning (${bld})</button>`,
+    arc > 0 ? `<button class="filter-chip ${active==='archived'?'active':''}" onclick="(${cb.toString()})('archived')" style="opacity:0.7;">📦 Arkiv (${arc})</button>` : ''
+  ].join('');
+  // Insert chips before the search wrapper (last child)
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const searchWrapper = container.querySelector('[style*="margin-left:auto"]');
+  if (searchWrapper) {
+    searchWrapper.insertAdjacentHTML('beforebegin', chips);
+    // Remove old chips (all but last child which is search)
+    const allChildren = Array.from(container.children);
+    allChildren.slice(0, allChildren.length - 1).forEach(ch => {
+      if (!ch.querySelector('#car-search')) ch.remove();
+    });
+    searchWrapper.insertAdjacentHTML('beforebegin', chips);
+  } else {
+    container.innerHTML = chips;
+  }
+}
+
+function renderCarTable(tbodyId, filter, showExtras) {
+  const tbody = document.getElementById(tbodyId);
+  // Search filter
+  const searchVal = (document.getElementById('car-search')?.value || '').toLowerCase().trim();
+
+  let filtered = cars.filter(c => {
+    if (filter === 'archived') return c.buildStatus === 'Returneret';
+    if (c.buildStatus === 'Returneret') return false;
+    if (filter === 'Odense') return c.location === 'Odense';
+    if (filter === 'København') return c.location === 'København';
+    if (filter === 'OB Garage') return c.location === 'OB Garage';
+    if (filter === 'building') return c.buildStatus && !['','I produktion'].includes(c.buildStatus);
+    return true;
+  });
+
+  // Apply search
+  if (searchVal) {
+    filtered = filtered.filter(c => {
+      if ((c.name||'').toLowerCase().includes(searchVal)) return true;
+      if ((c.plate||'').toLowerCase().includes(searchVal)) return true;
+      if ((c.vin||'').toLowerCase().includes(searchVal)) return true;
+      if ((c.make||'').toLowerCase().includes(searchVal)) return true;
+      if ((c.model||'').toLowerCase().includes(searchVal)) return true;
+      if ((c.fuelCards||[]).some(f => (f.num||'').toLowerCase().includes(searchVal) || (f.company||'').toLowerCase().includes(searchVal))) return true;
+      if ((c.chargeCards||[]).some(f => (f.num||'').toLowerCase().includes(searchVal) || (f.company||'').toLowerCase().includes(searchVal))) return true;
+      return false;
+    });
+  }
+
+  // Sort
+  filtered.sort((a,b) => {
+    const av = getSortValue(a, sortCol);
+    const bv = getSortValue(b, sortCol);
+    if (av < bv) return -sortDir;
+    if (av > bv) return sortDir;
+    return a.name.localeCompare(b.name);
+  });
+
+  // Find paired names
+  const nameMap = {};
+  filtered.forEach(c => { if(!nameMap[c.name+c.location]) nameMap[c.name+c.location]=[]; nameMap[c.name+c.location].push(c); });
+
+  let html = '';
+  const rendered = new Set();
+
+  filtered.forEach(c => {
+    if (rendered.has(c.id)) return;
+    const peers = nameMap[c.name+c.location] || [];
+    const isPaired = peers.length > 1;
+    const peerIdx = peers.indexOf(c);
+    rendered.add(c.id);
+
+    const trClass = isPaired ? (peerIdx === 0 ? 'paired-top' : 'paired-bottom') : '';
+    const ls = leasingStatus(c);
+
+    // Leasing status as colored text
+    const leaseHtml = `<span class="lease-status" style="color:${ls.color};">${ls.label}</span>`;
+
+    // Days chip
+    const d = daysUntil(effectiveEnd(c));
+    let daysHtml = '';
+    if (c.ownership === 'ejet') {
+      let ownedText = 'Ejet';
+      if (c.purchaseDate) {
+        const years = ((new Date() - new Date(c.purchaseDate)) / (365.25 * 86400000));
+        const yearsStr = years < 1
+          ? Math.round(years * 12) + ' mdr'
+          : (Math.floor(years * 2) / 2).toFixed(1).replace('.0','') + ' år';
+        ownedText = `Ejet · købt ${fmtDate(c.purchaseDate)} · ${yearsStr}`;
+      }
+      daysHtml = `<span style="font-size:11px;color:#2a8a4a;font-weight:500;">${ownedText}</span>`;
+    } else if (c.buildStatus === 'Returneret') {
+      if (c.ownership === 'ejet') {
+        const priceStr = c.soldPrice ? ' · kr. ' + Number(c.soldPrice).toLocaleString('da-DK') : '';
+        daysHtml = `<span style="font-size:12px;color:var(--text-muted);">Solgt${c.returnedDate ? ' ' + fmtDate(c.returnedDate) : ''}${priceStr}</span>`;
+      } else {
+        daysHtml = `<span style="font-size:12px;color:var(--text-muted);">Afhentet${c.returnedDate ? ' ' + fmtDate(c.returnedDate) : ''}</span>`;
+      }
+    } else if (d !== null && d <= 14) daysHtml = `<span class="days-chip days-critical">${fmtDate(effectiveEnd(c))}</span>`;
+    else if (d !== null && d <= 210) daysHtml = `<span class="days-chip days-warning">${fmtDate(effectiveEnd(c))}</span>`;
+    else daysHtml = `<span class="days-ok">${fmtDate(effectiveEnd(c))}</span>`;
+
+    // Note cell
+    const noteHtml = `<span class="note-snippet" onclick="event.stopPropagation();openNotePopup('${c.id}',this)">${c.notes ? (c.notes.length > 40 ? c.notes.slice(0,40)+'…' : c.notes) : '<span style="color:#ccc;">+</span>'}</span>`;
+
+    const isInOmbytning = c.buildStatus && c.buildStatus !== 'I produktion';
+    const ombytningDim = !isInOmbytning;
+
+    // Fuel card alert
+    const fuelAlert = (() => {
+      if (!c.fuelCards || !c.fuelCards.length) return '';
+      const overdue = c.fuelCards.filter(f => f.orderedDate && Math.floor((new Date()-new Date(f.orderedDate))/86400000) >= 25);
+      const pending = c.fuelCards.filter(f => f.orderedDate && Math.floor((new Date()-new Date(f.orderedDate))/86400000) < 25);
+      if (overdue.length) {
+        const tip = overdue.map(f => `${f.company||'Tankkort'}: FORSINKET (${Math.floor((new Date()-new Date(f.orderedDate))/86400000)} dage)`).join('\n');
+        return `<span class="fuel-alert overdue" title="${tip}" onclick="event.stopPropagation();openModalOnTab('${c.id}','kort')" style="cursor:pointer;">!</span>`;
+      }
+      if (pending.length) {
+        const tip = pending.map(f => `${f.company||'Tankkort'}: Bestilt ${fmtDate(f.orderedDate)}`).join('\n');
+        return `<span class="fuel-alert pending" title="${tip}" onclick="event.stopPropagation();openModalOnTab('${c.id}','kort')" style="cursor:pointer;">!</span>`;
+      }
+      return '';
+    })();
+
+    html += `<tr class="${trClass}">
+      <td style="text-align:center;width:32px;">${fuelAlert}</td>
+      <td><span class="loc-pill ${c.location==='Odense'?'loc-ode':c.location==='København'?'loc-kbh':'loc-ob'}">${c.location==='Odense'?'ODE':c.location==='København'?'KBH':'OBG'}</span></td>
+      <td style="cursor:pointer;" onclick="openModalForCar('${c.id}')">
+        <div class="car-name">${c.name}${isPaired?(peerIdx===0?' <span style="font-size:10px;color:var(--orange);font-weight:400;">(gl.)</span>':' <span style="font-size:10px;color:var(--blue);font-weight:400;">(ny)</span>'):''}</div>
+        <div class="gantt-sub">${c.make} ${c.model}</div>
+        ${c.plate ? `<div class="gantt-sub" style="font-family:var(--font-mono);font-size:10px;color:#9ca3af;">${c.plate}</div>` : ''}
+      </td>
+      <td>${leaseHtml}</td>
+      <td class="ombyg-col" onclick="event.stopPropagation();openQuickEdit('${c.id}',this)" style="cursor:pointer;">
+        ${buildStatusBadge(c.buildStatus) || `<span style="color:${ombytningDim?'#ccc':'var(--text-muted)'};font-size:12px;">—</span>`}
+      </td>
+      <td class="ombyg-col" onclick="event.stopPropagation();openQuickEdit('${c.id}',this)" style="cursor:pointer;">
+        <span style="font-size:12px;color:${ombytningDim?'#ccc':'var(--text-muted)'};">${c.workloc||'—'}</span>
+      </td>
+      <td style="font-size:12px;color:var(--text-muted);">${c.lessor||'—'}</td>
+      <td>${daysHtml}</td>
+      <td onclick="event.stopPropagation();">${noteHtml}</td>
+    </tr>`;
+  });
+
+  tbody.innerHTML = html || `<tr><td colspan="10" style="text-align:center;color:var(--text-muted);padding:20px;">${searchVal ? `Ingen biler matcher "${searchVal}"` : 'Ingen biler matcher filteret.'}</td></tr>`;
+}
+
+// ─── CARS VIEW ───────────────────────────────────────────────────────────────
+function renderCars() {
+  renderFilters('cars-filters', carsFilter, f => { carsFilter = f; renderCars(); });
+  renderCarTable('cars-tbody', carsFilter, true);
+}
+
+// ─── GANTT ──────────────────────────────────────────────────────────────────
+function setGanttFilter(f, btn) {
+  ganttFilter = f;
+  document.querySelectorAll('[id^="gf-"]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderGantt();
+}
+
+function setGanttZoom(m, btn) {
+  ganttMonths = m;
+  document.querySelectorAll('[id^="gz-"]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderGantt();
+}
+function scrollToToday() {
+  const scroll = document.getElementById('gantt-scroll');
+  const inner = document.getElementById('gantt-inner');
+  const totalWidth = inner.offsetWidth - 130;
+  const todayPct = getTodayPct();
+  const pos = (todayPct / 100) * totalWidth + 130 - 100;
+  scroll.scrollTo({ left: Math.max(0, pos), behavior: 'smooth' });
+}
+
+function getTodayPct() {
+  const now = new Date();
+  const start = ganttStart();
+  const end = ganttEnd();
+  const total = end - start;
+  const elapsed = now - start;
+  return Math.max(0, Math.min(100, (elapsed / total) * 100));
+}
+
+function ganttStart() {
+  const d = new Date();
+  d.setDate(1);
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+function ganttEnd() {
+  const d = ganttStart();
+  d.setMonth(d.getMonth() + ganttMonths);
+  return d;
+}
+
+function dateToPct(dateStr) {
+  if (!dateStr) return null;
+  const d = new Date(dateStr);
+  const start = ganttStart();
+  const end = ganttEnd();
+  const total = end - start;
+  return ((d - start) / total) * 100;
+}
+
+function renderGantt() {
+  const ganttSearchVal = (document.getElementById('gantt-search')?.value || '').toLowerCase().trim();
+
+  let filtered = cars.filter(c => {
+    if (c.buildStatus === 'Returneret') return false;
+    if (ganttFilter === 'Odense') return c.location === 'Odense';
+    if (ganttFilter === 'København') return c.location === 'København';
+    if (ganttFilter === 'OB Garage') return c.location === 'OB Garage';
+    if (ganttFilter === 'udskiftning') {
+      if (c.buildStatus && !['','I produktion'].includes(c.buildStatus)) return true;
+      return cars.some(other =>
+        other.id !== c.id && other.name === c.name && other.location === c.location &&
+        other.buildStatus && !['','I produktion'].includes(other.buildStatus)
+      );
+    }
+    return true;
+  });
+
+  if (ganttSearchVal) {
+    filtered = filtered.filter(c =>
+      (c.name||'').toLowerCase().includes(ganttSearchVal) ||
+      (c.plate||'').toLowerCase().includes(ganttSearchVal) ||
+      (c.vin||'').toLowerCase().includes(ganttSearchVal) ||
+      (c.make||'').toLowerCase().includes(ganttSearchVal) ||
+      (c.model||'').toLowerCase().includes(ganttSearchVal)
+    );
+  }
+
+  // Months header
+  const monthsEl = document.getElementById('gantt-months');
+  const months = [];
+  const s = ganttStart();
+  for (let i = 0; i < ganttMonths; i++) {
+    const d = new Date(s);
+    d.setMonth(d.getMonth() + i);
+    months.push(d.toLocaleDateString('da-DK', { month: 'short', year: i===0||d.getMonth()===0?'numeric':undefined }));
+  }
+  const colW = `${100/ganttMonths}%`;
+  monthsEl.style.gridTemplateColumns = `130px repeat(${ganttMonths}, 1fr)`;
+  monthsEl.innerHTML = `<div style="border-right:1px solid var(--gray-border);"></div>` +
+    months.map(m => `<div class="gantt-month">${m}</div>`).join('');
+
+  // Rows
+  const rowsEl = document.getElementById('gantt-rows');
+  const todayPct = getTodayPct();
+
+  // Group by location
+  const groups = {};
+  filtered.forEach(c => {
+    const loc = c.location || 'Ukendt';
+    if (!groups[loc]) groups[loc] = [];
+    groups[loc].push(c);
+  });
+
+  // Find paired names across ALL cars (not just filtered)
+  const nameCount = {};
+  cars.forEach(c => { nameCount[c.name + c.location] = (nameCount[c.name + c.location]||0)+1; });
+
+  let html = '';
+  ['Odense','København','OB Garage'].forEach(loc => {
+    const group = groups[loc];
+    if (!group || !group.length) return;
+    html += `<div class="gantt-group-row"><span class="g-dot" style="background:${loc==='Odense'?'#1a6fc4':loc==='København'?'#2a8a4a':'#7c3aed'};"></span>${loc}</div>`;
+
+    // Sort: paired cars together
+    const nameOrder = [...new Set(group.map(c => c.name))];
+    nameOrder.forEach(name => {
+      const carsForName = group.filter(c => c.name === name);
+      const isPaired = (nameCount[name + loc] || 0) > 1;
+
+      carsForName.forEach((c, idx) => {
+        const isTop = isPaired && idx === 0;
+        const isBot = isPaired && idx > 0;
+        const rowClass = isTop ? 'gantt-row paired-top' : isBot ? 'gantt-row paired-bottom' : 'gantt-row';
+        const labelClass = isTop ? 'gantt-label paired-top' : isBot ? 'gantt-label paired-bottom' : 'gantt-label';
+        const suffix = isPaired ? (idx===0 ? ' <span style="font-size:10px;color:var(--orange);opacity:0.8;">(gl.)</span>' : ' <span style="font-size:10px;color:var(--blue);opacity:0.8;">(ny)</span>') : '';
+
+        // Calculate bars
+        const barHtml = buildBars(c, todayPct, isPaired, carsForName, idx);
+
+        html += `<div class="${rowClass}">
+          <div class="${labelClass}">
+            <div class="gantt-name" style="cursor:pointer;" onclick="openModalForCar('${c.id}')">${c.name}${suffix}</div>
+            <div class="gantt-sub">${c.make} ${c.model}</div>
+            ${c.plate ? `<div class="gantt-sub" style="font-family:var(--font-mono);font-size:10px;color:#9ca3af;">${c.plate}</div>` : ''}
+          </div>
+          <div class="gantt-bars" id="bars-${c.id}">${barHtml}</div>
+        </div>`;
+      });
+    });
+  });
+
+  rowsEl.innerHTML = html;
+
+  // Add click handlers to bars
+  filtered.forEach(c => {
+    const barsEl = document.getElementById('bars-' + c.id);
+    if (barsEl) {
+      barsEl.querySelectorAll('.g-bar').forEach(bar => {
+        bar.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openModalOnTab(c.id, 'leasing');
+        });
+      });
+    }
+  });
+
+  // Place "I dag" marker in months header
+  const monthsEl2 = document.getElementById('gantt-months');
+  monthsEl2.style.position = 'relative';
+  const oldMarker = monthsEl2.querySelector('.today-header-marker');
+  if (oldMarker) oldMarker.remove();
+  const todayPctFinal = getTodayPct();
+
+  // Full-height today line across all rows
+  const oldLine = document.getElementById('today-full-line');
+  if (oldLine) oldLine.remove();
+
+  if (todayPctFinal >= 0 && todayPctFinal <= 100) {
+    // Header marker with label
+    const marker = document.createElement('div');
+    marker.className = 'today-header-marker';
+    marker.style.position = 'absolute';
+    marker.style.top = '0';
+    marker.style.bottom = '0';
+    marker.style.width = '2px';
+    marker.style.background = 'var(--red)';
+    marker.style.zIndex = '10';
+    marker.style.pointerEvents = 'none';
+    marker.innerHTML = '<span style="position:absolute;top:2px;left:4px;font-size:10px;font-weight:600;color:var(--red);white-space:nowrap;background:white;padding:0 2px;border-radius:2px;">I dag</span>';
+    requestAnimationFrame(() => {
+      const labelW = 130;
+      const totalW = monthsEl2.offsetWidth;
+      const barW = totalW - labelW;
+      marker.style.left = (labelW + (todayPctFinal / 100) * barW) + 'px';
+
+      // Full height line through rows
+      const rowsEl2 = document.getElementById('gantt-rows');
+      const line = document.createElement('div');
+      line.id = 'today-full-line';
+      line.style.cssText = `position:absolute;top:0;bottom:0;width:2px;background:rgba(204,0,0,0.3);z-index:3;pointer-events:none;left:${marker.style.left};`;
+      rowsEl2.style.position = 'relative';
+      rowsEl2.appendChild(line);
+    });
+    monthsEl2.appendChild(marker);
+  }
+}
+
+function buildBars(c, todayPct, isPaired, peers, idx) {
+  let html = '';
+
+  // Month grid lines — beregnet fra faktiske månedsgrænser så de flugter med header
+  for (let i = 1; i < ganttMonths; i++) {
+    const monthBoundary = new Date(ganttStart());
+    monthBoundary.setMonth(monthBoundary.getMonth() + i);
+    const pct = dateToPct(monthBoundary.toISOString().slice(0,10));
+    if (pct === null) continue;
+    if (Math.abs(pct - todayPct) < 0.8) continue;
+    html += `<div class="month-line" style="left:${pct}%"></div>`;
+  }
+
+  // Overlap stripe: if paired and this is new car, show overlap with old car
+  if (isPaired && idx > 0 && peers[0]) {
+    const oldEnd = effectiveEnd(peers[0]);
+    const newStart = c.start || c.buildStart;
+    if (oldEnd && newStart) {
+      const op1 = dateToPct(newStart);
+      const op2 = dateToPct(oldEnd);
+      if (op1 !== null && op2 !== null) {
+        const left = Math.min(op1, op2);
+        const right = Math.max(op1, op2);
+        if (right > left && left < 100 && right > 0) {
+          html += `<div class="overlap-stripe" style="left:${Math.max(0,left)}%;width:${Math.min(100,right)-Math.max(0,left)}%"></div>`;
+        }
+      }
+    }
+  }
+
+  // Main leasing bar
+  const startPct = c.start ? dateToPct(c.start) : 0;
+  const endPct = c.end ? dateToPct(c.end) : null;
+  const endExtPct = c.endext ? dateToPct(c.endext) : null;
+  const buildStartPct = c.buildStart ? dateToPct(c.buildStart) : null;
+  const buildEndPct = c.buildEnd ? dateToPct(c.buildEnd) : null;
+  const deliveryPct = c.delivery ? dateToPct(c.delivery) : null;
+
+  // Determine bar color — styret KUN af datoer, ikke buildStatus
+  const d = daysUntil(effectiveEnd(c));
+  let mainClass = 'active';
+  if (['Planlægges','Bestilt','Leveringsdato modtaget'].includes(c.buildStatus)) mainClass = 'planned';
+  else if (c.endext) mainClass = 'extended';
+  else if (d !== null && d >= 0 && d <= 30)  mainClass = 'expiring';
+  else if (d !== null && d >= 0 && d <= 210) mainClass = 'warning';
+
+  // Draw original period bar — farve styret af dato
+  if (startPct !== null && endPct !== null) {
+    const l = Math.max(0, startPct);
+    const w = Math.min(100, endPct) - l;
+    if (w > 0) {
+      html += bar(l, w, mainClass, c.end && daysUntil(c.end) <= 180 ? `Udløber ${fmtDate(c.end)}` : fmtDate(c.start) + ' – ' + fmtDate(c.end));
+    }
+  }
+
+  // Draw extended period bar
+  if (endPct !== null && endExtPct !== null) {
+    const l = Math.max(0, endPct);
+    const w = Math.min(100, endExtPct) - l;
+    if (w > 0) html += bar(l, w, 'extended', 'Forlænget til ' + fmtDate(c.endext));
+  }
+
+  // Draw build/status bar — vises øverst i rækken
+  // Kræver kun start-dato — slut er valgfri
+  if (buildStartPct !== null) {
+    const l = Math.max(0, buildStartPct);
+    const endP = buildEndPct !== null ? Math.min(100, buildEndPct) : Math.min(100, buildStartPct + 5);
+    const w = endP - l;
+    const buildBarClass = ['Afmonteres','Afventer afhentning'].includes(c.buildStatus) ? 'dismount' : 'building';
+    const label = c.buildEnd
+      ? `Ombygning ${fmtDate(c.buildStart)}–${fmtDate(c.buildEnd)}${c.buildStatus ? '\n' + c.buildStatus : ''}`
+      : `Ombygning fra ${fmtDate(c.buildStart)}${c.buildStatus ? '\n' + c.buildStatus : ''}`;
+    if (w > 0) {
+      html += `<div class="g-bar ${buildBarClass}" style="left:${l}%;width:${w}%;top:22%;transform:translateY(-50%);" title="${label}"><span class="bar-label">${label}</span></div>`;
+    }
+  }
+
+  return html;
+}
+
+function bar(left, width, cls, label) {
+  if (left > 100 || left + width < 0) return '';
+  // Hide text if bar is very narrow (under ~5% of visible area), show in tooltip
+  const tooNarrow = width < 4;
+  const inner = tooNarrow ? '' : `<span class="bar-label">${label}</span>`;
+  return `<div class="g-bar ${cls}" style="left:${left}%;width:${width}%;" title="${label}">${inner}</div>`;
+}
+
+// ─── GANTT POPUP ─────────────────────────────────────────────────────────────
+let ganttPopupOpen = false;
+function openGanttPopup(carId, e) {
+  const c = cars.find(x => x.id === carId);
+  if (!c) return;
+  currentGanttCarId = carId;
+  document.getElementById('gpop-title').textContent = c.name + ' — ' + c.make + ' ' + c.model;
+  document.getElementById('gpop-start').value = c.start || '';
+  document.getElementById('gpop-end').value = c.end || '';
+  document.getElementById('gpop-endext').value = c.endext || '';
+  document.getElementById('gpop-build-start').value = c.buildStart || '';
+  document.getElementById('gpop-build-end').value = c.buildEnd || '';
+
+  const pop = document.getElementById('gantt-popup');
+  const popH = 340;
+  const spaceBelow = window.innerHeight - e.clientY;
+  const top = spaceBelow < popH + 10
+    ? Math.max(10, e.clientY - popH - 10)
+    : e.clientY + 10;
+  pop.style.left = Math.min(e.clientX, window.innerWidth - 300) + 'px';
+  pop.style.top = Math.min(top, window.innerHeight - popH - 10) + 'px';
+  pop.classList.add('open');
+  ganttPopupOpen = true;
+
+  setTimeout(() => document.addEventListener('click', closeGanttPopupOutside), 10);
+}
+
+function closeGanttPopupOutside(e) {
+  const pop = document.getElementById('gantt-popup');
+  if (!pop.contains(e.target)) {
+    closeGanttPopup();
+    document.removeEventListener('click', closeGanttPopupOutside);
+  }
+}
+
+function closeGanttPopup() {
+  document.getElementById('gantt-popup').classList.remove('open');
+  ganttPopupOpen = false;
+}
+
+function saveGanttPopup() {
+  const c = cars.find(x => x.id === currentGanttCarId);
+  if (!c) return;
+  c.start = document.getElementById('gpop-start').value;
+  c.end = document.getElementById('gpop-end').value;
+  c.endext = document.getElementById('gpop-endext').value;
+  c.buildStart = document.getElementById('gpop-build-start').value;
+  c.buildEnd = document.getElementById('gpop-build-end').value;
+  saveData();
+  closeGanttPopup();
+  renderGantt();
+  showToast('Datoer gemt for ' + c.name);
+}
+
+// ─── LEASINGPERIODE ──────────────────────────────────────────────────────────
+let activePeriod = 0;
+
+function setPeriod(months) {
+  activePeriod = months;
+  document.querySelectorAll('.period-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.trim() === months + ' mdr');
+  });
+  autoCalcEnd();
+}
+
+function autoCalcEnd() {
+  if (!activePeriod) return;
+  const start = document.getElementById('f-start').value;
+  if (!start) return;
+  const d = new Date(start);
+  d.setMonth(d.getMonth() + activePeriod);
+  document.getElementById('f-end').value = d.toISOString().slice(0,10);
+}
+
+// ─── CSV EKSPORT / IMPORT ────────────────────────────────────────────────────
+const CSV_FIELDS = [
+  'name','plate','make','model','variant','vin','category','fuel','location','ownership',
+  'purchaseDate','purchasePrice','lessor','contract','orderno','start','end','endext',
+  'delivery','buildStatus','workloc','builder','buildStart','buildEnd','returnedDate','soldPrice',
+  'weightReady','weightTotal','envclass','co2',
+  'insurer','policy','roadsideCompany','roadsideNum',
+  'notes'
+];
+
+function exportCSV() {
+  const header = [...CSV_FIELDS, 'ladebrikker', 'tankkort'].join(';');
+  const rows = cars.map(c => {
+    const base = CSV_FIELDS.map(f => {
+      const v = (c[f] || '').toString().replace(/"/g,'""');
+      return v.includes(';') || v.includes('"') || v.includes('\n') ? `"${v}"` : v;
+    });
+    // Ladebrikker som "Selskab:Nr|Selskab:Nr"
+    const charge = (c.chargeCards||[]).filter(x=>x.company||x.num).map(x=>`${x.company||''}:${x.num||''}`).join('|');
+    // Tankkort som "Selskab:Nr:Status:Dato|..."
+    const fuel = (c.fuelCards||[]).filter(x=>x.company||x.num).map(x=>`${x.company||''}:${x.num||''}:${x.orderedDate||''}`).join('|');
+    return [...base, charge, fuel].join(';');
+  });
+  const csv = [header, ...rows].join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'flåde_' + today() + '.csv';
+  a.click(); URL.revokeObjectURL(url);
+  showToast('CSV eksporteret — ' + cars.length + ' biler');
+}
+
+function importCSV(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async e => {
+    try {
+      const text = e.target.result.replace(/^\uFEFF/, '');
+      const lines = text.split('\n').filter(l => l.trim());
+      if (lines.length < 2) { showToast('CSV er tom eller ugyldig'); return; }
+      const headers = lines[0].split(';').map(h => h.trim().replace(/^"|"$/g,''));
+      const imported = [];
+      for (let i = 1; i < lines.length; i++) {
+        const vals = parseCSVLine(lines[i]);
+        const car = { id: genId(), fuelCards: [], chargeCards: [], ownership: 'leasing' };
+        headers.forEach((h, idx) => { car[h] = (vals[idx] || '').trim(); });
+        if (car.name) imported.push(car);
+      }
+      if (!imported.length) { showToast('Ingen gyldige biler fundet i CSV'); return; }
+
+      if (!confirm(`Importer ${imported.length} biler? Dette tilføjer dem til eksisterende data.`)) return;
+
+      // Auto-berig med DMR data
+      const needsLookup = imported.filter(c => (c.plate || c.vin) && (!c.make || !c.model));
+      if (needsLookup.length > 0) {
+        showToast(`Henter data fra motorregistret for ${needsLookup.length} biler...`);
+        let done = 0;
+        for (const car of needsLookup) {
+          const data = await fetchDMR(car.plate, car.vin);
+          if (data) applyDMRData(car, data);
+          done++;
+          if (done % 5 === 0) showToast(`DMR opslag: ${done}/${needsLookup.length}...`);
+          await new Promise(r => setTimeout(r, 200));
+        }
+      }
+
+      cars.push(...imported);
+      saveData();
+      renderDashboard();
+      showToast(`${imported.length} biler importeret${needsLookup.length ? ` · ${needsLookup.length} beriget med DMR data` : ''}`);
+    } catch(err) {
+      showToast('Fejl ved import: ' + err.message);
+    }
+    input.value = '';
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function parseCSVLine(line) {
+  const result = [];
+  let cur = ''; let inQuote = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQuote && line[i+1] === '"') { cur += '"'; i++; }
+      else inQuote = !inQuote;
+    } else if (ch === ';' && !inQuote) {
+      result.push(cur); cur = '';
+    } else cur += ch;
+  }
+  result.push(cur);
+  return result;
+}
+function syncNotes(val) {
+  ['f-notes','f-notes-bildata','f-notes-leasing','f-notes-kort','f-notes-forsikring'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.value !== val) el.value = val;
+  });
+}
+
+function copyBuildDatesToPartner() {
+  const c = cars.find(x => x.id === editingId);
+  if (!c) return;
+  const partner = cars.find(x =>
+    x.id !== c.id && x.name === c.name &&
+    x.location === c.location && x.buildStatus !== 'Returneret'
+  );
+  if (!partner) { showToast('Ingen makker fundet'); return; }
+  const buildStart = document.getElementById('f-build-start').value;
+  const buildEnd   = document.getElementById('f-build-end').value;
+  if (!buildStart && !buildEnd) { showToast('Udfyld ombygningsdatoer først'); return; }
+  partner.buildStart = buildStart;
+  partner.buildEnd   = buildEnd;
+  saveData();
+  showToast('Ombygningsdatoer kopieret til ' + partner.name);
+}
+
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.modal-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  btn.classList.add('active');
+  // Scroll modal to top
+  const modal = document.querySelector('.modal');
+  if (modal) modal.scrollTop = 0;
+}
+
+// ─── DYNAMIC CARDS ───────────────────────────────────────────────────────────
+let chargeCards = [];
+let fuelCards = [];
+
+function fuelCardStatus(card) {
+  if (!card.orderedDate) return 'active';
+  const days = Math.floor((new Date() - new Date(card.orderedDate)) / 86400000);
+  if (days >= 25) return 'overdue';
+  return 'pending';
+}
+
+function renderCards(type) {
+  const list = type === 'charge' ? chargeCards : fuelCards;
+  const containerId = type === 'charge' ? 'charge-cards-list' : 'fuel-cards-list';
+  const placeholder = type === 'charge' ? 'Clever' : 'Circle K';
+  const numPlaceholder = type === 'charge' ? 'DK-XXXX-XXXX' : 'XXXX XXXX XXXX';
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  if (type === 'charge') {
+    container.innerHTML = list.map((card, i) => `
+      <div class="card-row">
+        <div class="field"><label>Selskab</label><input type="text" value="${card.company||''}" placeholder="${placeholder}" onchange="updateCard('charge',${i},'company',this.value)"></div>
+        <div class="field"><label>Kortnummer</label><input type="text" value="${card.num||''}" placeholder="${numPlaceholder}" onchange="updateCard('charge',${i},'num',this.value)"></div>
+        <button class="remove-btn" onclick="removeCard('charge',${i})" title="Fjern">×</button>
+      </div>`).join('');
+  } else {
+    container.innerHTML = list.map((card, i) => {
+      const status = fuelCardStatus(card);
+      const isPending = !!card.orderedDate;
+      const days = card.orderedDate ? Math.floor((new Date() - new Date(card.orderedDate)) / 86400000) : 0;
+      return `
+      <div class="card-row fuel-card-row" style="background:${status==='overdue'?'#fff5f5':status==='pending'?'#fffbeb':'transparent'};border-radius:var(--radius);padding:8px;margin-bottom:8px;">
+        <div class="field"><label>Selskab</label>
+          <select onchange="updateCard('fuel',${i},'company',this.value)">
+            <option value="">—</option>
+            ${['Circle K','Q8','Shell','OK'].map(s => `<option${card.company===s?' selected':''}>${s}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field"><label>Kortnummer</label><input type="text" value="${card.num||''}" placeholder="XXXX XXXX XXXX" onchange="updateCard('fuel',${i},'num',this.value)"></div>
+        <div class="field"><label>Status</label>
+          <div style="display:flex;gap:6px;align-items:center;">
+            ${isPending
+              ? `<span style="font-size:11px;color:${status==='overdue'?'#991b1b':'#92400e'};font-weight:500;">${status==='overdue'?'⚠ FORSINKET':'🟡 Bestilt'} ${fmtDate(card.orderedDate)}${status==='overdue'?' ('+days+' dage)':''}</span>
+                 <button class="btn" onclick="markFuelCardReceived(${i})" style="font-size:11px;padding:3px 8px;color:var(--green);">✓ Modtaget</button>`
+              : `<button class="btn" onclick="orderFuelCard(${i})" style="font-size:11px;padding:3px 8px;">Nyt bestilt</button>`
+            }
+          </div>
+        </div>
+        <button class="remove-btn" onclick="removeCard('fuel',${i})" title="Fjern">×</button>
+      </div>`;
+    }).join('');
+  }
+}
+
+function addCard(type) {
+  if (type === 'charge') chargeCards.push({company:'', num:''});
+  else fuelCards.push({company:'', num:'', orderedDate:''});
+  renderCards(type);
+}
+
+function removeCard(type, idx) {
+  if (type === 'charge') chargeCards.splice(idx, 1);
+  else fuelCards.splice(idx, 1);
+  renderCards(type);
+}
+
+function updateCard(type, idx, field, val) {
+  if (type === 'charge') chargeCards[idx][field] = val;
+  else fuelCards[idx][field] = val;
+}
+
+function orderFuelCard(idx) {
+  fuelCards[idx].orderedDate = today();
+  renderCards('fuel');
+}
+
+function markFuelCardReceived(idx) {
+  fuelCards[idx].orderedDate = '';
+  renderCards('fuel');
+}
+
+// Check all cars for overdue fuel cards on load
+function checkFuelCardAlerts() {
+  cars.forEach(c => {
+    if (!c.fuelCards) return;
+    c.fuelCards.forEach(card => {
+      if (card.orderedDate) {
+        const days = Math.floor((new Date() - new Date(card.orderedDate)) / 86400000);
+        card._status = days >= 25 ? 'overdue' : 'pending';
+        card._days = days;
+      } else {
+        card._status = 'active';
+        card._days = 0;
+      }
+    });
+  });
+}
+function openModalOnTab(id, tab) {
+  openModalForCar(id);
+  const tabBtn = document.querySelector(`.modal-tab[onclick*="'${tab}'"]`);
+  if (tabBtn) switchTab(tab, tabBtn);
+}
+
+function resetModalTabs() {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.modal-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-bildata').classList.add('active');
+  document.querySelector('.modal-tab').classList.add('active');
+}
+
+function openModal() {
+  editingId = null;
+  document.getElementById('modal-title').textContent = 'Tilføj bil';
+  document.getElementById('btn-delete').style.display = 'none';
+  document.getElementById('btn-replacement').style.display = 'none';
+  ['name','plate','make','model','variant','fuel','location','status','workloc',
+   'weight-ready','weight-total','envclass','co2','lessor','contract','start','end',
+   'endext','delivery','builder','build-start','build-end','notes'].forEach(id => {
+    const el = document.getElementById('f-'+id);
+    if (el) el.value = '';
+  });
+  chargeCards = [];
+  fuelCards = [];
+  renderCards('charge');
+  renderCards('fuel');
+  activePeriod = 0;
+  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('f-ownership').value = 'leasing';
+  toggleOwnership('leasing');
+  resetModalTabs();
+  document.getElementById('modal').classList.add('open');
+  setTimeout(() => { modalSnapshot = takeModalSnapshot(); }, 50);
+}
+
+function openModalForCar(id) {
+  const c = cars.find(x => x.id === id);
+  if (!c) return;
+  editingId = id;
+  const isPairedCar = cars.some(other =>
+    other.id !== c.id &&
+    other.name === c.name &&
+    other.location === c.location &&
+    other.buildStatus !== 'Returneret'
+  );
+  // A replacement car is paired AND has a later start date (or isReplacement flag)
+  const isReplacement = c.isReplacement || (isPairedCar && (() => {
+    const peers = cars.filter(x => x.id !== c.id && x.name === c.name && x.location === c.location && x.buildStatus !== 'Returneret');
+    const earliestPeer = peers.sort((a,b) => (a.start||'').localeCompare(b.start||''))[0];
+    return earliestPeer && (c.start||'') > (earliestPeer.start||'');
+  })());
+
+  document.getElementById('modal-title').textContent = 'Rediger — ' + c.name;
+  if (isReplacement) {
+    document.getElementById('modal-title').innerHTML =
+      `Rediger — ${c.name} <span style="font-size:10px;font-weight:500;color:var(--blue);font-family:var(--font);padding:2px 7px;border-radius:10px;margin-left:8px;background:var(--blue-light);">ny</span>`;
+  } else if (isPairedCar) {
+    document.getElementById('modal-title').innerHTML =
+      `Rediger — ${c.name} <span style="font-size:10px;font-weight:500;color:#7a4f00;font-family:var(--font);padding:2px 7px;border-radius:10px;margin-left:8px;background:#fff3cc;">gl.</span>`;
+  }
+  document.getElementById('btn-delete').style.display = 'inline-block';
+  document.getElementById('btn-replacement').style.display = isReplacement ? 'none' : 'inline-block';
+
+  document.getElementById('f-name').value = c.name||'';
+  document.getElementById('f-plate').value = c.plate||'';
+  document.getElementById('f-make').value = c.make||'';
+  document.getElementById('f-model').value = c.model||'';
+  document.getElementById('f-variant').value = c.variant||'';
+  document.getElementById('f-vin').value = c.vin||'';
+  document.getElementById('f-category').value = c.category||'';
+  document.getElementById('f-fuel').value = c.fuel||'';
+  document.getElementById('f-location').value = c.location||'';
+  document.getElementById('f-status').value = c.buildStatus||'';
+  document.getElementById('f-workloc').value = c.workloc||'';
+  document.getElementById('f-weight-ready').value = c.weightReady||'';
+  document.getElementById('f-weight-total').value = c.weightTotal||'';
+  document.getElementById('f-envclass').value = c.envclass||'';
+  document.getElementById('f-co2').value = c.co2||'';
+  document.getElementById('f-ownership').value = c.ownership||'leasing';
+  toggleOwnership(c.ownership||'leasing');
+  document.getElementById('f-purchase-date').value = c.purchaseDate||'';
+  document.getElementById('f-purchase-price').value = c.purchasePrice||'';
+  document.getElementById('f-lessor').value = c.lessor||'';
+  document.getElementById('f-contract').value = c.contract||'';
+  document.getElementById('f-orderno').value = c.orderno||'';
+  document.getElementById('f-start').value = c.start||'';
+  document.getElementById('f-end').value = c.end||'';
+  document.getElementById('f-endext').value = c.endext||'';
+  document.getElementById('f-delivery').value = c.delivery||'';
+  document.getElementById('f-builder').value = c.builder||'';
+  document.getElementById('f-build-start').value = c.buildStart||'';
+  document.getElementById('f-build-end').value = c.buildEnd||'';
+  document.getElementById('f-insurer').value = c.insurer||'';
+  document.getElementById('f-policy').value = c.policy||'';
+  document.getElementById('f-roadside-company').value = c.roadsideCompany||'';
+  document.getElementById('f-roadside-num').value = c.roadsideNum||'';
+  document.getElementById('f-notes').value = c.notes||'';
+  syncNotes(c.notes||'');
+
+  // Load cards
+  chargeCards = c.chargeCards ? JSON.parse(JSON.stringify(c.chargeCards)) : (c.chargeCompany ? [{company:c.chargeCompany, num:c.chargeNum||''}] : []);
+  fuelCards = c.fuelCards ? JSON.parse(JSON.stringify(c.fuelCards)) : (c.fuelCompany ? [{company:c.fuelCompany, num:c.fuelNum||''}] : []);
+  renderCards('charge');
+  renderCards('fuel');
+  // Vis "kopiér ombygningsdatoer" knap hvis bil har en makker
+  const hasPartner = cars.some(x =>
+    x.id !== c.id && x.name === c.name &&
+    x.location === c.location && x.buildStatus !== 'Returneret'
+  );
+  const copyWrap = document.getElementById('copy-build-dates-wrap');
+  if (copyWrap) copyWrap.style.display = hasPartner ? '' : 'none';
+  resetModalTabs();
+  document.getElementById('modal').classList.add('open');
+  setTimeout(() => {
+    modalSnapshot = takeModalSnapshot();
+    renderChecklist(id);
+    updateChecklistBadge(id);
+  }, 50);
+}
+
+let modalSnapshot = '';
+
+function takeModalSnapshot() {
+  const fields = ['name','plate','make','model','variant','vin','category','fuel',
+    'location','ownership','weight-ready','weight-total','envclass','co2',
+    'lessor','contract','orderno','start','end','endext','delivery',
+    'status','workloc','builder','build-start','build-end',
+    'insurer','policy','roadside-company','roadside-num','notes',
+    'purchase-date','purchase-price'];
+  return fields.map(id => {
+    const el = document.getElementById('f-'+id);
+    return el ? el.value : '';
+  }).join('|');
+}
+
+function safeCloseModal() {
+  const current = takeModalSnapshot();
+  if (current !== modalSnapshot) {
+    const choice = confirm('Du har ændringer der ikke er gemt.\n\nTryk OK for at gemme, eller Annuller for at lukke uden at gemme.');
+    if (choice) { saveCar(); return; }
+  }
+  closeModal();
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  editingId = null;
+  modalSnapshot = '';
+}
+
+function saveCar() {
+  const get = id => (document.getElementById('f-'+id)||{}).value || '';
+  const newStatus = get('status');
+  const oldCar = cars.find(x => x.id === editingId);
+
+  // Spørg om lokation ved Færdigbygget
+  if (newStatus === 'Færdigbygget' && oldCar?.buildStatus !== 'Færdigbygget') {
+    const locs = ['Haarby Karosseri','SIEB Teknik','Work System','TV 2 Odense','TV 2 København','Leasingselskab'];
+    const choice = prompt('Bilen er færdigbygget — hvor befinder den sig?\n\n' +
+      locs.map((l,i) => `${i+1}. ${l}`).join('\n') + '\n\nIndtast nummer:');
+    if (choice !== null) {
+      const idx = parseInt(choice) - 1;
+      if (idx >= 0 && idx < locs.length) {
+        document.getElementById('f-workloc').value = locs[idx];
+      }
+    }
+  }
+
+  // Advar hvis I produktion og tjekliste ikke komplet
+  if (newStatus === 'I produktion' && editingId && !checklistAnkomstComplete(editingId)) {
+    const done = CHECKLIST_ANKOMST.filter(i => (oldCar?.checklists||{})[i.id]).length;
+    if (!confirm(`Ankomst-tjeklisten er ikke komplet (${done}/${CHECKLIST_ANKOMST.length} afkrydset).\n\nVil du alligevel sætte bilen I produktion?`)) return;
+  }
+
+  const car = {
+    id: editingId || genId(),
+    name: get('name'), plate: get('plate').toUpperCase(), make: get('make'),
+    model: get('model'), variant: get('variant'), vin: get('vin'), fuel: get('fuel'), category: get('category'),
+    location: get('location'), buildStatus: get('status'), workloc: get('workloc'),
+    weightReady: get('weight-ready'), weightTotal: get('weight-total'),
+    envclass: get('envclass'), co2: get('co2'),
+    ownership: get('ownership') || 'leasing',
+    purchaseDate: get('purchase-date'), purchasePrice: get('purchase-price'),
+    lessor: get('lessor'), contract: get('contract'), orderno: get('orderno'),
+    start: get('start'), end: get('end'), endext: get('endext'), delivery: get('delivery'),
+    builder: get('builder'), buildStart: get('build-start'), buildEnd: get('build-end'),
+    chargeCards: JSON.parse(JSON.stringify(chargeCards)),
+    fuelCards: JSON.parse(JSON.stringify(fuelCards)),
+    // Keep legacy fields for backwards compat
+    chargeCompany: chargeCards[0]?.company||'', chargeNum: chargeCards[0]?.num||'',
+    fuelCompany: fuelCards[0]?.company||'', fuelNum: fuelCards[0]?.num||'',
+    insurer: get('insurer'), policy: get('policy'),
+    roadsideCompany: get('roadside-company'), roadsideNum: get('roadside-num'),
+    notes: get('notes'),
+    checklists: oldCar?.checklists || {}
+  };
+
+  if (!car.name) { showToast('Navn er påkrævet'); return; }
+
+  if (editingId) {
+    const idx = cars.findIndex(c => c.id === editingId);
+    if (idx >= 0) cars[idx] = car;
+  } else {
+    cars.push(car);
+  }
+
+  saveData();
+  saveCarToAPI(car);
+  closeModal();
+  showToast(editingId ? 'Bil opdateret' : 'Bil tilføjet');
+
+  const activeView = document.querySelector('.view.active').id.replace('view-','');
+  showView(activeView);
+}
+
+function deleteCar() {
+  if (!editingId) return;
+  const c = cars.find(x => x.id === editingId);
+  if (!confirm(`Slet ${c?.name || 'bil'}? Dette kan ikke fortrydes.`)) return;
+  cars = cars.filter(x => x.id !== editingId);
+  saveData();
+  closeModal();
+  showToast('Bil slettet');
+  const activeView = document.querySelector('.view.active').id.replace('view-','');
+  showView(activeView);
+}
+
+// ─── DMR LOOKUP ──────────────────────────────────────────────────────────────
+const DMR_API_KEY_DEFAULT = 'DEMO';
+function getDMRKey() {
+  return localStorage.getItem('tv2_dmr_key') || DMR_API_KEY_DEFAULT;
+}
+
+async function fetchDMR(plate, vin) {
+  const id = (plate || vin || '').trim().replace(/\s/g,'').toUpperCase();
+  if (!id) return null;
+  const BASE = 'https://corsproxy.io/?' + encodeURIComponent('https://v1.motorapi.dk/vehicles/') + id;
+  const BASE_ENV = 'https://corsproxy.io/?' + encodeURIComponent('https://v1.motorapi.dk/vehicles/') + id + '%2Fenvironment';
+  const headers = { 'X-AUTH-TOKEN': getDMRKey() };
+  try {
+    const [vRes, eRes] = await Promise.all([
+      fetch(BASE, { headers }),
+      fetch(BASE_ENV, { headers })
+    ]);
+    const vehicle = vRes.ok ? await vRes.json() : null;
+    const env     = eRes.ok ? await eRes.json() : null;
+    if (!vehicle) return null;
+    const combined = Object.assign({}, vehicle, env);
+    combined._raw = { vehicle, env };
+    return combined;
+  } catch(e) { return null; }
+}
+
+function applyDMRData(car, data) {
+  if (!data) return;
+  // Mærke — mulige feltnavne
+  const make = data.make || data.brand || data.brandName || data.manufacturer || '';
+  if (make && !car.make) car.make = make;
+  // Model
+  const model = data.model || data.modelName || data.type || '';
+  if (model && !car.model) car.model = model;
+  // Variant
+  const variant = data.variant || data.variantName || data.version || data.trim || '';
+  if (variant && !car.variant) car.variant = variant;
+  // VIN / stelnummer
+  const vinVal = data.vin || data.chassisNumber || data.vinNumber || data.vin_number || '';
+  if (vinVal && !car.vin) car.vin = vinVal;
+  // Drivkraft
+  const fuel = data.fuelType || data.fuel || data.propellant || data.drivmiddel || data.fuel_type || '';
+  if (fuel && !car.fuel) {
+    const f = fuel.toLowerCase();
+    car.fuel = f.includes('el') || f.includes('electric') ? 'El'
+             : f.includes('benzin') || f.includes('petrol') || f.includes('gasoline') ? 'Benzin'
+             : f.includes('diesel') ? 'Diesel'
+             : f.includes('hybrid') ? 'Hybrid'
+             : fuel;
+  }
+  // CO2
+  const co2 = data.co2 || data.co2Emission || data.co2_emission || data.emission || '';
+  if (co2 && !car.co2) car.co2 = String(co2);
+  // Miljøklasse
+  const euro = data.euroClass || data.euro_class || data.emissionClass || data.emission_class || data.euroNorm || '';
+  if (euro && !car.envclass) car.envclass = String(euro);
+  // Vægt
+  const weightReady = data.kerbWeight || data.kerb_weight || data.unladenWeight || data.unladen_weight || data.weight || '';
+  if (weightReady && !car.weightReady) car.weightReady = String(weightReady);
+  const weightTotal = data.totalWeight || data.total_weight || data.grossWeight || data.gross_weight || data.maxWeight || '';
+  if (weightTotal && !car.weightTotal) car.weightTotal = String(weightTotal);
+  // Køretøjskategori
+  const cat = data.vehicleCategory || data.category || data.typeApproval || data.type_approval
+           || data.vehicleType || data.vehicle_type || data.kind || '';
+  if (cat && !car.category) {
+    const match = cat.toString().match(/[MN][123]/i);
+    if (match) car.category = match[0].toUpperCase();
+  }
+}
+
+async function lookupDMR() {
+  const plate = document.getElementById('f-plate').value.trim();
+  const vin   = document.getElementById('f-vin').value.trim();
+  if (!plate && !vin) { showToast('Indtast nummerplade eller stelnummer først'); return; }
+  showToast('Henter data fra motorregistret...');
+  const data = await fetchDMR(plate, vin);
+  if (!data) { showToast('Kunne ikke hente data — tjek API-nøgle eller prøv igen'); return; }
+
+  // Udfyld felter
+  const dummy = {};
+  applyDMRData(dummy, data);
+  if (dummy.make)      document.getElementById('f-make').value     = dummy.make;
+  if (dummy.model)     document.getElementById('f-model').value    = dummy.model;
+  if (dummy.variant)   document.getElementById('f-variant').value  = dummy.variant;
+  if (dummy.vin)       document.getElementById('f-vin').value      = dummy.vin;
+  if (dummy.co2)       document.getElementById('f-co2').value      = dummy.co2;
+  if (dummy.envclass)  document.getElementById('f-envclass').value = dummy.envclass;
+  if (dummy.fuel)      document.getElementById('f-fuel').value     = dummy.fuel;
+  if (dummy.weightReady) document.getElementById('f-weight-ready').value = dummy.weightReady;
+  if (dummy.weightTotal) document.getElementById('f-weight-total').value = dummy.weightTotal;
+  if (dummy.category)  document.getElementById('f-category').value = dummy.category;
+
+  const filled = [dummy.make, dummy.model].filter(Boolean).join(' ');
+  showToast(filled ? 'Data hentet: ' + filled : 'Data hentet — tjek felterne');
+
+  // Debug: log rå data til konsollen så vi kan se feltnavnene
+  if (data._raw) console.log('DMR rå data:', data._raw);
+}
+
+// ─── QUICK EDIT POPUP ────────────────────────────────────────────────────────
+let currentQPopId = null;
+
+function openQuickEdit(carId, triggerEl) {
+  // Always close first, then open — prevents bleeding clicks
+  const alreadyOpen = currentQPopId === carId && document.getElementById('qpop').classList.contains('open');
+  closeQuickEdit();
+  if (alreadyOpen) return; // toggle off if same car
+
+  const c = cars.find(x => x.id === carId);
+  if (!c) return;
+  currentQPopId = carId;
+  document.getElementById('qpop-title').textContent = c.name + ' — ' + c.make + ' ' + c.model;
+  document.getElementById('qpop-buildstatus').value = c.buildStatus || '';
+  document.getElementById('qpop-workloc').value = c.workloc || '';
+  document.getElementById('qpop-saved').textContent = '';
+
+  const pop = document.getElementById('qpop');
+  const rect = triggerEl.getBoundingClientRect();
+  const popH = 200;
+  const spaceBelow = window.innerHeight - rect.bottom;
+  const top = spaceBelow < popH + 10
+    ? Math.max(10, rect.top - popH - 6)
+    : rect.bottom + 6;
+  pop.style.left = Math.min(rect.left, window.innerWidth - 290) + 'px';
+  pop.style.top = top + 'px';
+  pop.classList.add('open');
+
+  // Use capture phase so we catch ALL clicks before they bubble — including on other status cells
+  setTimeout(() => document.addEventListener('click', _qPopOutside, true), 10);
+}
+
+function _qPopOutside(e) {
+  const pop = document.getElementById('qpop');
+  if (pop && pop.contains(e.target)) return; // click inside popup — let it through
+  e.stopPropagation(); // block the click from triggering anything else
+  closeQuickEdit();
+}
+
+function closeQuickEdit() {
+  document.getElementById('qpop').classList.remove('open');
+  document.removeEventListener('click', _qPopOutside, true);
+  currentQPopId = null;
+}
+
+function autoSaveQuickEdit() {
+  const c = cars.find(x => x.id === currentQPopId);
+  if (!c) return;
+  c.buildStatus = document.getElementById('qpop-buildstatus').value;
+  c.workloc = document.getElementById('qpop-workloc').value;
+
+  // Auto-clear arbejdslokation når bil sættes klar til produktion
+  if (c.buildStatus === 'I produktion') {
+    c.workloc = '';
+    document.getElementById('qpop-workloc').value = '';
+  }
+
+  saveData();
+  document.getElementById('qpop-saved').textContent = c.buildStatus === 'I produktion' ? '✓ Gemt — arbejdslokation ryddet' : '✓ Gemt';
+  renderCarTable('dash-tbody', dashFilter);
+}
+
+// ─── NOTE POPUP ──────────────────────────────────────────────────────────────
+let currentNoteId = null;
+
+function openNotePopup(carId, triggerEl) {
+  const alreadyOpen = currentNoteId === carId && document.getElementById('npop').classList.contains('open');
+  closeNotePopup();
+  if (alreadyOpen) return;
+
+  const c = cars.find(x => x.id === carId);
+  if (!c) return;
+  currentNoteId = carId;
+  document.getElementById('npop-title').textContent = c.name + ' — ' + c.make + ' ' + c.model;
+  document.getElementById('npop-text').value = c.notes || '';
+  document.getElementById('npop-saved').textContent = '';
+
+  const pop = document.getElementById('npop');
+  const rect = triggerEl.getBoundingClientRect();
+  pop.style.left = Math.min(rect.left, window.innerWidth - 310) + 'px';
+  pop.style.top = Math.min(rect.bottom + 6, window.innerHeight - 200) + 'px';
+  pop.classList.add('open');
+
+  setTimeout(() => document.addEventListener('click', _nPopOutside, true), 10);
+  document.getElementById('npop-text').focus();
+}
+
+function _nPopOutside(e) {
+  const pop = document.getElementById('npop');
+  if (pop && pop.contains(e.target)) return;
+  e.stopPropagation();
+  saveNotePopup();
+  closeNotePopup();
+}
+
+function closeNotePopup() {
+  document.getElementById('npop').classList.remove('open');
+  document.removeEventListener('click', _nPopOutside, true);
+  currentNoteId = null;
+}
+
+function saveNotePopup() {
+  const c = cars.find(x => x.id === currentNoteId);
+  if (!c) return;
+  const newNote = document.getElementById('npop-text').value.trim();
+  if (newNote === c.notes) return; // unchanged
+  c.notes = newNote;
+  saveData();
+  document.getElementById('npop-saved').textContent = '✓ Gemt';
+  renderCarTable('dash-tbody', dashFilter);
+}
+
+// ─── TJEKLISTE ───────────────────────────────────────────────────────────────
+const CHECKLIST_ANKOMST = [
+  { id: 'a_noegler', section: 'Nøgler og klargøring' },
+  { id: 'a1', text: 'Begge bilnøgler opmærkes tydeligt' },
+  { id: 'a2', text: 'Bilinventar monteret (kasse, bord, mobilholder)' },
+  { id: 'a_teknisk', section: 'Teknisk opsætning' },
+  { id: 'a3', text: 'ABAX monteret og evt. omdøbt i portalen' },
+  { id: 'a4', text: 'Bilen tilmeldt PayByPlate' },
+  { id: 'a5', text: 'Nummerplade og data opdateret i FW' },
+  { id: 'a6', text: 'Tankkort/ladebrikker registreret i FW' },
+  { id: 'a_dok', section: 'Dokumenter' },
+  { id: 'a7', text: 'Registreringsattest lagt i bilen' },
+  { id: 'a8', text: 'Service- og instruktionsbog i handskerum' },
+  { id: 'a9', text: 'Info om specifikationer, vejhjælp og ladning i bil og handskerum' },
+  { id: 'a_daek', section: 'Dæk og udstyr' },
+  { id: 'a10', text: 'Sommer/vinterdæk bestilt' },
+  { id: 'a11', text: 'Gummimåtter bestilt/monteret' },
+  { id: 'a_maerkning', section: 'Mærkning' },
+  { id: 'a12', text: 'QR-kode på inventarkasse opdateret' },
+  { id: 'a13', text: 'ENG-nummer sat på bagrude' },
+  { id: 'a_parkering', section: 'Parkering' },
+  { id: 'a14', text: 'Nummerplade registreret hos QPARK' },
+  { id: 'a15', text: 'Nummerplade registreret hos Parkman' },
+  { id: 'a_sikkerhed', section: 'Sikkerhed og øvrigt' },
+  { id: 'a16', text: 'Grønne veste, førstehjælp og advarselstrekant i bilen' },
+  { id: 'a17', text: 'Skraldeposer og servietter foran' },
+  { id: 'a18', text: 'P-skive i bilen' },
+  { id: 'a19', text: 'Grønt miljømærke' },
+];
+
+const CHECKLIST_AFLEVERING = [
+  { id: 'f_noegler', section: 'Nøgler' },
+  { id: 'f1', text: 'Begge bilnøgler klar (uden messingnøgleringe)' },
+  { id: 'f_dok', section: 'Dokumenter' },
+  { id: 'f2', text: 'Registreringsattest i bilen' },
+  { id: 'f3', text: 'Servicebog i bilen' },
+  { id: 'f4', text: 'Instruktionsbog i bilen' },
+  { id: 'f_km', section: 'Kilometerstand' },
+  { id: 'f5', text: 'Billeder af kilometertæller taget og sendt til GEWI og CAMA' },
+  { id: 'f_daek', section: 'Dæk' },
+  { id: 'f6', text: 'Sommer/vinterdæk i bilen (KBH-biler: dæk sendt til Odense)' },
+  { id: 'f_afmeld', section: 'Afmeldinger' },
+  { id: 'f7', text: 'PayByPlate afmeldt hos HEOD' },
+  { id: 'f_klarg', section: 'Klargøring' },
+  { id: 'f8', text: 'Bilen rengjort og vasket' },
+  { id: 'f9', text: 'Skader udbedret inden aflevering' },
+  { id: 'f10', text: 'Klistermærker fjernet' },
+  { id: 'f_udstyr', section: 'Udstyr' },
+  { id: 'f11', text: 'Inventar afmonteret ved Haarby/SIEB Teknik' },
+  { id: 'f12', text: 'Tracking-enhed afmonteret' },
+];
+
+function renderChecklist(carId) {
+  const c = cars.find(x => x.id === carId);
+  if (!c) return;
+  const checks = c.checklists || {};
+
+  // Auto-detekt: biler der ikke har været I produktion → ankomst, ellers aflevering
+  const hasBeenInProduction = c.buildStatus === 'I produktion' ||
+    c.buildStatus === 'Afmonteres' || c.buildStatus === 'Afventer afhentning' ||
+    c.buildStatus === 'Returneret';
+
+  const isOldCar = (() => {
+    const peers = cars.filter(o => o.id !== c.id && o.name === c.name && o.location === c.location && o.buildStatus !== 'Returneret');
+    if (!peers.length) return false;
+    return (c.start||'') <= (peers[0].start||'');
+  })();
+
+  // Gammel bil i par → aflevering, ny bil eller enkeltbil der er I produktion → aflevering, ellers ankomst
+  const mode = (isOldCar || hasBeenInProduction) ? 'aflevering' : 'ankomst';
+  const modeLabel = mode === 'ankomst' ? '🚗 Ankomst af ny bil' : '🔄 Aflevering af gammel bil';
+  const items = mode === 'ankomst' ? CHECKLIST_ANKOMST : CHECKLIST_AFLEVERING;
+  const checkItems = items.filter(i => i.text);
+  const done = checkItems.filter(i => checks[i.id]).length;
+  const total = checkItems.length;
+
+  const container = document.getElementById('checklist-content');
+  if (!container) return;
+
+  let html = `
+    <div class="form-section" style="border-top:none;padding-top:0;margin-top:0;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div class="form-section-title" style="margin-bottom:0;">${modeLabel}</div>
+        <button class="btn" onclick="toggleChecklistMode('${carId}')" style="font-size:11px;padding:3px 10px;">
+          Skift til ${mode === 'ankomst' ? 'aflevering' : 'ankomst'}
+        </button>
+      </div>
+      <div style="margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+          <span style="font-size:11px;color:var(--text-muted);">${done}/${total} afkrydset</span>
+          ${done === total ? '<span style="font-size:11px;color:#2a8a4a;font-weight:600;">✓ Komplet</span>' : ''}
+        </div>
+        <div style="height:5px;background:var(--gray-border);border-radius:3px;">
+          <div style="height:5px;background:${done===total?'#2a8a4a':'var(--red)'};border-radius:3px;width:${Math.round(done/total*100)}%;transition:width .3s;"></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+  `;
+
+  items.forEach(item => {
+    if (item.section) {
+      html += `<div style="font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-top:10px;margin-bottom:2px;padding-bottom:4px;border-bottom:1px solid var(--gray-border);">${item.section}</div>`;
+    } else {
+      const checked = !!checks[item.id];
+      html += `
+        <label style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:var(--radius);cursor:pointer;background:${checked?'#f0fdf4':'var(--bg-card)'};border:1px solid ${checked?'#86efac':'var(--gray-border)'};transition:all .15s;">
+          <input type="checkbox" ${checked?'checked':''} onchange="toggleCheck('${carId}','${item.id}',this.checked)"
+            style="width:16px;height:16px;cursor:pointer;accent-color:var(--red);flex-shrink:0;">
+          <span style="font-size:13px;${checked?'text-decoration:line-through;color:var(--text-muted);':'color:var(--text);'}">${item.text}</span>
+        </label>`;
+    }
+  });
+
+  html += `</div></div>
+    <div style="margin-top:12px;padding:10px 12px;background:var(--gray-light);border-radius:var(--radius);font-size:12px;color:var(--text-muted);">
+      ${mode === 'ankomst'
+        ? 'Bilen kan ikke sættes til "I produktion" før alle punkter er afkrydset.'
+        : 'Alle punkter skal afkrydses inden bilen afhentes.'}
+    </div>`;
+
+  // Replace content inside tab
+  container.innerHTML = html;
+}
+
+function toggleChecklistMode(carId) {
+  const c = cars.find(x => x.id === carId);
+  if (!c) return;
+  if (!c.checklists) c.checklists = {};
+  c.checklists._forceMode = c.checklists._forceMode === 'aflevering' ? 'ankomst' : 'aflevering';
+  saveData();
+  renderChecklist(carId);
+}
+
+function toggleCheck(carId, itemId, checked) {
+  const c = cars.find(x => x.id === carId);
+  if (!c) return;
+  if (!c.checklists) c.checklists = {};
+  if (checked) c.checklists[itemId] = new Date().toISOString().slice(0,10);
+  else delete c.checklists[itemId];
+  saveData();
+  renderChecklist(carId);
+  // Update tab badge
+  updateChecklistBadge(carId);
+}
+
+function updateChecklistBadge(carId) {
+  const c = cars.find(x => x.id === carId);
+  if (!c) return;
+  const checks = c.checklists || {};
+  const ankomstDone = CHECKLIST_ANKOMST.filter(i => checks[i.id]).length;
+  const btn = document.querySelector('.modal-tab[onclick*="tjekliste"]');
+  if (btn) {
+    btn.textContent = ankomstDone === CHECKLIST_ANKOMST.length
+      ? 'Udskiftning ✓'
+      : `Udskiftning (${ankomstDone}/${CHECKLIST_ANKOMST.length})`;
+  }
+}
+
+function checklistAnkomstComplete(carId) {
+  const c = cars.find(x => x.id === carId);
+  if (!c) return true;
+  const checks = c.checklists || {};
+  return CHECKLIST_ANKOMST.filter(i => i.text).every(i => checks[i.id]);
+}
+
+function checklistAfleveringComplete(carId) {
+  const c = cars.find(x => x.id === carId);
+  if (!c) return true;
+  const checks = c.checklists || {};
+  return CHECKLIST_AFLEVERING.every(i => checks[i.id]);
+}
+function markReturned(carId) {
+  const c = cars.find(x => x.id === carId);
+  if (!c) return;
+  if (c.ownership === 'ejet') {
+    const dateInput = prompt(`Markér ${c.name} (${c.make} ${c.model}) som solgt?\n\nIndtast salgsdato:`, today());
+    if (dateInput === null) return;
+    const priceInput = prompt('Salgspris (kr.) — valgfrit:', '');
+    if (priceInput === null) return;
+    c.buildStatus = 'Returneret';
+    c.returnedDate = dateInput || today();
+    c.soldPrice = priceInput ? parseInt(priceInput.replace(/\D/g,'')) || '' : '';
+    saveData(); renderDashboard();
+    showToast(c.name + ' solgt ' + fmtDate(c.returnedDate) + ' — flyttet til arkiv');
+  } else {
+    const dateInput = prompt(`Markér ${c.name} (${c.make} ${c.model}) som afhentet?\n\nIndtast afhentningsdato:`, today());
+    if (dateInput === null) return;
+    c.buildStatus = 'Returneret';
+    c.returnedDate = dateInput || today();
+    saveData(); renderDashboard();
+    showToast(c.name + ' afhentet ' + fmtDate(c.returnedDate) + ' — flyttet til arkiv');
+  }
+}
+
+function renderFaultGrid() {
+  const grid = document.getElementById('fault-grid');
+  if (!grid) return;
+
+  const items = [];
+
+  // Tankkort-advarsler
+  cars.filter(c => c.buildStatus !== 'Returneret').forEach(c => {
+    (c.fuelCards||[]).forEach(f => {
+      if (!f.orderedDate) return;
+      const days = Math.floor((new Date() - new Date(f.orderedDate)) / 86400000);
+      const isOverdue = days >= 25;
+      items.push({
+        carId: c.id,
+        carName: c.name,
+        make: c.make, model: c.model,
+        type: 'tankkort',
+        company: f.company || 'Tankkort',
+        days,
+        isOverdue,
+        label: isOverdue
+          ? `Tankkort FORSINKET (${days} dage siden bestilling)`
+          : `Tankkort bestilt (${days} dage siden)`
+      });
+    });
+  });
+
+  if (!items.length) {
+    grid.innerHTML = '<div style="color:var(--text-muted);font-size:13px;padding:8px 0;">Ingen aktive fejlmeldinger.</div>';
+    return;
+  }
+
+  grid.innerHTML = items.map(item => `
+    <div class="obs-card ${item.isOverdue ? 'critical' : 'warning'}" onclick="openModalOnTab('${item.carId}','kort')" style="cursor:pointer;">
+      <div class="obs-name">${item.carName}</div>
+      <div class="obs-detail">${item.make||''} ${item.model||''}</div>
+      <div class="obs-detail">${item.company}</div>
+      <span class="badge ${item.isOverdue ? 'badge-critical' : 'badge-warning'}">${item.label}</span>
+    </div>
+  `).join('');
+}
+// ─── ERSTATNINGSBIL ──────────────────────────────────────────────────────────
+function openReplacementModal() {
+  const c = cars.find(x => x.id === editingId);
+  if (!c) return;
+  document.getElementById('r-name').value = c.name || '';
+  document.getElementById('r-plate').value = '';
+  document.getElementById('r-vin').value = '';
+  document.getElementById('r-location').value = c.location || '';
+  document.getElementById('r-lessor').value = c.lessor || '';
+  document.getElementById('r-new-status').value = 'Bestilt';
+  document.getElementById('r-old-status').value = '';
+  document.getElementById('r-endext-wrap').style.display = 'none';
+  document.getElementById('r-endext').value = '';
+  document.getElementById('replacement-modal').classList.add('open');
+
+  // Show endext field when Forlænget is selected
+  document.getElementById('r-old-status').onchange = function() {
+    document.getElementById('r-endext-wrap').style.display =
+      this.value === 'Forlænget' ? 'block' : 'none';
+  };
+}
+
+function closeReplacementModal() {
+  document.getElementById('replacement-modal').classList.remove('open');
+}
+
+function createReplacement() {
+  const c = cars.find(x => x.id === editingId);
+  if (!c) return;
+
+  const name     = document.getElementById('r-name').value.trim();
+  const location = document.getElementById('r-location').value;
+  if (!name) { showToast('Navn er påkrævet'); return; }
+
+  // Update old car status if chosen
+  const oldStatus = document.getElementById('r-old-status').value;
+  if (oldStatus) {
+    c.buildStatus = oldStatus === 'Forlænget' ? c.buildStatus : oldStatus;
+    if (oldStatus === 'Forlænget') {
+      c.endext = document.getElementById('r-endext').value;
+    }
+  }
+
+  // Create new replacement car
+  const newCar = {
+    id: genId(),
+    name: name,
+    isReplacement: true,
+    plate: document.getElementById('r-plate').value.trim().toUpperCase(),
+    vin: document.getElementById('r-vin').value.trim().toUpperCase(),
+    location: location,
+    lessor: document.getElementById('r-lessor').value.trim(),
+    buildStatus: document.getElementById('r-new-status').value,
+    ownership: 'leasing',
+    // Copy non-specific fields from old car
+    make: '', model: '', variant: '', fuel: '', category: '',
+    start: '', end: '', endext: '', delivery: '',
+    workloc: '', builder: '', buildStart: '', buildEnd: '',
+    weightReady: '', weightTotal: '', envclass: '', co2: '', vin: '',
+    chargeCards: [], fuelCards: [], insurer: '', policy: '',
+    roadsideCompany: '', roadsideNum: '', notes: '',
+    purchaseDate: '', purchasePrice: '', contract: ''
+  };
+
+  cars.push(newCar);
+  saveData();
+  closeReplacementModal();
+  closeModal();
+  renderDashboard();
+  showToast(`Ny erstatning oprettet — ${name} er nu parret som gl./ny`);
+}
+
+// Close replacement modal on overlay click
+document.getElementById('replacement-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeReplacementModal();
+});
+function openSettings() {
+  const key = localStorage.getItem('tv2_dmr_key') || '';
+  document.getElementById('s-dmr-key').value = key;
+  document.getElementById('s-dmr-key').type = 'password';
+  document.getElementById('eye-btn').textContent = '👁';
+  document.getElementById('dmr-status').textContent = '';
+
+  // Vis brugerstyring kun for admins når API er aktiv
+  const usersSection = document.getElementById('users-section');
+  if (usersSection) {
+    usersSection.style.display = (USE_API && Auth.isAdmin()) ? 'block' : 'none';
+    if (USE_API && Auth.isAdmin()) loadUsers();
+  }
+
+  document.getElementById('settings-modal').classList.add('open');
+}
+
+async function loadUsers() {
+  const result = await apiCall('getUsers');
+  if (!result || result.error) return;
+  const list = document.getElementById('users-list');
+  list.innerHTML = result.users.map(u => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border:1px solid var(--gray-border);border-radius:var(--radius);margin-bottom:6px;background:white;">
+      <div>
+        <span style="font-weight:500;font-size:13px;">${u.name}</span>
+        <span style="color:var(--text-muted);font-size:12px;margin-left:8px;">${u.username}</span>
+        <span style="font-size:11px;padding:1px 7px;border-radius:10px;margin-left:6px;background:${u.role==='Admin'?'#fef2f2':'#f0fdf4'};color:${u.role==='Admin'?'var(--red)':'#166534'};">${u.role}</span>
+        ${u.active === 'Nej' ? '<span style="font-size:11px;color:var(--text-muted);margin-left:6px;">(Inaktiv)</span>' : ''}
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button onclick="toggleUserActive('${u.username}','${u.active === 'Ja' ? 'Nej' : 'Ja'}')" style="font-size:11px;padding:3px 8px;border:1px solid var(--gray-border);border-radius:6px;background:none;cursor:pointer;">${u.active === 'Ja' ? 'Deaktiver' : 'Aktiver'}</button>
+        ${u.username !== Auth.getUser()?.username ? `<button onclick="resetPassword('${u.username}')" style="font-size:11px;padding:3px 8px;border:1px solid var(--gray-border);border-radius:6px;background:none;cursor:pointer;">Nulstil kode</button>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function showAddUser() {
+  document.getElementById('add-user-form').style.display = 'block';
+  document.getElementById('nu-username').focus();
+}
+
+async function createUser() {
+  const username = document.getElementById('nu-username').value.trim();
+  const name = document.getElementById('nu-name').value.trim();
+  const password = document.getElementById('nu-password').value;
+  const role = document.getElementById('nu-role').value;
+  if (!username || !name || !password) { showToast('Udfyld alle felter'); return; }
+  const result = await apiCall('saveUser', { username, name, password, role, active: 'Ja' });
+  if (result?.ok) {
+    showToast('Bruger oprettet: ' + name);
+    document.getElementById('add-user-form').style.display = 'none';
+    document.getElementById('nu-username').value = '';
+    document.getElementById('nu-name').value = '';
+    document.getElementById('nu-password').value = '';
+    loadUsers();
+  } else {
+    showToast('Fejl: ' + (result?.error || 'Ukendt fejl'));
+  }
+}
+
+async function toggleUserActive(username, newState) {
+  const result = await apiCall('saveUser', { username, name: username, active: newState });
+  if (result?.ok) { showToast(username + ' ' + (newState === 'Ja' ? 'aktiveret' : 'deaktiveret')); loadUsers(); }
+}
+
+async function resetPassword(username) {
+  const newPw = prompt(`Nyt kodeord for ${username} (min. 6 tegn):`);
+  if (!newPw || newPw.length < 6) { if (newPw !== null) showToast('Kodeord skal være mindst 6 tegn'); return; }
+  const result = await apiCall('changePassword', { targetUser: username, newPassword: newPw });
+  if (result?.ok) showToast('Kodeord nulstillet for ' + username);
+  else showToast('Fejl: ' + (result?.error || 'Ukendt fejl'));
+}
+
+async function doChangePassword() {
+  const oldPw = document.getElementById('s-old-pw').value;
+  const newPw = document.getElementById('s-new-pw').value;
+  if (!oldPw || !newPw) { showToast('Udfyld begge kodeord'); return; }
+  if (newPw.length < 6) { showToast('Nyt kodeord skal være mindst 6 tegn'); return; }
+  if (!USE_API) { showToast('API ikke konfigureret'); return; }
+  const result = await apiCall('changePassword', { oldPassword: oldPw, newPassword: newPw });
+  if (result?.ok) {
+    showToast('Kodeord skiftet');
+    document.getElementById('s-old-pw').value = '';
+    document.getElementById('s-new-pw').value = '';
+  } else showToast('Fejl: ' + (result?.error || 'Forkert kodeord'));
+}
+
+async function doLogout() {
+  if (USE_API) await apiCall('logout');
+  Auth.clearSession();
+  window.location.href = 'login.html';
+}
+
+function closeSettings() {
+  document.getElementById('settings-modal').classList.remove('open');
+}
+
+function saveSettings() {
+  const key = document.getElementById('s-dmr-key').value.trim();
+  if (key) {
+    localStorage.setItem('tv2_dmr_key', key);
+    showToast('Indstillinger gemt');
+  } else {
+    localStorage.removeItem('tv2_dmr_key');
+    showToast('API-nøgle fjernet');
+  }
+  closeSettings();
+}
+
+function toggleApiKeyVisibility() {
+  const input = document.getElementById('s-dmr-key');
+  const btn = document.getElementById('eye-btn');
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.textContent = '🙈';
+  } else {
+    input.type = 'password';
+    btn.textContent = '👁';
+  }
+}
+
+async function testDMRKey() {
+  const key = document.getElementById('s-dmr-key').value.trim();
+  if (!key) { document.getElementById('dmr-status').innerHTML = '<span style="color:var(--red);">Ingen nøgle indtastet</span>'; return; }
+  document.getElementById('dmr-status').innerHTML = '<span style="color:var(--text-muted);">Tester forbindelse...</span>';
+  try {
+    const res = await fetch('https://v1.motorapi.dk/usage', {
+      headers: { 'X-AUTH-TOKEN': key }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const used = data.today?.requests ?? '?';
+      const limit = data.today?.limit ?? '?';
+      const remaining = data.today?.remaining ?? '?';
+      document.getElementById('dmr-status').innerHTML =
+        `<span style="color:var(--green);">✓ Forbindelse OK — ${used}/${limit} opslag brugt i dag (${remaining} tilbage)</span>`;
+    } else {
+      document.getElementById('dmr-status').innerHTML = '<span style="color:var(--red);">✗ Ugyldig API-nøgle</span>';
+    }
+  } catch(e) {
+    document.getElementById('dmr-status').innerHTML = '<span style="color:var(--red);">✗ Kunne ikke forbinde</span>';
+  }
+}
+
+function clearAllData() {
+  if (!confirm('Slet ALLE biler? Dette kan ikke fortrydes!')) return;
+  cars = [];
+  saveData();
+  renderDashboard();
+  closeSettings();
+  showToast('Alle biler slettet');
+}
+
+// Close settings on overlay click
+document.getElementById('settings-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeSettings();
+});
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+// Vis bruger i topbar
+const _user = Auth.getUser();
+if (_user) {
+  const _disp = document.getElementById('user-display');
+  if (_disp) {
+    _disp.style.display = 'flex';
+    const _name = document.getElementById('user-name');
+    if (_name) _name.textContent = _user.name || _user.username;
+  }
+}
+
+(async () => {
+  await loadData();
+  checkFuelCardAlerts();
+  renderDashboard();
+})();
+
+// Close modal on overlay click
+document.getElementById('modal').addEventListener('click', function(e) {
+  if (e.target === this) safeCloseModal();
+});
+
+// Mousewheel zoom on gantt — scroll over gantt area to zoom
+document.addEventListener('wheel', function(e) {
+  if (!document.getElementById('view-gantt').classList.contains('active')) return;
+  if (ganttMode === 'udskiftning') {
+    if (!document.getElementById('gantt-udskift-panel').contains(e.target)) return;
+    e.preventDefault();
+    const zooms = [6,12,24,52];
+    const idx = zooms.indexOf(udskiftWeeks);
+    if (e.deltaY < 0 && idx > 0) udskiftWeeks = zooms[idx-1];
+    else if (e.deltaY > 0 && idx < zooms.length-1) udskiftWeeks = zooms[idx+1];
+    document.querySelectorAll('[id^="uz-"]').forEach(b => b.classList.remove('active'));
+    document.getElementById('uz-'+udskiftWeeks)?.classList.add('active');
+    renderUdskiftningsplan();
+    return;
+  }
+  if (!document.getElementById('gantt-scroll').contains(e.target)) return;
+  e.preventDefault();
+  const zooms = [6,12,24,36,48,60];
+  const idx = zooms.indexOf(ganttMonths);
+  if (e.deltaY < 0 && idx > 0) ganttMonths = zooms[idx-1];
+  else if (e.deltaY > 0 && idx < zooms.length-1) ganttMonths = zooms[idx+1];
+  document.querySelectorAll('[id^="gz-"]').forEach(b => b.classList.remove('active'));
+  document.getElementById('gz-'+ganttMonths)?.classList.add('active');
+  renderGantt();
+}, { passive: false });
+</script>
+</body>
+</html>

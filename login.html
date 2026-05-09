@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>Log ind — TV 2 Flådestyring</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --red: #CC0000; --red-light: #fff0f0;
+    --text: #1a1a1a; --text-muted: #6b7280;
+    --bg: #f5f5f0; --bg-card: #ffffff;
+    --gray-border: #e5e7eb;
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --radius: 8px;
+  }
+  body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .login-wrap {
+    width: 100%; max-width: 420px;
+  }
+  .login-logo {
+    text-align: center; margin-bottom: 32px;
+  }
+  .logo-circle {
+    width: 56px; height: 56px; background: var(--red); border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: white; font-weight: 800; font-size: 18px; margin-bottom: 12px;
+  }
+  .login-title { font-size: 22px; font-weight: 700; color: var(--text); }
+  .login-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+  .login-card {
+    background: var(--bg-card); border-radius: 16px;
+    padding: 32px; box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    border: 1px solid var(--gray-border);
+  }
+  .field { margin-bottom: 18px; }
+  .field label { display: block; font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
+  .field input {
+    width: 100%; padding: 10px 14px; border: 1px solid var(--gray-border);
+    border-radius: var(--radius); font-size: 14px; font-family: var(--font);
+    color: var(--text); background: white; transition: border-color .15s;
+  }
+  .field input:focus { outline: none; border-color: var(--red); }
+  .field .pw-wrap { position: relative; }
+  .field .pw-wrap input { padding-right: 40px; }
+  .eye-btn {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; cursor: pointer; color: var(--text-muted);
+    font-size: 16px; padding: 0; line-height: 1;
+  }
+  .login-btn {
+    width: 100%; padding: 12px; background: var(--red); color: white;
+    border: none; border-radius: var(--radius); font-size: 15px; font-weight: 600;
+    cursor: pointer; font-family: var(--font); transition: opacity .15s;
+    margin-top: 4px;
+  }
+  .login-btn:hover { opacity: .9; }
+  .login-btn:disabled { opacity: .6; cursor: not-allowed; }
+  .error-msg {
+    background: #fef2f2; border: 1px solid #fecaca; color: #991b1b;
+    border-radius: var(--radius); padding: 10px 14px; font-size: 13px;
+    margin-bottom: 16px; display: none;
+  }
+  .error-msg.show { display: block; }
+  .footer-note {
+    text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 20px;
+  }
+</style>
+</head>
+<body>
+<div class="login-wrap">
+  <div class="login-logo">
+    <div class="logo-circle">v2</div>
+    <div class="login-title">Flådestyring</div>
+    <div class="login-sub">TV 2 Depot</div>
+  </div>
+  <div class="login-card">
+    <div class="error-msg" id="error-msg"></div>
+    <div class="field">
+      <label>Brugernavn</label>
+      <input type="text" id="username" placeholder="dit brugernavn" autocomplete="username" autofocus>
+    </div>
+    <div class="field">
+      <label>Kodeord</label>
+      <div class="pw-wrap">
+        <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+        <button class="eye-btn" onclick="togglePw()" tabindex="-1" type="button">👁</button>
+      </div>
+    </div>
+    <button class="login-btn" id="login-btn" onclick="doLogin()">Log ind</button>
+  </div>
+  <div class="footer-note">TV 2 Danmark · Depot · Intern system</div>
+</div>
+
+<script>
+const API_URL = 'https://script.google.com/macros/s/AKfycbx63HNv4mbydpHVW2eMCK89zvT-iocHXWyXGOr90oiCkoUrxgyUCiVe0jWwOaqTGXxirA/exec'; // Sættes ind efter deploy
+
+// Check om allerede logget ind
+const existingToken = localStorage.getItem('tv2_token');
+if (existingToken) {
+  const expires = localStorage.getItem('tv2_token_expires');
+  if (expires && new Date(expires) > new Date()) {
+    window.location.href = 'index.html';
+  }
+}
+
+function togglePw() {
+  const pw = document.getElementById('password');
+  pw.type = pw.type === 'password' ? 'text' : 'password';
+}
+
+document.getElementById('password').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+document.getElementById('username').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('password').focus();
+});
+
+async function doLogin() {
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+  const btn = document.getElementById('login-btn');
+  const err = document.getElementById('error-msg');
+
+  if (!username || !password) {
+    showError('Udfyld brugernavn og kodeord');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Logger ind...';
+  err.classList.remove('show');
+
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'login', username, password })
+    });
+    const data = await res.json();
+
+    if (data.ok) {
+      localStorage.setItem('tv2_token', data.token);
+      localStorage.setItem('tv2_user', JSON.stringify(data.user));
+      localStorage.setItem('tv2_token_expires', data.expires);
+      window.location.href = 'index.html';
+    } else {
+      showError(data.error || 'Login fejlede');
+      btn.disabled = false;
+      btn.textContent = 'Log ind';
+    }
+  } catch(e) {
+    showError('Kunne ikke forbinde til serveren. Prøv igen.');
+    btn.disabled = false;
+    btn.textContent = 'Log ind';
+  }
+}
+
+function showError(msg) {
+  const err = document.getElementById('error-msg');
+  err.textContent = msg;
+  err.classList.add('show');
+}
+</script>
+</body>
+</html>
