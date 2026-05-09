@@ -1087,7 +1087,14 @@ function callAPI(params) {
 async function apiCall(action, data = {}) {
   if (!USE_API) return null;
   try {
-    const result = await callAPI({ action, token: Auth.getToken() || '', ...data });
+    const params = new URLSearchParams({ action, token: Auth.getToken() || '' });
+    Object.entries(data).forEach(([k,v]) => params.append(k, typeof v === 'object' ? JSON.stringify(v) : v));
+    const res = await fetch(API_URL + '?' + params.toString(), {
+      method: 'GET', redirect: 'follow', credentials: 'omit'
+    });
+    const text = await res.text();
+    const json = text.replace(/^[^(]+\(/, '').replace(/\);?\s*$/, '');
+    const result = JSON.parse(json);
     if (result?.error === 'Ugyldig session - log ind igen') { Auth.clearSession(); window.location.href = 'login.html'; return null; }
     return result;
   } catch(e) { console.error('API fejl:', e); return null; }

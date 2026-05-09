@@ -152,7 +152,22 @@ async function doLogin() {
   err.classList.remove('show');
 
   try {
-    const data = await callAPI({ action: 'login', username, password });
+    const url = API_URL 
+      + '?action=login'
+      + '&username=' + encodeURIComponent(username)
+      + '&password=' + encodeURIComponent(password);
+    
+    const res = await fetch(url, {
+      method: 'GET',
+      redirect: 'follow',
+      credentials: 'omit'
+    });
+    
+    const text = await res.text();
+    // Apps Script pakker svaret i callback — strip det
+    const json = text.replace(/^[^(]+\(/, '').replace(/\);?\s*$/, '');
+    const data = JSON.parse(json);
+
     if (data.ok) {
       localStorage.setItem('tv2_token', data.token);
       localStorage.setItem('tv2_user', JSON.stringify(data.user));
@@ -164,6 +179,7 @@ async function doLogin() {
       btn.textContent = 'Log ind';
     }
   } catch(e) {
+    console.error(e);
     showError('Kunne ikke forbinde til serveren. Prøv igen.');
     btn.disabled = false;
     btn.textContent = 'Log ind';
