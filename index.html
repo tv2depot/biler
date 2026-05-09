@@ -2119,12 +2119,12 @@ function importCSV(input) {
 
       cars.push(...imported);
       saveData();
-      // Gem i API
+      // Gem i API via bulk
       if (USE_API) {
-        showToast('Gemmer biler i database...');
-        for (const car of imported) {
-          await saveCarToAPI(car);
-        }
+        showToast('Gemmer ' + imported.length + ' biler i database...');
+        const result = await apiCall('bulkSaveCars', { cars: imported });
+        if (result?.ok) showToast(result.count + ' biler gemt i database ✓');
+        else showToast('Advarsel: kunne ikke gemme i database');
       }
       renderDashboard();
       showToast(`${imported.length} biler importeret${needsLookup.length ? ` · ${needsLookup.length} beriget med DMR data` : ''}`);
