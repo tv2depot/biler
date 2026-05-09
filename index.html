@@ -1073,12 +1073,13 @@ if (USE_API && !Auth.isLoggedIn()) window.location.href = 'login.html';
 async function apiCall(action, data = {}) {
   if (!USE_API) return null;
   try {
-    const res = await fetch(API_URL, {
-      method: 'POST',
-      mode: 'cors',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ action, token: Auth.getToken(), ...data })
+    const payload = { action, token: Auth.getToken(), ...data };
+    // Serialiser nested objects
+    const params = new URLSearchParams();
+    Object.entries(payload).forEach(([k, v]) => {
+      params.append(k, typeof v === 'object' ? JSON.stringify(v) : v);
     });
+    const res = await fetch(API_URL + '?' + params.toString(), { method: 'GET', mode: 'cors' });
     const json = await res.json();
     if (json.error === 'Ugyldig session - log ind igen') { Auth.clearSession(); window.location.href = 'login.html'; return null; }
     return json;

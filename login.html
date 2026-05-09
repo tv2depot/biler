@@ -137,11 +137,10 @@ async function doLogin() {
   err.classList.remove('show');
 
   try {
-    const res = await fetch(API_URL, {
-      method: 'POST',
-      mode: 'cors',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ action: 'login', username, password })
+    const url = API_URL + '?action=login&username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password);
+    const res = await fetch(url, {
+      method: 'GET',
+      mode: 'cors'
     });
     const data = await res.json();
 
