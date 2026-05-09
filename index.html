@@ -1036,6 +1036,8 @@ table.cars tr.paired-bottom:hover td.ombyg-col { background: #eee8c8; }
     </div>
     <button class="btn" onclick="doChangePassword()" style="font-size:12px;margin-top:4px;">Skift kodeord</button>
   </div>
+
+  <div class="form-section"><div class="form-section-title">Data</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
       <button class="btn" onclick="exportCSV();closeSettings()" style="font-size:12px;">↓ Eksporter CSV</button>
       <button class="btn" onclick="closeSettings();setTimeout(()=>document.getElementById('csv-import').click(),100)" style="font-size:12px;">↑ Importer CSV</button>
@@ -1056,8 +1058,8 @@ table.cars tr.paired-bottom:hover td.ombyg-col { background: #eee8c8; }
 <script>
 // ─── DATA ───────────────────────────────────────────────────────────────────
 const STORAGE_KEY = 'tv2_fleet_v1';
-const API_URL = 'https://tv2-fleet-api.gwinther.workers.dev'; // Indsæt deploy URL efter publicering
-const USE_API = API_URL !== 'https://tv2-fleet-api.gwinther.workers.dev';
+const API_URL = 'https://tv2-fleet-api.gwinther.workers.dev';
+const USE_API = true;
 
 // ─── AUTH ─────────────────────────────────────────────────────────────────────
 const Auth = {
@@ -3014,11 +3016,13 @@ function openSettings() {
   document.getElementById('eye-btn').textContent = '👁';
   document.getElementById('dmr-status').textContent = '';
 
-  // Vis brugerstyring kun for admins når API er aktiv
+  // Vis brugerstyring for admins
   const usersSection = document.getElementById('users-section');
   if (usersSection) {
-    usersSection.style.display = (USE_API && Auth.isAdmin()) ? 'block' : 'none';
-    if (USE_API && Auth.isAdmin()) loadUsers();
+    const user = Auth.getUser();
+    const isAdmin = user && user.role === 'Admin';
+    usersSection.style.display = (USE_API && isAdmin) ? 'block' : 'none';
+    if (USE_API && isAdmin) loadUsers();
   }
 
   document.getElementById('settings-modal').classList.add('open');
@@ -3105,13 +3109,16 @@ function closeSettings() {
   document.getElementById('settings-modal').classList.remove('open');
 }
 
-function saveSettings() {
+async function saveSettings() {
   const key = document.getElementById('s-dmr-key').value.trim();
   if (key) {
     localStorage.setItem('tv2_dmr_key', key);
+    // Gem også i API hvis tilgængeligt
+    if (USE_API) await apiCall('saveSetting', { key: 'dmr_api_key', value: key });
     showToast('Indstillinger gemt');
   } else {
     localStorage.removeItem('tv2_dmr_key');
+    if (USE_API) await apiCall('saveSetting', { key: 'dmr_api_key', value: '' });
     showToast('API-nøgle fjernet');
   }
   closeSettings();
@@ -3180,6 +3187,11 @@ if (_user) {
 
 (async () => {
   await loadData();
+  // Hent DMR nøgle fra API hvis tilgængelig
+  if (USE_API) {
+    const setting = await apiCall('getSetting', { key: 'dmr_api_key' });
+    if (setting?.value) localStorage.setItem('tv2_dmr_key', setting.value);
+  }
   checkFuelCardAlerts();
   renderDashboard();
 })();
