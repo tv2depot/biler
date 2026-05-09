@@ -1127,7 +1127,10 @@ async function loadData() {
   // Vis localStorage data øjeblikkeligt
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) cars = JSON.parse(raw);
+    if (raw) {
+      cars = JSON.parse(raw);
+      renderDashboard(); // Render med det samme fra localStorage
+    }
   } catch(e) {}
 
   if (USE_API) {
@@ -1135,10 +1138,14 @@ async function loadData() {
     if (result && result.cars && result.cars.length > 0) {
       cars = result.cars;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(cars));
+      renderDashboard(); // Opdater med Sheets-data
     }
   }
 
-  if (!cars.length) cars = getSampleData();
+  if (!cars.length) {
+    cars = getSampleData();
+    renderDashboard();
+  }
 }
 
 async function saveData() {
