@@ -1006,7 +1006,10 @@ table.cars tr.paired-bottom:hover td.ombyg-col { background: #eee8c8; }
       <span class="hint">Opret gratis konto på <a href="https://v1.motorapi.dk" target="_blank" style="color:var(--red);">v1.motorapi.dk</a> · 100 gratis opslag/dag</span>
     </div>
     <div id="dmr-status" style="font-size:12px;margin-top:8px;"></div>
-    <button class="btn" onclick="testDMRKey()" style="font-size:12px;margin-top:4px;">Test forbindelse</button>
+    <div style="display:flex;gap:8px;margin-top:8px;">
+      <button class="btn" onclick="testDMRKey()" style="font-size:12px;">Test forbindelse</button>
+      <button class="btn btn-primary" onclick="saveSettings()" style="font-size:12px;">Gem API-nøgle</button>
+    </div>
   </div>
 
   <div class="form-section" id="users-section" style="display:none;">
@@ -1034,7 +1037,7 @@ table.cars tr.paired-bottom:hover td.ombyg-col { background: #eee8c8; }
       <div class="field"><label>Nuværende kodeord</label><input type="password" id="s-old-pw" placeholder="••••••••"></div>
       <div class="field"><label>Nyt kodeord</label><input type="password" id="s-new-pw" placeholder="Min. 6 tegn"></div>
     </div>
-    <button class="btn" onclick="doChangePassword()" style="font-size:12px;margin-top:4px;">Skift kodeord</button>
+    <button class="btn" onclick="doChangePassword()" style="font-size:12px;margin-top:8px;">Skift kodeord</button>
   </div>
 
   <div class="form-section"><div class="form-section-title">Data</div>
@@ -1047,7 +1050,6 @@ table.cars tr.paired-bottom:hover td.ombyg-col { background: #eee8c8; }
 
   <div class="modal-footer">
     <button class="btn" onclick="closeSettings()">Luk</button>
-    <button class="btn btn-primary" onclick="saveSettings()">Gem indstillinger</button>
   </div>
 </div>
 </div>
