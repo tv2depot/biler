@@ -463,6 +463,7 @@ table.cars tr.paired-bottom:hover td.ombyg-col { background: #eee8c8; }
   transition: all 0.25s; z-index: 500;
   pointer-events: none;
 }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 .toast.show { transform: translateY(0); opacity: 1; }
 
 /* MODAL TABS */
@@ -3087,7 +3088,7 @@ function openSettings() {
 
 async function loadUsers() {
   const list = document.getElementById('users-list');
-  list.innerHTML = '<div style="color:var(--text-muted);font-size:13px;padding:8px 0;">Henter brugere...</div>';
+  list.innerHTML = '<div style="color:var(--text-muted);font-size:13px;padding:8px 0;animation:pulse 1.2s ease-in-out infinite;">Henter brugere...</div>';
   const result = await apiCall('getUsers');
   if (!result || result.error) { list.innerHTML = '<div style="color:var(--red);font-size:13px;">Kunne ikke hente brugere</div>'; return; }
   list.innerHTML = result.users.map(u => `
