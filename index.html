@@ -3086,9 +3086,10 @@ function openSettings() {
 }
 
 async function loadUsers() {
-  const result = await apiCall('getUsers');
-  if (!result || result.error) return;
   const list = document.getElementById('users-list');
+  list.innerHTML = '<div style="color:var(--text-muted);font-size:13px;padding:8px 0;">Henter brugere...</div>';
+  const result = await apiCall('getUsers');
+  if (!result || result.error) { list.innerHTML = '<div style="color:var(--red);font-size:13px;">Kunne ikke hente brugere</div>'; return; }
   list.innerHTML = result.users.map(u => `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border:1px solid var(--gray-border);border-radius:var(--radius);margin-bottom:6px;background:white;">
       <div>
