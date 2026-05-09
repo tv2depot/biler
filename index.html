@@ -1091,16 +1091,27 @@ function callAPI(params) {
 async function apiCall(action, data = {}) {
   if (!USE_API) return null;
   try {
-    const params = new URLSearchParams({ action, token: Auth.getToken() || '' });
-    Object.entries(data).forEach(([k,v]) => params.append(k, typeof v === 'object' ? JSON.stringify(v) : v));
-    const res = await fetch(API_URL + '?' + params.toString(), {
-      method: 'GET', redirect: 'follow', credentials: 'omit'
-    });
-    const text = await res.text();
-    const json = text.replace(/^[^(]+\(/, '').replace(/\);?\s*$/, '');
-    const result = JSON.parse(json);
-    if (result?.error === 'Ugyldig session - log ind igen') { Auth.clearSession(); window.location.href = 'login.html'; return null; }
-    return result;
+    // Brug POST til bulk-operationer, GET til alt andet
+    const bulkActions = ['bulkSaveCars', 'saveCar'];
+    if (bulkActions.includes(action)) {
+      const payload = { action, token: Auth.getToken() || '', ...data };
+      const res = await fetch(API_URL + '?action=' + action + '&token=' + encodeURIComponent(Auth.getToken() || ''), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const text = await res.text();
+      const json = text.trim().startsWith('{') ? JSON.parse(text) : JSON.parse(text.replace(/^[^(]+\(/, '').replace(/\);?\s*$/, ''));
+      return json;
+    } else {
+      const params = new URLSearchParams({ action, token: Auth.getToken() || '' });
+      Object.entries(data).forEach(([k,v]) => params.append(k, typeof v === 'object' ? JSON.stringify(v) : v));
+      const res = await fetch(API_URL + '?' + params.toString(), { method: 'GET', redirect: 'follow', credentials: 'omit' });
+      const text = await res.text();
+      const json = text.trim().startsWith('{') ? JSON.parse(text) : JSON.parse(text.replace(/^[^(]+\(/, '').replace(/\);?\s*$/, ''));
+      if (json?.error === 'Ugyldig session - log ind igen') { Auth.clearSession(); window.location.href = 'login.html'; return null; }
+      return json;
+    }
   } catch(e) { console.error('API fejl:', e); return null; }
 }
 
@@ -1113,21 +1124,21 @@ let dashFilter = 'all';
 let carsFilter = 'all';
 
 async function loadData() {
-  if (USE_API) {
-    showToast('Henter data...');
-    const result = await apiCall('getCars');
-    if (result && result.cars) {
-      cars = result.cars;
-      showToast('Data hentet — ' + cars.length + ' biler');
-      return;
-    }
-  }
-  // Fallback til localStorage
+  // Vis localStorage data øjeblikkeligt
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) cars = JSON.parse(raw);
-    else cars = getSampleData();
-  } catch(e) { cars = getSampleData(); }
+  } catch(e) {}
+
+  if (USE_API) {
+    const result = await apiCall('getCars');
+    if (result && result.cars && result.cars.length > 0) {
+      cars = result.cars;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cars));
+    }
+  }
+
+  if (!cars.length) cars = getSampleData();
 }
 
 async function saveData() {
