@@ -1070,19 +1070,26 @@ const Auth = {
 
 if (USE_API && !Auth.isLoggedIn()) window.location.href = 'login.html';
 
+function callAPI(params) {
+  return new Promise((resolve, reject) => {
+    const cbName = 'cb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+    const script = document.createElement('script');
+    const url = new URL(API_URL);
+    Object.entries(params).forEach(([k,v]) => url.searchParams.append(k, typeof v === 'object' ? JSON.stringify(v) : v));
+    url.searchParams.append('callback', cbName);
+    window[cbName] = (data) => { delete window[cbName]; script.remove(); resolve(data); };
+    script.onerror = () => { delete window[cbName]; script.remove(); reject(new Error('Netværksfejl')); };
+    script.src = url.toString();
+    document.body.appendChild(script);
+  });
+}
+
 async function apiCall(action, data = {}) {
   if (!USE_API) return null;
   try {
-    const payload = { action, token: Auth.getToken(), ...data };
-    // Serialiser nested objects
-    const params = new URLSearchParams();
-    Object.entries(payload).forEach(([k, v]) => {
-      params.append(k, typeof v === 'object' ? JSON.stringify(v) : v);
-    });
-    const res = await fetch(API_URL + '?' + params.toString(), { method: 'GET', mode: 'cors' });
-    const json = await res.json();
-    if (json.error === 'Ugyldig session - log ind igen') { Auth.clearSession(); window.location.href = 'login.html'; return null; }
-    return json;
+    const result = await callAPI({ action, token: Auth.getToken() || '', ...data });
+    if (result?.error === 'Ugyldig session - log ind igen') { Auth.clearSession(); window.location.href = 'login.html'; return null; }
+    return result;
   } catch(e) { console.error('API fejl:', e); return null; }
 }
 

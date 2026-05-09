@@ -121,29 +121,38 @@ document.getElementById('username').addEventListener('keydown', e => {
   if (e.key === 'Enter') document.getElementById('password').focus();
 });
 
+function callAPI(params) {
+  return new Promise((resolve, reject) => {
+    const cbName = 'cb_' + Date.now();
+    const script = document.createElement('script');
+    const url = new URL(API_URL);
+    Object.entries(params).forEach(([k,v]) => url.searchParams.append(k, typeof v === 'object' ? JSON.stringify(v) : v));
+    url.searchParams.append('callback', cbName);
+    window[cbName] = (data) => {
+      delete window[cbName];
+      document.body.removeChild(script);
+      resolve(data);
+    };
+    script.onerror = () => { delete window[cbName]; document.body.removeChild(script); reject(new Error('Netværksfejl')); };
+    script.src = url.toString();
+    document.body.appendChild(script);
+  });
+}
+
 async function doLogin() {
   const username = document.getElementById('username').value.trim();
   const password = document.getElementById('password').value;
   const btn = document.getElementById('login-btn');
   const err = document.getElementById('error-msg');
 
-  if (!username || !password) {
-    showError('Udfyld brugernavn og kodeord');
-    return;
-  }
+  if (!username || !password) { showError('Udfyld brugernavn og kodeord'); return; }
 
   btn.disabled = true;
   btn.textContent = 'Logger ind...';
   err.classList.remove('show');
 
   try {
-    const url = API_URL + '?action=login&username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password);
-    const res = await fetch(url, {
-      method: 'GET',
-      mode: 'cors'
-    });
-    const data = await res.json();
-
+    const data = await callAPI({ action: 'login', username, password });
     if (data.ok) {
       localStorage.setItem('tv2_token', data.token);
       localStorage.setItem('tv2_user', JSON.stringify(data.user));
