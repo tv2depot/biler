@@ -1148,8 +1148,17 @@ async function saveData() {
 
 async function saveCarToAPI(car) {
   if (!USE_API) return;
-  const result = await apiCall('saveCar', { car });
-  if (result && result.error) showToast('API fejl: ' + result.error);
+  try {
+    const result = await apiCall('saveCar', { car: car });
+    if (result?.ok) {
+      console.log('Bil gemt i Sheets:', car.name);
+    } else {
+      console.error('Fejl ved gem i Sheets:', result?.error || 'Ukendt fejl');
+      showToast('⚠️ Kunne ikke gemme i database: ' + (result?.error || 'Ukendt fejl'));
+    }
+  } catch(e) {
+    console.error('saveCarToAPI fejl:', e);
+  }
 }
 
 async function deleteCarFromAPI(id, name) {
@@ -2446,7 +2455,7 @@ function closeModal() {
   modalSnapshot = '';
 }
 
-function saveCar() {
+async function saveCar() {
   const get = id => (document.getElementById('f-'+id)||{}).value || '';
   const newStatus = get('status');
   const oldCar = cars.find(x => x.id === editingId);
@@ -2503,7 +2512,7 @@ function saveCar() {
   }
 
   saveData();
-  saveCarToAPI(car);
+  await saveCarToAPI(car);
   closeModal();
   showToast(editingId ? 'Bil opdateret' : 'Bil tilføjet');
 
