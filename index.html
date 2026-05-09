@@ -2526,7 +2526,7 @@ async function saveCar() {
 
   if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Gem bil'; }
   closeModal();
-  showToast(editingId ? 'Bil opdateret' : 'Bil tilføjet');
+  showToast(editingId ? `${car.name} — ændringer gemt` : `${car.name} tilføjet`);
 
   const activeView = document.querySelector('.view.active').id.replace('view-','');
   showView(activeView);
