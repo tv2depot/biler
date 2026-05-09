@@ -3254,8 +3254,14 @@ if (_user) {
 })();
 
 // Close modal on overlay click
+// Luk modal ved klik udenfor — men ikke ved drag fra indre til ydre
+let _modalMouseDownTarget = null;
+document.getElementById('modal').addEventListener('mousedown', function(e) {
+  _modalMouseDownTarget = e.target;
+});
 document.getElementById('modal').addEventListener('click', function(e) {
-  if (e.target === this) safeCloseModal();
+  if (e.target === this && _modalMouseDownTarget === this) safeCloseModal();
+  _modalMouseDownTarget = null;
 });
 
 // Mousewheel zoom on gantt — scroll over gantt area to zoom
