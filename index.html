@@ -2518,8 +2518,13 @@ async function saveCar() {
     cars.push(car);
   }
 
+  const saveBtn = document.querySelector('.modal-footer .btn-primary');
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Gemmer...'; }
+
   saveData();
   await saveCarToAPI(car);
+
+  if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Gem bil'; }
   closeModal();
   showToast(editingId ? 'Bil opdateret' : 'Bil tilføjet');
 
