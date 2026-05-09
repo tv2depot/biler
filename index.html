@@ -2081,6 +2081,22 @@ function importCSV(input) {
         const vals = parseCSVLine(lines[i]);
         const car = { id: genId(), fuelCards: [], chargeCards: [], ownership: 'leasing' };
         headers.forEach((h, idx) => { car[h] = (vals[idx] || '').trim(); });
+        // Parse fuelCards og chargeCards fra pipe-format: company:num:orderedDate
+        if (typeof car.fuelCards === 'string' && car.fuelCards) {
+          car.fuelCards = car.fuelCards.split('|').filter(Boolean).map(s => {
+            const parts = s.split(':');
+            return { company: parts[0]||'', num: parts[1]||'', orderedDate: parts[2]||'' };
+          }).filter(f => f.company || f.num);
+        } else { car.fuelCards = []; }
+        if (typeof car.chargeCards === 'string' && car.chargeCards) {
+          car.chargeCards = car.chargeCards.split('|').filter(Boolean).map(s => {
+            const parts = s.split(':');
+            return { company: parts[0]||'', num: parts[1]||'', orderedDate: parts[2]||'' };
+          }).filter(f => f.company || f.num);
+        } else { car.chargeCards = []; }
+        if (typeof car.checklists === 'string' && car.checklists) {
+          try { car.checklists = JSON.parse(car.checklists); } catch(e) { car.checklists = {}; }
+        } else { car.checklists = {}; }
         if (car.name) imported.push(car);
       }
       if (!imported.length) { showToast('Ingen gyldige biler fundet i CSV'); return; }
@@ -2103,6 +2119,13 @@ function importCSV(input) {
 
       cars.push(...imported);
       saveData();
+      // Gem i API
+      if (USE_API) {
+        showToast('Gemmer biler i database...');
+        for (const car of imported) {
+          await saveCarToAPI(car);
+        }
+      }
       renderDashboard();
       showToast(`${imported.length} biler importeret${needsLookup.length ? ` · ${needsLookup.length} beriget med DMR data` : ''}`);
     } catch(err) {
