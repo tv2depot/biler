@@ -523,6 +523,7 @@ table.cars tr.paired-bottom:hover td.ombyg-col { background: #eee8c8; }
   </div>
   <nav class="topbar-nav">
     <button class="nav-btn active" onclick="showView('dashboard')">Oversigt</button>
+    <button class="nav-btn" onclick="showView('udskiftning')">Udskiftning</button>
     <button class="nav-btn" onclick="showView('gantt')">Gantt-kort</button>
   </nav>
   <div class="topbar-right">
@@ -584,6 +585,17 @@ table.cars tr.paired-bottom:hover td.ombyg-col { background: #eee8c8; }
   <div id="view-cars" class="view" style="display:none;"></div>
 
   <!-- GANTT VIEW -->
+  <div id="view-udskiftning" class="view">
+    <div class="obs-section">
+      <div class="section-hdr">Indgående — nye biler</div>
+      <div id="udskift-incoming"></div>
+    </div>
+    <div class="obs-section" style="margin-top:24px;">
+      <div class="section-hdr">Udgående — gamle biler</div>
+      <div id="udskift-outgoing"></div>
+    </div>
+  </div>
+
   <div id="view-gantt" class="view">
     <!-- MODE TOGGLE -->
     <div style="display:flex;gap:0;margin-bottom:14px;border-bottom:2px solid var(--gray-border);">
@@ -1217,7 +1229,7 @@ function leasingStatus(car) {
   if (car.endext) return { key: 'extended', label: 'Forlænget', color: '#d47c00' };
   if (d !== null && d < 0) return { key: 'returned', label: 'Returneret', color: '#6b7280' };
   if (d !== null && d <= 30) return { key: 'critical', label: 'Udløber snart', color: '#CC0000' };
-  if (d !== null && d <= 210) return { key: 'warning', label: `Udløber om ${d} dage`, color: '#d4a000' };
+  if (d !== null && d <= 90) return { key: 'warning', label: `Udløber om ${d} dage`, color: '#d4a000' };
   if (!car.start && !car.end) return { key: 'planned', label: 'Ikke startet', color: '#9ca3af' };
   return { key: 'active', label: 'Aktiv', color: '#2a8a4a' };
 }
@@ -1254,9 +1266,12 @@ function showView(v) {
   document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(el => {
-    if (el.textContent.toLowerCase().includes(v === 'dashboard' ? 'oversigt' : 'gantt')) el.classList.add('active');
+    if (v === 'dashboard' && el.textContent.includes('Oversigt')) el.classList.add('active');
+    if (v === 'udskiftning' && el.textContent.includes('Udskiftning')) el.classList.add('active');
+    if (v === 'gantt' && el.textContent.includes('Gantt')) el.classList.add('active');
   });
   if (v === 'dashboard') renderDashboard();
+  if (v === 'udskiftning') renderUdskiftning();
   if (v === 'gantt') {
     if (ganttMode === 'leasing') renderGantt();
     else renderUdskiftningsplan();
@@ -1462,9 +1477,105 @@ function renderUdskiftningsplan() {
 }
 
 // ─── DASHBOARD ──────────────────────────────────────────────────────────────
+function renderUdskiftning() {
+  const INCOMING_STATUS = ['Planlægges','Bestilt','Leveringsdato modtaget','Leveret til ombygning','Færdigbygget','I produktion'];
+  const OUTGOING_STATUS = ['Afmonteres','Afventer afhentning'];
+
+  const active = cars.filter(c => c.buildStatus !== 'Returneret');
+
+  // Indgående — nye biler med udskiftningsstatus
+  const incoming = active
+    .filter(c => INCOMING_STATUS.includes(c.buildStatus))
+    .sort((a, b) => INCOMING_STATUS.indexOf(a.buildStatus) - INCOMING_STATUS.indexOf(b.buildStatus));
+
+  // Udgående — gamle biler der skal afleveres
+  const outgoing = active
+    .filter(c => OUTGOING_STATUS.includes(c.buildStatus))
+    .sort((a, b) => (a.end||'').localeCompare(b.end||''));
+
+  // Find makker (gammel bil der erstattes)
+  function findPartner(car) {
+    return cars.find(o => o.id !== car.id && o.name === car.name && o.location === car.location && o.buildStatus !== 'Returneret');
+  }
+
+  // Status farve
+  function statusColor(s) {
+    const map = {
+      'Planlægges': '#94a3b8',
+      'Bestilt': '#f59e0b',
+      'Leveringsdato modtaget': '#3b82f6',
+      'Leveret til ombygning': '#8b5cf6',
+      'Færdigbygget': '#10b981',
+      'I produktion': '#2a8a4a',
+      'Afmonteres': '#f97316',
+      'Afventer afhentning': '#ef4444',
+    };
+    return map[s] || '#94a3b8';
+  }
+
+  // Tjekliste progress
+  function checkProgress(car, mode) {
+    const items = mode === 'ankomst' ? CHECKLIST_ANKOMST : CHECKLIST_AFLEVERING;
+    const checkItems = items.filter(i => i.text);
+    const checks = car.checklists || {};
+    const done = checkItems.filter(i => checks[i.id]).length;
+    return { done, total: checkItems.length, pct: Math.round(done/checkItems.length*100) };
+  }
+
+  function carCard(car, mode) {
+    const partner = findPartner(car);
+    const prog = checkProgress(car, mode);
+    const progColor = prog.done === prog.total ? '#2a8a4a' : prog.done > 0 ? '#f59e0b' : '#e5e7eb';
+    return `
+      <div onclick="openModalOnTab('${car.id}','tjekliste')" style="cursor:pointer;background:white;border:1px solid var(--gray-border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;display:grid;grid-template-columns:1fr auto;gap:8px;align-items:start;transition:box-shadow .15s;"
+        onmouseover="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow=''">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+            <span style="font-weight:600;font-size:14px;">${car.name}</span>
+            <span style="font-size:11px;color:white;background:${statusColor(car.buildStatus)};padding:2px 8px;border-radius:10px;">${car.buildStatus||'—'}</span>
+            ${partner ? `<span style="font-size:11px;color:var(--text-muted);">↔ ${partner.name}</span>` : ''}
+          </div>
+          <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;">${car.make||''} ${car.model||''} · ${car.plate||''} · ${car.location||''}</div>
+          ${car.builder ? `<div style="font-size:12px;color:var(--text-muted);">Opbygger: ${car.builder}${car.buildStart ? ' · ' + fmtDate(car.buildStart) + (car.buildEnd ? ' → ' + fmtDate(car.buildEnd) : '') : ''}</div>` : ''}
+          ${car.delivery ? `<div style="font-size:12px;color:var(--text-muted);">Levering: ${fmtDate(car.delivery)}</div>` : ''}
+        </div>
+        <div style="text-align:right;min-width:90px;">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">Tjekliste ${prog.done}/${prog.total}</div>
+          <div style="height:6px;background:#e5e7eb;border-radius:3px;overflow:hidden;">
+            <div style="height:6px;background:${progColor};width:${prog.pct}%;border-radius:3px;transition:width .3s;"></div>
+          </div>
+          ${prog.done === prog.total ? '<div style="font-size:11px;color:#2a8a4a;margin-top:4px;">✓ Komplet</div>' : ''}
+        </div>
+      </div>`;
+  }
+
+  // Render incoming grupperet efter status
+  const incomingEl = document.getElementById('udskift-incoming');
+  if (!incoming.length) {
+    incomingEl.innerHTML = '<div style="color:var(--text-muted);font-size:13px;padding:8px 0;">Ingen biler under indgående udskiftning.</div>';
+  } else {
+    // Gruppér efter lokation
+    const byLoc = {};
+    incoming.forEach(c => { if (!byLoc[c.location]) byLoc[c.location] = []; byLoc[c.location].push(c); });
+    incomingEl.innerHTML = Object.entries(byLoc).map(([loc, list]) => `
+      <div style="margin-bottom:16px;">
+        <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">${loc}</div>
+        ${list.map(c => carCard(c, 'ankomst')).join('')}
+      </div>`).join('');
+  }
+
+  // Render outgoing
+  const outgoingEl = document.getElementById('udskift-outgoing');
+  if (!outgoing.length) {
+    outgoingEl.innerHTML = '<div style="color:var(--text-muted);font-size:13px;padding:8px 0;">Ingen biler under udgående udskiftning.</div>';
+  } else {
+    outgoingEl.innerHTML = outgoing.map(c => carCard(c, 'aflevering')).join('');
+  }
+}
+
 function renderDashboard() {
   const activeCars = cars.filter(c => c.buildStatus !== 'Returneret');
-  const expiring = activeCars.filter(c => { const d = daysUntil(effectiveEnd(c)); return d !== null && d <= 210 && d >= 0; });
+  const expiring = activeCars.filter(c => { const d = daysUntil(effectiveEnd(c)); return d !== null && d <= 90 && d >= 0; });
   const building = activeCars.filter(c => c.buildStatus && !['','I produktion'].includes(c.buildStatus));
   const ordered  = activeCars.filter(c => ['Bestilt','Leveringsdato modtaget','Planlægges'].includes(c.buildStatus));
   const archived = cars.filter(c => c.buildStatus === 'Returneret');
@@ -1491,7 +1602,7 @@ function renderDashboard() {
   const obsGrid = document.getElementById('obs-grid');
   const obsCars = activeCars.filter(c => {
     const d = daysUntil(effectiveEnd(c));
-    if (d !== null && d <= 210 && d >= 0) return true;
+    if (d !== null && d <= 90 && d >= 0) return true;
     if (c.notes && c.notes.toLowerCase().includes('rykket')) return true;
     if (['Afventer afhentning', 'Afmonteres'].includes(c.buildStatus)) return true;
     return false;
@@ -1504,7 +1615,7 @@ function renderDashboard() {
     if (['Afventer afhentning','Afmonteres'].includes(c.buildStatus) && (d === null || d > 60)) {
       cls = 'warning'; badgeCls = 'badge-warning'; badgeText = c.buildStatus;
     } else if (d !== null && d <= 14) { cls = 'critical'; badgeCls = 'badge-critical'; badgeText = d + ' dage'; }
-    else if (d !== null && d <= 210) { cls = 'warning'; badgeCls = 'badge-warning'; badgeText = d + ' dage'; }
+    else if (d !== null && d <= 90) { cls = 'warning'; badgeCls = 'badge-warning'; badgeText = d + ' dage'; }
     else if (c.notes && c.notes.toLowerCase().includes('rykket')) { badgeText = 'Dato rykket'; badgeCls = 'badge-info'; }
     const detailLine = ['Afventer afhentning','Afmonteres'].includes(c.buildStatus)
       ? c.buildStatus + (effectiveEnd(c) ? ' · udløb ' + fmtDate(effectiveEnd(c)) : '')
@@ -1643,7 +1754,7 @@ function renderCarTable(tbodyId, filter, showExtras) {
         daysHtml = `<span style="font-size:12px;color:var(--text-muted);">Afhentet${c.returnedDate ? ' ' + fmtDate(c.returnedDate) : ''}</span>`;
       }
     } else if (d !== null && d <= 14) daysHtml = `<span class="days-chip days-critical">${fmtDate(effectiveEnd(c))}</span>`;
-    else if (d !== null && d <= 210) daysHtml = `<span class="days-chip days-warning">${fmtDate(effectiveEnd(c))}</span>`;
+    else if (d !== null && d <= 90) daysHtml = `<span class="days-chip days-warning">${fmtDate(effectiveEnd(c))}</span>`;
     else daysHtml = `<span class="days-ok">${fmtDate(effectiveEnd(c))}</span>`;
 
     // Note cell
@@ -1944,7 +2055,7 @@ function buildBars(c, todayPct, isPaired, peers, idx) {
   if (['Planlægges','Bestilt','Leveringsdato modtaget'].includes(c.buildStatus)) mainClass = 'planned';
   else if (c.endext) mainClass = 'extended';
   else if (d !== null && d >= 0 && d <= 30)  mainClass = 'expiring';
-  else if (d !== null && d >= 0 && d <= 210) mainClass = 'warning';
+  else if (d !== null && d >= 0 && d <= 90) mainClass = 'warning';
 
   // Draw original period bar — farve styret af dato
   if (startPct !== null && endPct !== null) {
