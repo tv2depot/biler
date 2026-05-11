@@ -342,19 +342,55 @@ td:last-child { white-space: nowrap; min-width: 180px; }
 .qr-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 12px;
+  gap: 16px;
   margin-top: 12px;
 }
 .qr-card {
   background: var(--bg-card);
   border: 1px solid var(--gray-border);
   border-radius: var(--radius);
-  padding: 14px;
+  padding: 16px;
   text-align: center;
 }
-.qr-car-id { font-family: var(--font-mono); font-weight: 700; font-size: 15px; margin-bottom: 8px; }
-.qr-img { width: 100%; max-width: 140px; height: auto; border-radius: 4px; }
-.qr-url { font-size: 10px; color: var(--text-muted); margin-top: 6px; word-break: break-all; }
+.qr-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+.qr-title strong {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  color: var(--red);
+}
+.qr-img { width: 100%; max-width: 160px; height: auto; border-radius: 4px; }
+.qr-scan-hint { font-size: 11px; color: var(--text-muted); margin-top: 8px; }
+.qr-print-btn {
+  margin-top: 10px;
+  background: var(--bg);
+  border: 1px solid var(--gray-border);
+  border-radius: var(--radius);
+  padding: 7px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font);
+  color: var(--text);
+  width: 100%;
+  transition: background 0.15s;
+}
+.qr-print-btn:hover { background: var(--gray-light); }
+
+@media print {
+  body > * { display: none !important; }
+  #print-area { display: block !important; }
+}
+#print-area {
+  display: none;
+  text-align: center;
+  font-family: 'DM Sans', sans-serif;
+}
 </style>
 </head>
 <body>
@@ -537,6 +573,9 @@ td:last-child { white-space: nowrap; min-width: 180px; }
 
 <!-- ── TOAST ── -->
 <div class="toast" id="toast"></div>
+
+<!-- PRINT AREA -->
+<div id="print-area"></div>
 
 <script>
 // ─── KONFIGURATION (hardcodet) ────────────────────────────────────────────────
@@ -853,18 +892,38 @@ function generateQR() {
   const grid = document.getElementById('qr-grid');
   grid.innerHTML = cars.map(car => {
     const url = baseUrl + '?bil=' + encodeURIComponent(car);
-    const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
+    const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${encodeURIComponent(url)}`;
     return `
-      <div class="qr-card">
-        <div class="qr-car-id">${car}</div>
+      <div class="qr-card" id="qr-${car}">
+        <div class="qr-title">Fejlmeldinger på<br><strong>${car}</strong></div>
         <img class="qr-img" src="${qrApi}" alt="QR ${car}" loading="lazy">
-        <div class="qr-url">${url}</div>
-        <div style="margin-top:8px;">
+        <div class="qr-scan-hint">Scan for at indberette fejl</div>
+        <button class="qr-print-btn" onclick="printQR('${car}')">🖨 Print</button>
+        <div style="margin-top:6px;">
           <a href="${url}" target="_blank" style="font-size:11px;color:var(--blue);">Test link ↗</a>
         </div>
       </div>
     `;
   }).join('');
+}
+
+function printQR(car) {
+  const cfg = loadConfig();
+  const baseUrl = cfg.reportUrl || 'https://tv2depot.github.io/biler/fejlmelding.html';
+  const url = baseUrl + '?bil=' + encodeURIComponent(car);
+  // 300px QR ≈ 6cm ved 127 DPI
+  const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${encodeURIComponent(url)}`;
+
+  const printArea = document.getElementById('print-area');
+  printArea.innerHTML = `
+    <div style="width:226px; padding:14px; border:2px solid #333; border-radius:8px; margin:40px auto; font-family:sans-serif; text-align:center;">
+      <div style="font-size:13px; font-weight:600; margin-bottom:4px;">Fejlmeldinger på</div>
+      <div style="font-size:20px; font-weight:700; font-family:monospace; color:#CC0000; margin-bottom:10px;">${car}</div>
+      <img src="${qrApi}" style="width:198px; height:198px;" alt="QR">
+      <div style="font-size:10px; color:#666; margin-top:8px;">Scan for at indberette fejl</div>
+    </div>
+  `;
+  window.print();
 }
 
 // ─── APPS SCRIPT KODE ─────────────────────────────────────────────────────────
