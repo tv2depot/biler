@@ -364,7 +364,7 @@ td:last-child { white-space: nowrap; min-width: 180px; }
   font-size: 16px;
   color: var(--red);
 }
-.qr-img { width: 100%; max-width: 160px; height: auto; border-radius: 4px; }
+.qr-img { width: 100%; max-width: 100px; height: auto; border-radius: 4px; }
 .qr-scan-hint { font-size: 11px; color: var(--text-muted); margin-top: 8px; }
 .qr-print-btn {
   margin-top: 10px;
@@ -892,7 +892,7 @@ function generateQR() {
   const grid = document.getElementById('qr-grid');
   grid.innerHTML = cars.map(car => {
     const url = baseUrl + '?bil=' + encodeURIComponent(car);
-    const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${encodeURIComponent(url)}`;
+    const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=5&data=${encodeURIComponent(url)}`;
     return `
       <div class="qr-card" id="qr-${car}">
         <div class="qr-title">Fejlmeldinger på<br><strong>${car}</strong></div>
@@ -912,15 +912,15 @@ function printQR(car) {
   const baseUrl = cfg.reportUrl || 'https://tv2depot.github.io/biler/fejlmelding.html';
   const url = baseUrl + '?bil=' + encodeURIComponent(car);
   // 300px QR ≈ 6cm ved 127 DPI
-  const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${encodeURIComponent(url)}`;
+  const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=5&data=${encodeURIComponent(url)}`;
 
   const printArea = document.getElementById('print-area');
   printArea.innerHTML = `
-    <div style="width:226px; padding:14px; border:2px solid #333; border-radius:8px; margin:40px auto; font-family:sans-serif; text-align:center;">
+    <div style="width:180px; padding:12px; border:2px solid #333; border-radius:8px; margin:40px auto; font-family:sans-serif; text-align:center;">
       <div style="font-size:13px; font-weight:600; margin-bottom:4px;">Fejlmeldinger på</div>
-      <div style="font-size:20px; font-weight:700; font-family:monospace; color:#CC0000; margin-bottom:10px;">${car}</div>
-      <img src="${qrApi}" style="width:198px; height:198px;" alt="QR">
-      <div style="font-size:10px; color:#666; margin-top:8px;">Scan for at indberette fejl</div>
+      <div style="font-size:18px; font-weight:700; font-family:monospace; color:#CC0000; margin-bottom:8px;">${car}</div>
+      <img src="${qrApi}" style="width:120px; height:120px;" alt="QR">
+      <div style="font-size:10px; color:#666; margin-top:6px;">Scan for at indberette fejl</div>
     </div>
   `;
   window.print();
