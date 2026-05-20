@@ -1621,11 +1621,11 @@ function renderDashboard() {
           <div class="obs-detail">${detailLine}</div>
           ${badgeText ? `<span class="badge ${badgeCls}">${badgeText}</span>` : ''}
         </div>
-        <button onclick="markReturned('${c.id}')" title="${c.ownership==='ejet'?'Markér som solgt':'Markér som afhentet'}"
+        <button onclick="event.stopPropagation();openModalOnTab('${c.id}','tjekliste')" 
           style="flex-shrink:0;padding:4px 8px;font-size:11px;border:1px solid #d1d5db;border-radius:var(--radius);background:white;cursor:pointer;color:var(--text-muted);white-space:nowrap;"
-          onmouseover="this.style.background='#f0fdf4';this.style.color='#166534';this.style.borderColor='#86efac';"
+          onmouseover="this.style.background='#eff6ff';this.style.color='#1d4ed8';this.style.borderColor='#93c5fd';"
           onmouseout="this.style.background='white';this.style.color='var(--text-muted)';this.style.borderColor='#d1d5db';">
-          ${c.ownership==='ejet' ? '✓ Solgt' : '✓ Afhentet'}
+          ${c.ownership==='ejet' ? '📋 Klargøring' : '📋 Tjekliste'}
         </button>
       </div>
     </div>`;
@@ -1718,10 +1718,27 @@ function renderCarTable(tbodyId, filter, showExtras) {
     nameMap[key].push(c);
   });
 
+  // Sorter så parrede biler altid er naboer
+  const pairGrouped = [];
+  const addedIds = new Set();
+  filtered.forEach(c => {
+    if (addedIds.has(c.id)) return;
+    addedIds.add(c.id);
+    pairGrouped.push(c);
+    // Find makker og tilføj umiddelbart efter
+    const peers = nameMap[c.name+'|||'+c.location] || [];
+    peers.forEach(peer => {
+      if (!addedIds.has(peer.id)) {
+        addedIds.add(peer.id);
+        pairGrouped.push(peer);
+      }
+    });
+  });
+
   let html = '';
   const rendered = new Set();
 
-  filtered.forEach(c => {
+  pairGrouped.forEach(c => {
     if (rendered.has(c.id)) return;
     const peers = nameMap[c.name+'|||'+c.location] || [];
     const isPaired = peers.length > 1;
