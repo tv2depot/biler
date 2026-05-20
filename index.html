@@ -1266,6 +1266,7 @@ function showView(v) {
   }
 }
 
+let hideOwned = false;
 let sortCol = 'location';
 let sortDir = 1; // 1 = asc, -1 = desc
 
@@ -1637,7 +1638,6 @@ function renderFilters(containerId, active, cb, archivedCount) {
   const kbh = activeCars.filter(c => c.location === 'København').length;
   const obg = activeCars.filter(c => c.location === 'OB Garage').length;
   const bld = activeCars.filter(c => c.buildStatus && !['','I produktion'].includes(c.buildStatus)).length;
-  const owned = activeCars.filter(c => c.ownership === 'ejet').length;
   const arc = archivedCount || cars.filter(c => c.buildStatus === 'Returneret').length;
   const chips = [
     `<button class="filter-chip ${active==='all'?'active':''}" onclick="(${cb.toString()})('all')">Alle (${activeCars.length})</button>`,
@@ -1645,8 +1645,11 @@ function renderFilters(containerId, active, cb, archivedCount) {
     `<button class="filter-chip ${active==='København'?'active':''}" onclick="(${cb.toString()})('København')">København (${kbh})</button>`,
     `<button class="filter-chip ${active==='OB Garage'?'active':''}" onclick="(${cb.toString()})('OB Garage')">OB Garage (${obg})</button>`,
     `<button class="filter-chip ${active==='building'?'active':''}" onclick="(${cb.toString()})('building')">Under udskiftning (${bld})</button>`,
-    owned > 0 ? `<button class="filter-chip ${active==='owned'?'active':''}" onclick="(${cb.toString()})('owned')">Ejede (${owned})</button>` : '',
-    arc > 0 ? `<button class="filter-chip ${active==='archived'?'active':''}" onclick="(${cb.toString()})('archived')" style="opacity:0.7;">📦 Arkiv (${arc})</button>` : ''
+    arc > 0 ? `<button class="filter-chip ${active==='archived'?'active':''}" onclick="(${cb.toString()})('archived')" style="opacity:0.7;">📦 Arkiv (${arc})</button>` : '',
+    `<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);cursor:pointer;margin-left:4px;">
+      <input type="checkbox" id="hide-owned-toggle" ${hideOwned?'checked':''} onchange="hideOwned=this.checked;renderDashboard();" style="cursor:pointer;accent-color:var(--red);">
+      Skjul ejede biler
+    </label>`
   ].join('');
   const container = document.getElementById(containerId);
   if (!container) return;
@@ -1675,7 +1678,6 @@ function renderCarTable(tbodyId, filter, showExtras) {
     if (filter === 'København') return c.location === 'København';
     if (filter === 'OB Garage') return c.location === 'OB Garage';
     if (filter === 'building') return c.buildStatus && !['','I produktion'].includes(c.buildStatus);
-    if (filter === 'owned') return c.ownership === 'ejet';
     return true;
   });
 
@@ -1692,6 +1694,9 @@ function renderCarTable(tbodyId, filter, showExtras) {
       return false;
     });
   }
+
+  // Skjul ejede biler hvis toggle er aktiv
+  if (hideOwned) filtered = filtered.filter(c => c.ownership !== 'ejet');
 
   // Sort
   filtered.sort((a,b) => {
