@@ -1710,16 +1710,20 @@ function renderCarTable(tbodyId, filter, showExtras) {
     return a.name.localeCompare(b.name);
   });
 
-  // Find paired names
+  // Find paired names — brug separator for at undgå falske matches
   const nameMap = {};
-  filtered.forEach(c => { if(!nameMap[c.name+c.location]) nameMap[c.name+c.location]=[]; nameMap[c.name+c.location].push(c); });
+  filtered.forEach(c => {
+    const key = c.name + '|||' + c.location;
+    if (!nameMap[key]) nameMap[key] = [];
+    nameMap[key].push(c);
+  });
 
   let html = '';
   const rendered = new Set();
 
   filtered.forEach(c => {
     if (rendered.has(c.id)) return;
-    const peers = nameMap[c.name+c.location] || [];
+    const peers = nameMap[c.name+'|||'+c.location] || [];
     const isPaired = peers.length > 1;
     const peerIdx = peers.indexOf(c);
     rendered.add(c.id);
