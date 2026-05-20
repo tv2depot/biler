@@ -547,6 +547,10 @@ table.cars tr.paired-bottom:hover td.ombyg-col { background: #eee8c8; }
   <div id="view-dashboard" class="view active">
     <div class="stat-grid" id="stat-grid"></div>
     <div class="obs-section">
+      <div class="section-hdr">Nye biler — klar til afhentning</div>
+      <div class="obs-grid" id="new-cars-grid"></div>
+    </div>
+    <div class="obs-section">
       <div class="section-hdr">Leasing udløb</div>
       <div class="obs-grid" id="obs-grid"></div>
     </div>
@@ -1571,6 +1575,76 @@ function renderUdskiftning() {
   }
 }
 
+function renderNewCarsGrid() {
+  const grid = document.getElementById('new-cars-grid');
+  if (!grid) return;
+
+  // Nye biler under indgående udskiftning (ikke returnerede)
+  const newCars = cars.filter(c =>
+    c.buildStatus && !['', 'I produktion', 'Returneret', 'Afmonteres', 'Afventer afhentning'].includes(c.buildStatus)
+  );
+
+  if (!newCars.length) {
+    grid.innerHTML = '<div style="color:var(--text-muted);font-size:13px;padding:8px 0;">Ingen nye biler under klargøring.</div>';
+    return;
+  }
+
+  grid.innerHTML = newCars.map(c => {
+    const checks = typeof c.checklists === 'string' ? (()=>{ try{return JSON.parse(c.checklists);}catch(e){return {};} })() : (c.checklists || {});
+    const checkItems = CHECKLIST_ANKOMST.filter(i => i.text);
+    const done = checkItems.filter(i => checks[i.id]).length;
+    const total = checkItems.length;
+    const complete = done === total;
+    const pct = Math.round(done/total*100);
+
+    return `
+      <div style="background:white;border:1px solid var(--gray-border);border-radius:var(--radius);padding:14px;">
+        <div onclick="openModalForCar('${c.id}')" style="cursor:pointer;">
+          <div class="obs-name">${c.name}</div>
+          <div class="obs-detail">${c.make||''} ${c.model||''}</div>
+          <div class="obs-detail" style="margin-top:4px;">
+            <span style="font-size:11px;padding:2px 7px;border-radius:10px;background:${complete?'#f0fdf4':'#fef3c7'};color:${complete?'#166534':'#92400e'};">
+              ${c.buildStatus}
+            </span>
+          </div>
+        </div>
+        <div style="margin-top:10px;">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-bottom:4px;">
+            <span>Tjekliste ${done}/${total}</span>
+            ${complete ? '<span style="color:#166534;font-weight:500;">✓ Komplet</span>' : ''}
+          </div>
+          <div style="height:4px;background:var(--gray-border);border-radius:2px;">
+            <div style="height:4px;background:${complete?'#22c55e':'#f59e0b'};border-radius:2px;width:${pct}%;transition:width .3s;"></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:10px;align-items:center;flex-wrap:wrap;">
+          <button onclick="openChecklistModal('${c.id}')" style="font-size:11px;padding:4px 8px;border:1px solid var(--gray-border);border-radius:var(--radius);background:none;cursor:pointer;">📋 Tjekliste</button>
+          ${complete ? `
+            <div style="display:flex;align-items:center;gap:4px;flex:1;">
+              <input type="date" id="afh-date-${c.id}" style="font-size:11px;padding:3px 6px;border:1px solid var(--gray-border);border-radius:var(--radius);flex:1;" value="${today()}">
+              <button onclick="markCarArrived('${c.id}')" style="font-size:11px;padding:4px 8px;background:#166534;color:white;border:none;border-radius:var(--radius);cursor:pointer;white-space:nowrap;">✓ Afhentet</button>
+            </div>
+          ` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function markCarArrived(carId) {
+  const c = cars.find(x => x.id === carId);
+  if (!c) return;
+  const dateInput = document.getElementById(`afh-date-${carId}`);
+  const date = dateInput ? dateInput.value : today();
+  if (!confirm(`Sæt ${c.name} til "I produktion" pr. ${fmtDate(date)}?`)) return;
+  c.buildStatus = 'I produktion';
+  c.workloc = '';
+  c.buildEnd = date;
+  saveData();
+  saveCarToAPI(c);
+  renderDashboard();
+  showToast(`${c.name} sat I produktion ✓`);
+}
+
 function renderDashboard() {
   const activeCars = cars.filter(c => c.buildStatus !== 'Returneret');
   const expiring = activeCars.filter(c => { const d = daysUntil(effectiveEnd(c)); return d !== null && d <= 270 && d >= 0; });
@@ -1639,6 +1713,7 @@ function renderDashboard() {
   renderFilters('dash-filters', dashFilter, f => { dashFilter = f; renderDashboard(); }, archived.length);
   renderCarTable('dash-tbody', dashFilter);
   renderFaultGrid();
+  renderNewCarsGrid();
 }
 
 function renderFilters(containerId, active, cb, archivedCount) {
@@ -2956,7 +3031,12 @@ function closeChecklistModal() {
 function renderChecklist(carId) {
   const c = cars.find(x => x.id === carId);
   if (!c) return;
-  const checks = c.checklists || {};
+  // Sikr checklists er et objekt og ikke en streng
+  if (typeof c.checklists === 'string') {
+    try { c.checklists = JSON.parse(c.checklists); } catch(e) { c.checklists = {}; }
+  }
+  if (!c.checklists || typeof c.checklists !== 'object') c.checklists = {};
+  const checks = c.checklists;
 
   // Auto-detekt: biler der ikke har været I produktion → ankomst, ellers aflevering
   const hasBeenInProduction = c.buildStatus === 'I produktion' ||
