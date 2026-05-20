@@ -1637,6 +1637,7 @@ function renderFilters(containerId, active, cb, archivedCount) {
   const kbh = activeCars.filter(c => c.location === 'København').length;
   const obg = activeCars.filter(c => c.location === 'OB Garage').length;
   const bld = activeCars.filter(c => c.buildStatus && !['','I produktion'].includes(c.buildStatus)).length;
+  const owned = activeCars.filter(c => c.ownership === 'ejet').length;
   const arc = archivedCount || cars.filter(c => c.buildStatus === 'Returneret').length;
   const chips = [
     `<button class="filter-chip ${active==='all'?'active':''}" onclick="(${cb.toString()})('all')">Alle (${activeCars.length})</button>`,
@@ -1644,15 +1645,14 @@ function renderFilters(containerId, active, cb, archivedCount) {
     `<button class="filter-chip ${active==='København'?'active':''}" onclick="(${cb.toString()})('København')">København (${kbh})</button>`,
     `<button class="filter-chip ${active==='OB Garage'?'active':''}" onclick="(${cb.toString()})('OB Garage')">OB Garage (${obg})</button>`,
     `<button class="filter-chip ${active==='building'?'active':''}" onclick="(${cb.toString()})('building')">Under udskiftning (${bld})</button>`,
+    owned > 0 ? `<button class="filter-chip ${active==='owned'?'active':''}" onclick="(${cb.toString()})('owned')">Ejede (${owned})</button>` : '',
     arc > 0 ? `<button class="filter-chip ${active==='archived'?'active':''}" onclick="(${cb.toString()})('archived')" style="opacity:0.7;">📦 Arkiv (${arc})</button>` : ''
   ].join('');
-  // Insert chips before the search wrapper (last child)
   const container = document.getElementById(containerId);
   if (!container) return;
   const searchWrapper = container.querySelector('[style*="margin-left:auto"]');
   if (searchWrapper) {
     searchWrapper.insertAdjacentHTML('beforebegin', chips);
-    // Remove old chips (all but last child which is search)
     const allChildren = Array.from(container.children);
     allChildren.slice(0, allChildren.length - 1).forEach(ch => {
       if (!ch.querySelector('#car-search')) ch.remove();
@@ -1675,6 +1675,7 @@ function renderCarTable(tbodyId, filter, showExtras) {
     if (filter === 'København') return c.location === 'København';
     if (filter === 'OB Garage') return c.location === 'OB Garage';
     if (filter === 'building') return c.buildStatus && !['','I produktion'].includes(c.buildStatus);
+    if (filter === 'owned') return c.ownership === 'ejet';
     return true;
   });
 
@@ -1772,8 +1773,8 @@ function renderCarTable(tbodyId, filter, showExtras) {
       <td><span class="loc-pill ${c.location==='Odense'?'loc-ode':c.location==='København'?'loc-kbh':'loc-ob'}">${c.location==='Odense'?'ODE':c.location==='København'?'KBH':'OBG'}</span></td>
       <td style="cursor:pointer;" onclick="openModalForCar('${c.id}')">
         <div class="car-name">${c.name}${isPaired?(peerIdx===0?' <span style="font-size:10px;color:var(--orange);font-weight:400;">(gl.)</span>':' <span style="font-size:10px;color:var(--blue);font-weight:400;">(ny)</span>'):''}</div>
-        <div class="gantt-sub">${c.make} ${c.model}</div>
-        ${c.plate ? `<div class="gantt-sub" style="font-family:var(--font-mono);font-size:10px;color:#9ca3af;">${c.plate}</div>` : ''}
+        ${(c.make||c.model) ? `<div class="gantt-sub">${c.make||''} ${c.model||''}</div>` : '<div class="gantt-sub">&nbsp;</div>'}
+        ${c.plate ? `<div class="gantt-sub" style="font-family:var(--font-mono);font-size:10px;color:#9ca3af;">${c.plate}</div>` : '<div class="gantt-sub">&nbsp;</div>'}
       </td>
       <td>${leaseHtml}</td>
       <td class="ombyg-col" onclick="event.stopPropagation();openQuickEdit('${c.id}',this)" style="cursor:pointer;">
@@ -2304,10 +2305,9 @@ function copyBuildDatesToPartner() {
 
 function switchTab(tab, btn) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.modal-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#modal .modal-tab').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
   btn.classList.add('active');
-  // Scroll modal to top
   const modal = document.querySelector('.modal');
   if (modal) modal.scrollTop = 0;
 }
@@ -2418,9 +2418,9 @@ function openModalOnTab(id, tab) {
 
 function resetModalTabs() {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.modal-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#modal .modal-tab').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-bildata').classList.add('active');
-  document.querySelector('.modal-tab').classList.add('active');
+  document.querySelector('#modal .modal-tab').classList.add('active');
 }
 
 function openModal() {
