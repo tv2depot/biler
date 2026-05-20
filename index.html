@@ -766,6 +766,32 @@ table.cars tr.paired-bottom:hover td.ombyg-col { background: #eee8c8; }
         </div>
       </div>
     </div>
+    <div class="form-section">
+      <div class="form-section-title">Udskiftning & ombygning</div>
+      <div class="form-grid">
+        <div class="field"><label>Udskiftningsstatus</label>
+          <select id="f-status">
+            <option value="">— ingen —</option>
+            <optgroup label="Indgående"><option>Planlægges</option><option>Bestilt</option><option>Leveringsdato modtaget</option><option>Leveret til ombygning</option><option>Færdigbygget</option><option>I produktion</option></optgroup>
+            <optgroup label="Udgående"><option>Afmonteres</option><option>Afventer afhentning</option></optgroup>
+          </select>
+        </div>
+        <div class="field"><label>Arbejdslokation</label>
+          <select id="f-workloc"><option value="">—</option><option>Haarby Karosseri</option><option>SIEB Teknik</option><option>Work System</option><option>TV 2 Odense</option><option>TV 2 København</option><option>Leasingselskab</option><option>Andet</option></select>
+        </div>
+        <div class="field"><label>Opbygger</label>
+          <select id="f-builder"><option value="">—</option><option>Haarby Karosseri</option><option>SIEB Teknik</option><option>Work System</option><option>TV 2 intern</option><option>Andet</option></select>
+        </div>
+        <div class="field"></div>
+        <div class="field"><label>Ombygning start</label><input type="date" id="f-build-start"></div>
+        <div class="field"><label>Ombygning slut (forventet)</label><input type="date" id="f-build-end"></div>
+        <div class="field" style="grid-column:span 2;" id="copy-build-dates-wrap">
+          <button type="button" class="btn" onclick="copyBuildDatesToPartner()" style="font-size:12px;color:var(--blue);border-color:var(--blue);">
+            ↔ Kopiér ombygningsdatoer til makker
+          </button>
+        </div>
+      </div>
+    </div>
     <div class="form-section" style="border-top:1px solid var(--gray-border);margin-top:8px;">
       <div class="form-section-title">Noter</div>
       <div class="form-grid full"><div class="field"><textarea id="f-notes-leasing" placeholder="Fri tekst..." rows="3" oninput="syncNotes(this.value)"></textarea></div></div>
@@ -813,40 +839,6 @@ table.cars tr.paired-bottom:hover td.ombyg-col { background: #eee8c8; }
   </div>
 
   <!-- TAB: UDSKIFTNING -->
-  <div id="tab-tjekliste" class="tab-panel">
-    <div class="form-section" style="border-top:none;padding-top:0;margin-top:0;">
-      <div class="form-section-title">Ombygning</div>
-      <div class="form-grid">
-        <div class="field"><label>Udskiftningsstatus</label>
-          <select id="f-status">
-            <option value="">— ingen —</option>
-            <optgroup label="Indgående"><option>Planlægges</option><option>Bestilt</option><option>Leveringsdato modtaget</option><option>Leveret til ombygning</option><option>Færdigbygget</option><option>I produktion</option></optgroup>
-            <optgroup label="Udgående"><option>Afmonteres</option><option>Afventer afhentning</option></optgroup>
-          </select>
-        </div>
-        <div class="field"><label>Arbejdslokation</label>
-          <select id="f-workloc"><option value="">—</option><option>Haarby Karosseri</option><option>SIEB Teknik</option><option>Work System</option><option>TV 2 Odense</option><option>TV 2 København</option><option>Leasingselskab</option><option>Andet</option></select>
-        </div>
-        <div class="field"><label>Opbygger</label>
-          <select id="f-builder"><option value="">—</option><option>Haarby Karosseri</option><option>SIEB Teknik</option><option>Work System</option><option>TV 2 intern</option><option>Andet</option></select>
-        </div>
-        <div class="field"></div>
-        <div class="field"><label>Ombygning start</label><input type="date" id="f-build-start"></div>
-        <div class="field"><label>Ombygning slut (forventet)</label><input type="date" id="f-build-end"></div>
-        <div class="field" style="grid-column:span 2;" id="copy-build-dates-wrap">
-          <button type="button" class="btn" onclick="copyBuildDatesToPartner()"
-            style="font-size:12px;color:var(--blue);border-color:var(--blue);">
-            ↔ Kopiér ombygningsdatoer til makker
-          </button>
-        </div>
-      </div>
-    </div>
-    <div class="form-section">
-      <div class="form-section-title">Tjekliste</div>
-      <div id="checklist-content"></div>
-    </div>
-  </div>
-
   <!-- Skjult master noter-felt -->
   <textarea id="f-notes" style="display:none;"></textarea>
 
@@ -1533,7 +1525,7 @@ function renderUdskiftning() {
     const prog = checkProgress(car, mode);
     const progColor = prog.done === prog.total ? '#2a8a4a' : prog.done > 0 ? '#f59e0b' : '#e5e7eb';
     return `
-      <div onclick="openModalOnTab('${car.id}','tjekliste')" style="cursor:pointer;background:white;border:1px solid var(--gray-border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;display:grid;grid-template-columns:1fr auto;gap:8px;align-items:start;transition:box-shadow .15s;"
+      <div onclick="openChecklistModal('${car.id}')" style="cursor:pointer;background:white;border:1px solid var(--gray-border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;display:grid;grid-template-columns:1fr auto;gap:8px;align-items:start;transition:box-shadow .15s;"
         onmouseover="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow=''">
         <div>
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
