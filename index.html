@@ -122,11 +122,14 @@ body {
   border-radius: var(--radius-lg); padding: 12px 14px;
   border-left: 3px solid var(--gray-border);
   cursor: pointer; transition: box-shadow 0.15s;
+  display: flex; flex-direction: column;
 }
 .obs-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
 .obs-card.critical { border-left-color: var(--red); }
 .obs-card.warning { border-left-color: var(--orange); }
 .obs-card.info { border-left-color: var(--blue); }
+.obs-card-body { flex: 1; }
+.obs-card-footer { margin-top: 10px; }
 .obs-name { font-size: 14px; font-weight: 600; }
 .obs-detail { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
 .badge {
@@ -135,6 +138,7 @@ body {
 }
 .badge-critical { background: #fee2e2; color: #991b1b; }
 .badge-warning { background: #fef3c7; color: #92400e; }
+.badge-ok { background: #dcfce7; color: #166534; }
 .badge-info { background: var(--blue-light); color: #1e40af; }
 .badge-success { background: var(--green-light); color: #166534; }
 .badge-gray { background: var(--gray-light); color: var(--gray); }
@@ -1595,22 +1599,24 @@ function renderNewCarsGrid() {
     const complete = done === total;
     const pct = Math.round(done/total*100);
     return `
-      <div class="obs-card info" onclick="openModalForCar('${nc.id}')" style="cursor:pointer;">
-        <div class="obs-name">${nc.name}</div>
-        <div class="obs-detail">${nc.make||''} ${nc.model||''}</div>
-        <div class="obs-detail" style="margin-top:4px;">
-          <span class="badge ${complete?'badge-ok':'badge-warning'}">${nc.buildStatus}</span>
-        </div>
-        <div style="margin-top:10px;">
-          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-bottom:3px;">
-            <span>Tjekliste ${done}/${total}</span>
-            ${complete ? '<span style="color:#166534;font-weight:500;">&#10003; Komplet</span>' : ''}
+      <div class="obs-card info" onclick="openModalForCar('${nc.id}')">
+        <div class="obs-card-body">
+          <div class="obs-name">${nc.name}</div>
+          <div class="obs-detail">${nc.make||'&nbsp;'} ${nc.model||''}</div>
+          <div class="obs-detail" style="margin-top:4px;">
+            <span class="badge ${complete?'badge-ok':'badge-warning'}">${nc.buildStatus}</span>
           </div>
-          <div style="height:4px;background:var(--gray-border);border-radius:2px;">
-            <div style="height:4px;background:${complete?'#22c55e':'#f59e0b'};border-radius:2px;width:${pct}%;transition:width .3s;"></div>
+          <div style="margin-top:10px;">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-bottom:3px;">
+              <span>Tjekliste ${done}/${total}</span>
+              ${complete ? '<span style="color:#166534;font-weight:500;">&#10003; Komplet</span>' : ''}
+            </div>
+            <div style="height:4px;background:var(--gray-border);border-radius:2px;">
+              <div style="height:4px;background:${complete?'#22c55e':'#f59e0b'};border-radius:2px;width:${pct}%;transition:width .3s;"></div>
+            </div>
           </div>
         </div>
-        <div style="display:flex;gap:6px;margin-top:10px;align-items:center;flex-wrap:wrap;" onclick="event.stopPropagation();">
+        <div class="obs-card-footer" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;" onclick="event.stopPropagation();">
           <button onclick="openChecklistModal('${nc.id}')" style="font-size:11px;padding:3px 8px;border:1px solid var(--gray-border);border-radius:var(--radius);background:none;cursor:pointer;color:var(--text-muted);">&#128203; Tjekliste</button>
           ${complete ? `<input type="date" id="afh-date-${nc.id}" style="font-size:11px;padding:3px 6px;border:1px solid var(--gray-border);border-radius:var(--radius);flex:1;" value="${today()}">
             <button onclick="markCarArrived('${nc.id}')" style="font-size:11px;padding:3px 8px;background:#166534;color:white;border:none;border-radius:var(--radius);cursor:pointer;white-space:nowrap;">&#10003; Klar</button>` : ''}
@@ -1681,18 +1687,16 @@ function renderDashboard() {
       ? c.buildStatus + (effectiveEnd(c) ? ' · udløb ' + fmtDate(effectiveEnd(c)) : '')
       : effectiveEnd(c) ? 'Udløber ' + fmtDate(effectiveEnd(c)) : c.buildStatus||'';
     return `<div class="obs-card ${cls}">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
-        <div onclick="openModalForCar('${c.id}')" style="cursor:pointer;flex:1;">
-          <div class="obs-name">${c.name}</div>
-          <div class="obs-detail">${c.make} ${c.model}</div>
-          <div class="obs-detail">${detailLine}</div>
-          ${badgeText ? `<span class="badge ${badgeCls}">${badgeText}</span>` : ''}
-        </div>
+      <div class="obs-card-body" onclick="openModalForCar('${c.id}')">
+        <div class="obs-name">${c.name}</div>
+        <div class="obs-detail">${c.make||'&nbsp;'} ${c.model||''}</div>
+        <div class="obs-detail">${detailLine}</div>
+        ${badgeText ? `<span class="badge ${badgeCls}">${badgeText}</span>` : ''}
+      </div>
+      <div class="obs-card-footer">
         <button onclick="event.stopPropagation();openChecklistModal('${c.id}')" 
-          style="flex-shrink:0;padding:4px 8px;font-size:11px;border:1px solid #d1d5db;border-radius:var(--radius);background:white;cursor:pointer;color:var(--text-muted);white-space:nowrap;"
-          onmouseover="this.style.background='#eff6ff';this.style.color='#1d4ed8';this.style.borderColor='#93c5fd';"
-          onmouseout="this.style.background='white';this.style.color='var(--text-muted)';this.style.borderColor='#d1d5db';">
-          ${c.ownership==='ejet' ? '📋 Klargøring' : '📋 Tjekliste'}
+          style="font-size:11px;padding:3px 8px;border:1px solid var(--gray-border);border-radius:var(--radius);background:none;cursor:pointer;color:var(--text-muted);">
+          📋 Tjekliste
         </button>
       </div>
     </div>`;
