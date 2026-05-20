@@ -681,7 +681,6 @@ table.cars tr.paired-bottom:hover td.ombyg-col { background: #eee8c8; }
     <button class="modal-tab" onclick="switchTab('leasing',this)">Leasing &amp; udskiftning</button>
     <button class="modal-tab" onclick="switchTab('kort',this)">Kort &amp; brikker</button>
     <button class="modal-tab" onclick="switchTab('forsikring',this)">Forsikring &amp; vejhjælp</button>
-    <button class="modal-tab" onclick="switchTab('tjekliste',this)">Udskiftning</button>
   </div>
 
   <!-- TAB: BILDATA -->
@@ -918,6 +917,20 @@ table.cars tr.paired-bottom:hover td.ombyg-col { background: #eee8c8; }
   <div class="qpop-btns" style="margin-top:8px;">
     <button class="btn btn-primary" onclick="saveNotePopup();closeNotePopup()" style="font-size:12px;">Gem</button>
     <button class="btn" onclick="closeNotePopup()" style="font-size:12px;">Luk</button>
+  </div>
+</div>
+
+<!-- TJEKLISTE POPUP -->
+<div class="modal-overlay" id="checklist-modal" style="display:none;align-items:center;justify-content:center;">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-hdr">
+      <div class="modal-title" id="checklist-modal-title">Tjekliste</div>
+      <button class="modal-close" onclick="closeChecklistModal()">×</button>
+    </div>
+    <div id="checklist-content" style="height:420px;overflow-y:auto;"></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeChecklistModal()">Luk</button>
+    </div>
   </div>
 </div>
 
@@ -1621,7 +1634,7 @@ function renderDashboard() {
           <div class="obs-detail">${detailLine}</div>
           ${badgeText ? `<span class="badge ${badgeCls}">${badgeText}</span>` : ''}
         </div>
-        <button onclick="event.stopPropagation();openModalOnTab('${c.id}','tjekliste')" 
+        <button onclick="event.stopPropagation();openChecklistModal('${c.id}')" 
           style="flex-shrink:0;padding:4px 8px;font-size:11px;border:1px solid #d1d5db;border-radius:var(--radius);background:white;cursor:pointer;color:var(--text-muted);white-space:nowrap;"
           onmouseover="this.style.background='#eff6ff';this.style.color='#1d4ed8';this.style.borderColor='#93c5fd';"
           onmouseout="this.style.background='white';this.style.color='var(--text-muted)';this.style.borderColor='#d1d5db';">
@@ -2935,6 +2948,18 @@ const CHECKLIST_AFLEVERING = [
   { id: 'f11', text: 'Inventar afmonteret ved Haarby/SIEB Teknik' },
   { id: 'f12', text: 'Tracking-enhed afmonteret' },
 ];
+
+function openChecklistModal(carId) {
+  const c = cars.find(x => x.id === carId);
+  if (!c) return;
+  document.getElementById('checklist-modal-title').textContent = `Tjekliste — ${c.name}`;
+  document.getElementById('checklist-modal').style.display = 'flex';
+  renderChecklist(carId);
+}
+
+function closeChecklistModal() {
+  document.getElementById('checklist-modal').style.display = 'none';
+}
 
 function renderChecklist(carId) {
   const c = cars.find(x => x.id === carId);
