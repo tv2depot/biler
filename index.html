@@ -1718,15 +1718,12 @@ function renderCarTable(tbodyId, filter, showExtras) {
     nameMap[key].push(c);
   });
 
-  // Sorter så parrede biler altid er naboer
+  // Sorter så parrede biler altid er naboer — baseret på leasingstart (ældst = gl.)
   const pairGrouped = [];
   const addedIds = new Set();
   filtered.forEach(c => {
     if (addedIds.has(c.id)) return;
-    addedIds.add(c.id);
-    pairGrouped.push(c);
-    // Find makker og tilføj umiddelbart efter
-    const peers = nameMap[c.name+'|||'+c.location] || [];
+    const peers = (nameMap[c.name+'|||'+c.location] || [c]).slice().sort((a,b) => (a.start||'').localeCompare(b.start||''));
     peers.forEach(peer => {
       if (!addedIds.has(peer.id)) {
         addedIds.add(peer.id);
@@ -1740,9 +1737,9 @@ function renderCarTable(tbodyId, filter, showExtras) {
 
   pairGrouped.forEach(c => {
     if (rendered.has(c.id)) return;
-    const peers = nameMap[c.name+'|||'+c.location] || [];
+    const peers = (nameMap[c.name+'|||'+c.location] || [c]).slice().sort((a,b) => (a.start||'').localeCompare(b.start||''));
     const isPaired = peers.length > 1;
-    const peerIdx = peers.indexOf(c);
+    const peerIdx = peers.findIndex(p => p.id === c.id);
     rendered.add(c.id);
 
     const trClass = isPaired ? (peerIdx === 0 ? 'paired-top' : 'paired-bottom') : '';
