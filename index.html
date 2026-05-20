@@ -1655,10 +1655,9 @@ function renderFilters(containerId, active, cb, archivedCount) {
   if (!container) return;
   const searchWrapper = container.querySelector('[style*="margin-left:auto"]');
   if (searchWrapper) {
-    searchWrapper.insertAdjacentHTML('beforebegin', chips);
-    const allChildren = Array.from(container.children);
-    allChildren.slice(0, allChildren.length - 1).forEach(ch => {
-      if (!ch.querySelector('#car-search')) ch.remove();
+    // Fjern alle børn undtagen søgefeltet
+    Array.from(container.children).forEach(ch => {
+      if (!ch.contains(document.getElementById('car-search'))) ch.remove();
     });
     searchWrapper.insertAdjacentHTML('beforebegin', chips);
   } else {
@@ -2627,11 +2626,14 @@ async function saveCar() {
   if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Gemmer...'; }
 
   saveData();
-  await saveCarToAPI(car);
 
+  // Luk modal øjeblikkeligt — gem til Sheets i baggrunden
   if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Gem bil'; }
   closeModal();
   showToast(editingId ? `${car.name} — ændringer gemt` : `${car.name} tilføjet`);
+
+  // Gem til Sheets i baggrunden uden at blokere UI
+  saveCarToAPI(car);
 
   const activeView = document.querySelector('.view.active').id.replace('view-','');
   showView(activeView);
