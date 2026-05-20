@@ -523,7 +523,6 @@ table.cars tr.paired-bottom:hover td.ombyg-col { background: #eee8c8; }
   </div>
   <nav class="topbar-nav">
     <button class="nav-btn active" onclick="showView('dashboard')">Oversigt</button>
-    <button class="nav-btn" onclick="showView('udskiftning')">Udskiftning</button>
     <button class="nav-btn" onclick="showView('gantt')">Gantt-kort</button>
   </nav>
   <div class="topbar-right">
@@ -585,17 +584,6 @@ table.cars tr.paired-bottom:hover td.ombyg-col { background: #eee8c8; }
   <div id="view-cars" class="view" style="display:none;"></div>
 
   <!-- GANTT VIEW -->
-  <div id="view-udskiftning" class="view">
-    <div class="obs-section">
-      <div class="section-hdr">Indgående — nye biler</div>
-      <div id="udskift-incoming"></div>
-    </div>
-    <div class="obs-section" style="margin-top:24px;">
-      <div class="section-hdr">Udgående — gamle biler</div>
-      <div id="udskift-outgoing"></div>
-    </div>
-  </div>
-
   <div id="view-gantt" class="view">
     <!-- MODE TOGGLE -->
     <div style="display:flex;gap:0;margin-bottom:14px;border-bottom:2px solid var(--gray-border);">
@@ -1229,7 +1217,7 @@ function leasingStatus(car) {
   if (car.endext) return { key: 'extended', label: 'Forlænget', color: '#d47c00' };
   if (d !== null && d < 0) return { key: 'returned', label: 'Returneret', color: '#6b7280' };
   if (d !== null && d <= 30) return { key: 'critical', label: 'Udløber snart', color: '#CC0000' };
-  if (d !== null && d <= 90) return { key: 'warning', label: `Udløber om ${d} dage`, color: '#d4a000' };
+  if (d !== null && d <= 270) return { key: 'warning', label: `Udløber om ${d} dage`, color: '#d4a000' };
   if (!car.start && !car.end) return { key: 'planned', label: 'Ikke startet', color: '#9ca3af' };
   return { key: 'active', label: 'Aktiv', color: '#2a8a4a' };
 }
@@ -1575,7 +1563,7 @@ function renderUdskiftning() {
 
 function renderDashboard() {
   const activeCars = cars.filter(c => c.buildStatus !== 'Returneret');
-  const expiring = activeCars.filter(c => { const d = daysUntil(effectiveEnd(c)); return d !== null && d <= 90 && d >= 0; });
+  const expiring = activeCars.filter(c => { const d = daysUntil(effectiveEnd(c)); return d !== null && d <= 270 && d >= 0; });
   const building = activeCars.filter(c => c.buildStatus && !['','I produktion'].includes(c.buildStatus));
   const ordered  = activeCars.filter(c => ['Bestilt','Leveringsdato modtaget','Planlægges'].includes(c.buildStatus));
   const archived = cars.filter(c => c.buildStatus === 'Returneret');
@@ -1602,7 +1590,7 @@ function renderDashboard() {
   const obsGrid = document.getElementById('obs-grid');
   const obsCars = activeCars.filter(c => {
     const d = daysUntil(effectiveEnd(c));
-    if (d !== null && d <= 90 && d >= 0) return true;
+    if (d !== null && d <= 270 && d >= 0) return true;
     if (c.notes && c.notes.toLowerCase().includes('rykket')) return true;
     if (['Afventer afhentning', 'Afmonteres'].includes(c.buildStatus)) return true;
     return false;
@@ -1615,7 +1603,7 @@ function renderDashboard() {
     if (['Afventer afhentning','Afmonteres'].includes(c.buildStatus) && (d === null || d > 60)) {
       cls = 'warning'; badgeCls = 'badge-warning'; badgeText = c.buildStatus;
     } else if (d !== null && d <= 14) { cls = 'critical'; badgeCls = 'badge-critical'; badgeText = d + ' dage'; }
-    else if (d !== null && d <= 90) { cls = 'warning'; badgeCls = 'badge-warning'; badgeText = d + ' dage'; }
+    else if (d !== null && d <= 270) { cls = 'warning'; badgeCls = 'badge-warning'; badgeText = d + ' dage'; }
     else if (c.notes && c.notes.toLowerCase().includes('rykket')) { badgeText = 'Dato rykket'; badgeCls = 'badge-info'; }
     const detailLine = ['Afventer afhentning','Afmonteres'].includes(c.buildStatus)
       ? c.buildStatus + (effectiveEnd(c) ? ' · udløb ' + fmtDate(effectiveEnd(c)) : '')
@@ -1754,7 +1742,7 @@ function renderCarTable(tbodyId, filter, showExtras) {
         daysHtml = `<span style="font-size:12px;color:var(--text-muted);">Afhentet${c.returnedDate ? ' ' + fmtDate(c.returnedDate) : ''}</span>`;
       }
     } else if (d !== null && d <= 14) daysHtml = `<span class="days-chip days-critical">${fmtDate(effectiveEnd(c))}</span>`;
-    else if (d !== null && d <= 90) daysHtml = `<span class="days-chip days-warning">${fmtDate(effectiveEnd(c))}</span>`;
+    else if (d !== null && d <= 270) daysHtml = `<span class="days-chip days-warning">${fmtDate(effectiveEnd(c))}</span>`;
     else daysHtml = `<span class="days-ok">${fmtDate(effectiveEnd(c))}</span>`;
 
     // Note cell
@@ -2055,7 +2043,7 @@ function buildBars(c, todayPct, isPaired, peers, idx) {
   if (['Planlægges','Bestilt','Leveringsdato modtaget'].includes(c.buildStatus)) mainClass = 'planned';
   else if (c.endext) mainClass = 'extended';
   else if (d !== null && d >= 0 && d <= 30)  mainClass = 'expiring';
-  else if (d !== null && d >= 0 && d <= 90) mainClass = 'warning';
+  else if (d !== null && d >= 0 && d <= 270) mainClass = 'warning';
 
   // Draw original period bar — farve styret af dato
   if (startPct !== null && endPct !== null) {
