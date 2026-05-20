@@ -1239,7 +1239,7 @@ function buildStatusBadge(buildStatus) {
   return `<span style="display:inline-block;font-size:11px;font-weight:500;padding:2px 9px;border-radius:20px;background:${s.bg};color:${s.color};">${buildStatus}</span>`;
 }
 
-function effectiveEnd(car) { return car.endext || car.end || ''; }
+function effectiveEnd(car) { return (car.endext && car.endext.trim()) ? car.endext : (car.end || ''); }
 
 function showToast(msg) {
   const t = document.getElementById('toast');
@@ -1271,8 +1271,12 @@ let sortCol = 'location';
 let sortDir = 1; // 1 = asc, -1 = desc
 
 function sortTable(col) {
-  if (sortCol === col) sortDir *= -1;
-  else { sortCol = col; sortDir = 1; }
+  if (sortCol === col) {
+    sortDir *= -1;
+  } else {
+    sortCol = col;
+    sortDir = 1;
+  }
   // Update header indicators
   document.querySelectorAll('table.cars th').forEach(th => {
     th.classList.remove('sort-asc','sort-desc');
