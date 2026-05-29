@@ -1173,13 +1173,14 @@ async function saveCarToAPI(car) {
   try {
     const result = await apiCall('saveCar', { car: car });
     if (result?.ok) {
-      console.log('Bil gemt i Sheets:', car.name);
+      console.log('✓ Gemt i Sheets:', car.name);
     } else {
-      console.error('Fejl ved gem i Sheets:', result?.error || 'Ukendt fejl');
-      showToast('⚠️ Kunne ikke gemme i database: ' + (result?.error || 'Ukendt fejl'));
+      console.error('Sheets fejl:', result?.error || 'Ukendt');
+      showToast('⚠️ Ikke gemt i database — prøv igen', 5000);
     }
   } catch(e) {
     console.error('saveCarToAPI fejl:', e);
+    showToast('⚠️ Ikke gemt i database — prøv igen', 5000);
   }
 }
 
@@ -1255,11 +1256,11 @@ function buildStatusBadge(buildStatus) {
 
 function effectiveEnd(car) { return (car.endext && car.endext.trim()) ? car.endext : (car.end || ''); }
 
-function showToast(msg) {
+function showToast(msg, duration = 2500) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
+  setTimeout(() => t.classList.remove('show'), duration);
 }
 
 // ─── VIEWS ──────────────────────────────────────────────────────────────────
