@@ -2739,10 +2739,10 @@ async function saveCar() {
 
   saveData();
 
-  // Luk modal øjeblikkeligt — gem til Sheets i baggrunden
+  const wasEditing = !!editingId;
   if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Gem bil'; }
   closeModal();
-  showToast(editingId ? `${car.name} — ændringer gemt` : `${car.name} tilføjet`);
+  showToast(wasEditing ? `${car.name} — ændringer gemt` : `${car.name} tilføjet`);
 
   // Gem til Sheets i baggrunden uden at blokere UI
   saveCarToAPI(car);
