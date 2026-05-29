@@ -2566,7 +2566,11 @@ function openModalForCar(id) {
     return earliestPeer && (c.start||'') > (earliestPeer.start||'');
   })());
 
+  // Nulstil titel og partner knap først
   document.getElementById('modal-title').textContent = 'Rediger — ' + c.name;
+  const partnerSwitchEl = document.getElementById('btn-partner-switch');
+  if (partnerSwitchEl) partnerSwitchEl.style.display = 'none';
+
   if (isReplacement) {
     document.getElementById('modal-title').innerHTML =
       `Rediger — ${c.name} <span style="font-size:10px;font-weight:500;color:var(--blue);font-family:var(--font);padding:2px 7px;border-radius:10px;margin-left:8px;background:var(--blue-light);">ny</span>`;
@@ -2575,20 +2579,14 @@ function openModalForCar(id) {
       `Rediger — ${c.name} <span style="font-size:10px;font-weight:500;color:#7a4f00;font-family:var(--font);padding:2px 7px;border-radius:10px;margin-left:8px;background:#fff3cc;">gl.</span>`;
   }
 
-  // Tilføj "skift til makker" knap hvis bilen er parret
-  const partnerSwitchEl = document.getElementById('btn-partner-switch');
+  // Vis partner-knap
   if (isPairedCar) {
     const partner = cars.find(x => x.id !== c.id && x.name === c.name && x.location === c.location && x.buildStatus !== 'Returneret');
-    if (partner) {
-      const partnerRole = isReplacement ? 'gl.' : 'ny';
-      if (partnerSwitchEl) {
-        partnerSwitchEl.style.display = 'inline-block';
-        partnerSwitchEl.textContent = '⇄ Vis ' + partnerRole;
-        partnerSwitchEl.onclick = () => openModalForCar(partner.id);
-      }
+    if (partner && partnerSwitchEl) {
+      partnerSwitchEl.style.display = 'inline-block';
+      partnerSwitchEl.textContent = '⇄ Vis ' + (isReplacement ? 'gl.' : 'ny');
+      partnerSwitchEl.onclick = () => openModalForCar(partner.id);
     }
-  } else {
-    if (partnerSwitchEl) partnerSwitchEl.style.display = 'none';
   }
   document.getElementById('btn-delete').style.display = 'inline-block';
   document.getElementById('btn-replacement').style.display = isReplacement ? 'none' : 'inline-block';
