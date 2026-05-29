@@ -2772,17 +2772,18 @@ function getDMRKey() {
 async function fetchDMR(plate, vin) {
   const id = (plate || vin || '').trim().replace(/\s/g,'').toUpperCase();
   if (!id) return null;
-  const BASE = 'https://corsproxy.io/?' + encodeURIComponent('https://v1.motorapi.dk/vehicles/') + id;
-  const BASE_ENV = 'https://corsproxy.io/?' + encodeURIComponent('https://v1.motorapi.dk/vehicles/') + id + '%2Fenvironment';
-  const headers = { 'X-AUTH-TOKEN': getDMRKey() };
+  // Brug vores Cloudflare Worker som DMR proxy
+  const DMR_BASE = API_URL + '?dmr=' + encodeURIComponent('https://v1.motorapi.dk/vehicles/' + id);
+  const DMR_ENV  = API_URL + '?dmr=' + encodeURIComponent('https://v1.motorapi.dk/vehicles/' + id + '/environment');
+  const key = getDMRKey();
   try {
     const [vRes, eRes] = await Promise.all([
-      fetch(BASE, { headers }),
-      fetch(BASE_ENV, { headers })
+      fetch(DMR_BASE + '&dmr_token=' + encodeURIComponent(key)),
+      fetch(DMR_ENV  + '&dmr_token=' + encodeURIComponent(key))
     ]);
     const vehicle = vRes.ok ? await vRes.json() : null;
     const env     = eRes.ok ? await eRes.json() : null;
-    if (!vehicle) return null;
+    if (!vehicle || vehicle.error) return null;
     const combined = Object.assign({}, vehicle, env);
     combined._raw = { vehicle, env };
     return combined;
