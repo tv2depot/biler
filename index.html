@@ -2711,6 +2711,9 @@ async function saveCar() {
     if (!confirm(`Ankomst-tjeklisten er ikke komplet (${done}/${CHECKLIST_ANKOMST.length} afkrydset).\n\nVil du alligevel sætte bilen I produktion?`)) return;
   }
 
+  // Hjælpefunktion: bevar eksisterende værdi hvis form-felt er tomt
+  const getOrKeep = (id) => get(id) || oldCar?.[id] || '';
+
   const car = {
     id: editingId || genId(),
     name: get('name'), plate: get('plate').toUpperCase(), make: get('make'),
@@ -2718,19 +2721,19 @@ async function saveCar() {
     location: get('location'), buildStatus: get('status'), workloc: get('workloc'),
     weightReady: get('weight-ready'), weightTotal: get('weight-total'),
     envclass: get('envclass'), co2: get('co2'),
-    ownership: get('ownership') || 'leasing',
-    purchaseDate: get('purchase-date'), purchasePrice: get('purchase-price'),
-    lessor: get('lessor'), contract: get('contract'), orderno: get('orderno'),
-    start: get('start'), end: get('end'), endext: get('endext'), delivery: get('delivery'),
-    builder: get('builder'), buildStart: get('build-start'), buildEnd: get('build-end'),
+    ownership: get('ownership') || oldCar?.ownership || 'leasing',
+    purchaseDate: getOrKeep('purchase-date'), purchasePrice: getOrKeep('purchase-price'),
+    lessor: getOrKeep('lessor'), contract: getOrKeep('contract'), orderno: getOrKeep('orderno'),
+    start: getOrKeep('start'), end: getOrKeep('end'), endext: getOrKeep('endext'),
+    delivery: getOrKeep('delivery'),
+    builder: getOrKeep('builder'), buildStart: getOrKeep('build-start'), buildEnd: getOrKeep('build-end'),
     chargeCards: JSON.parse(JSON.stringify(chargeCards)),
     fuelCards: JSON.parse(JSON.stringify(fuelCards)),
-    // Keep legacy fields for backwards compat
     chargeCompany: chargeCards[0]?.company||'', chargeNum: chargeCards[0]?.num||'',
     fuelCompany: fuelCards[0]?.company||'', fuelNum: fuelCards[0]?.num||'',
-    insurer: get('insurer'), policy: get('policy'),
-    roadsideCompany: get('roadside-company'), roadsideNum: get('roadside-num'),
-    notes: get('notes'),
+    insurer: getOrKeep('insurer'), policy: getOrKeep('policy'),
+    roadsideCompany: getOrKeep('roadside-company'), roadsideNum: getOrKeep('roadside-num'),
+    notes: get('notes') || oldCar?.notes || '',
     checklists: oldCar?.checklists || {}
   };
 
