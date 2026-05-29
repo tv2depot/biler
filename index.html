@@ -2549,7 +2549,7 @@ function openModal() {
   setTimeout(() => { modalSnapshot = takeModalSnapshot(); }, 50);
 }
 
-function openModalForCar(id) {
+function openModalForCar(id, keepTab) {
   const c = cars.find(x => x.id === id);
   if (!c) return;
   editingId = id;
@@ -2567,16 +2567,21 @@ function openModalForCar(id) {
   })());
 
   // Nulstil titel og partner knap først
+  const currentTab = document.querySelector('#modal .modal-tab.active')?.getAttribute('onclick')?.match(/switchTab\('(\w+)'/)?.[1];
+
   document.getElementById('modal-title').textContent = 'Rediger — ' + c.name;
   const partnerSwitchEl = document.getElementById('btn-partner-switch');
   if (partnerSwitchEl) partnerSwitchEl.style.display = 'none';
 
   if (isReplacement) {
     document.getElementById('modal-title').innerHTML =
-      `Rediger — ${c.name} <span style="font-size:10px;font-weight:500;color:var(--blue);font-family:var(--font);padding:2px 7px;border-radius:10px;margin-left:8px;background:var(--blue-light);">ny</span>`;
+      `Rediger — ${c.name}${c.plate ? ` <span style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);font-weight:400;">${c.plate}</span>` : ''} <span style="font-size:10px;font-weight:500;color:var(--blue);font-family:var(--font);padding:2px 7px;border-radius:10px;margin-left:4px;background:var(--blue-light);">ny</span>`;
   } else if (isPairedCar) {
     document.getElementById('modal-title').innerHTML =
-      `Rediger — ${c.name} <span style="font-size:10px;font-weight:500;color:#7a4f00;font-family:var(--font);padding:2px 7px;border-radius:10px;margin-left:8px;background:#fff3cc;">gl.</span>`;
+      `Rediger — ${c.name}${c.plate ? ` <span style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);font-weight:400;">${c.plate}</span>` : ''} <span style="font-size:10px;font-weight:500;color:#7a4f00;font-family:var(--font);padding:2px 7px;border-radius:10px;margin-left:4px;background:#fff3cc;">gl.</span>`;
+  } else {
+    document.getElementById('modal-title').innerHTML =
+      `Rediger — ${c.name}${c.plate ? ` <span style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);font-weight:400;">${c.plate}</span>` : ''}`;
   }
 
   // Vis partner-knap
@@ -2585,7 +2590,7 @@ function openModalForCar(id) {
     if (partner && partnerSwitchEl) {
       partnerSwitchEl.style.display = 'inline-block';
       partnerSwitchEl.textContent = '⇄ Vis ' + (isReplacement ? 'gl.' : 'ny');
-      partnerSwitchEl.onclick = () => openModalForCar(partner.id);
+      partnerSwitchEl.onclick = () => openModalForCar(partner.id, currentTab);
     }
   }
   document.getElementById('btn-delete').style.display = 'inline-block';
@@ -2640,6 +2645,10 @@ function openModalForCar(id) {
   const copyWrap = document.getElementById('copy-build-dates-wrap');
   if (copyWrap) copyWrap.style.display = hasPartner ? '' : 'none';
   resetModalTabs();
+  if (keepTab) {
+    const tabBtn = document.querySelector(`#modal .modal-tab[onclick*="'${keepTab}'"]`);
+    if (tabBtn) switchTab(keepTab, tabBtn);
+  }
   document.getElementById('modal').classList.add('open');
   setTimeout(() => {
     modalSnapshot = takeModalSnapshot();
