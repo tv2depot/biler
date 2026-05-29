@@ -2594,7 +2594,7 @@ function openModalForCar(id, keepTab) {
     }
   }
   document.getElementById('btn-delete').style.display = 'inline-block';
-  document.getElementById('btn-replacement').style.display = isReplacement ? 'none' : 'inline-block';
+  document.getElementById('btn-replacement').style.display = (isReplacement || isPairedCar) ? 'none' : 'inline-block';
 
   document.getElementById('f-name').value = c.name||'';
   document.getElementById('f-plate').value = c.plate||'';
