@@ -2615,16 +2615,34 @@ function openModalForCar(id, keepTab) {
   toggleOwnership(c.ownership||'leasing');
   document.getElementById('f-purchase-date').value = c.purchaseDate||'';
   document.getElementById('f-purchase-price').value = c.purchasePrice||'';
+  // Hjælpefunktion til at sætte datofelter sikkert
+  const setDate = (id, val) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (!val) { el.value = ''; return; }
+    // Konverter evt. dato-streng til ISO format
+    const str = val.toString();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+      el.value = str;
+    } else {
+      try {
+        const d = new Date(str);
+        if (!isNaN(d)) el.value = d.toISOString().slice(0,10);
+        else el.value = '';
+      } catch(e) { el.value = ''; }
+    }
+  };
+
   document.getElementById('f-lessor').value = c.lessor||'';
   document.getElementById('f-contract').value = c.contract||'';
   document.getElementById('f-orderno').value = c.orderno||'';
-  document.getElementById('f-start').value = c.start||'';
-  document.getElementById('f-end').value = c.end||'';
-  document.getElementById('f-endext').value = c.endext||'';
-  document.getElementById('f-delivery').value = c.delivery||'';
+  setDate('f-start', c.start);
+  setDate('f-end', c.end);
+  setDate('f-endext', c.endext);
+  setDate('f-delivery', c.delivery);
   document.getElementById('f-builder').value = c.builder||'';
-  document.getElementById('f-build-start').value = c.buildStart||'';
-  document.getElementById('f-build-end').value = c.buildEnd||'';
+  setDate('f-build-start', c.buildStart);
+  setDate('f-build-end', c.buildEnd);
   document.getElementById('f-insurer').value = c.insurer||'';
   document.getElementById('f-policy').value = c.policy||'';
   document.getElementById('f-roadside-company').value = c.roadsideCompany||'';
