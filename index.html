@@ -1586,9 +1586,18 @@ function renderUdskiftning() {
 function renderNewCarsGrid() {
   const grid = document.getElementById('new-cars-grid');
   if (!grid) return;
-  const newCars = cars.filter(nc =>
-    nc.buildStatus && !['', 'I produktion', 'Returneret', 'Afmonteres', 'Afventer afhentning'].includes(nc.buildStatus)
-  );
+  const newCars = cars.filter(nc => {
+    if (!nc.buildStatus) return false;
+    if (['', 'I produktion', 'Returneret', 'Afmonteres', 'Afventer afhentning'].includes(nc.buildStatus)) return false;
+    // Hvis bilen er parret, vis kun den nyeste (ny-bil)
+    const peers = cars.filter(o => o.id !== nc.id && o.name === nc.name && o.location === nc.location && o.buildStatus !== 'Returneret');
+    if (peers.length > 0) {
+      // Sorter efter start — nyeste start = ny bil
+      const sorted = [nc, ...peers].sort((a,b) => (a.start||'').localeCompare(b.start||''));
+      if (sorted[0].id === nc.id) return false; // nc er den ældste = gl. bil
+    }
+    return true;
+  });
   if (!newCars.length) {
     grid.innerHTML = '<div style="color:var(--text-muted);font-size:13px;padding:8px 0;">Ingen indgående biler under klargøring.</div>';
     return;
@@ -2405,7 +2414,10 @@ function copyBuildDatesToPartner() {
   showToast('Ombygningsdatoer kopieret til ' + partner.name);
 }
 
+let activeModalTab = 'bildata';
+
 function switchTab(tab, btn) {
+  activeModalTab = tab;
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('#modal .modal-tab').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
@@ -2519,6 +2531,7 @@ function openModalOnTab(id, tab) {
 }
 
 function resetModalTabs() {
+  activeModalTab = 'bildata';
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('#modal .modal-tab').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-bildata').classList.add('active');
@@ -2567,8 +2580,6 @@ function openModalForCar(id, keepTab) {
   })());
 
   // Nulstil titel og partner knap først
-  const currentTab = document.querySelector('#modal .modal-tab.active')?.getAttribute('onclick')?.match(/switchTab\('(\w+)'/)?.[1];
-
   document.getElementById('modal-title').textContent = 'Rediger — ' + c.name;
   const partnerSwitchEl = document.getElementById('btn-partner-switch');
   if (partnerSwitchEl) partnerSwitchEl.style.display = 'none';
@@ -2590,7 +2601,7 @@ function openModalForCar(id, keepTab) {
     if (partner && partnerSwitchEl) {
       partnerSwitchEl.style.display = 'inline-block';
       partnerSwitchEl.textContent = '⇄ Vis ' + (isReplacement ? 'gl.' : 'ny');
-      partnerSwitchEl.onclick = () => openModalForCar(partner.id, currentTab);
+      partnerSwitchEl.onclick = () => openModalForCar(partner.id, activeModalTab);
     }
   }
   document.getElementById('btn-delete').style.display = 'inline-block';
