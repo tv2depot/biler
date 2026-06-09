@@ -687,12 +687,12 @@ table.cars tr.paired-bottom:hover td.ombyg-col { background: #eee8c8; }
 <div class="modal">
   <div class="modal-hdr" style="align-items:flex-start;">
     <div style="flex:1;">
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;">
         <div class="modal-title" id="modal-title">Tilføj bil</div>
-        <button id="btn-partner-switch" style="display:none;font-size:11px;padding:3px 10px;border:1px solid var(--gray-border);border-radius:20px;background:none;cursor:pointer;font-family:var(--font);"></button>
+        <span id="modal-plate" style="font-size:12px;color:var(--text-muted);font-family:var(--font-mono);font-weight:400;"></span>
       </div>
-      <div id="modal-status-row" style="display:none;margin-top:6px;align-items:center;gap:8px;">
-        <span id="modal-plate" style="font-size:12px;color:var(--text-muted);font-family:var(--font-mono);"></span>
+      <div id="modal-status-row" style="display:none;margin-top:7px;align-items:center;gap:8px;flex-wrap:wrap;">
+        <button id="btn-partner-switch" style="display:none;font-size:11px;padding:3px 10px;border:1px solid var(--gray-border);border-radius:20px;background:none;cursor:pointer;font-family:var(--font);"></button>
         <select id="modal-status-select" onchange="quickStatusFromModal(this.value)"
           style="font-size:12px;padding:3px 10px;border:1px solid var(--gray-border);border-radius:20px;background:none;cursor:pointer;font-family:var(--font);color:var(--text);">
           <option value="">— ingen status —</option>
