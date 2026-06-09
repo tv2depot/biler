@@ -786,8 +786,8 @@ table.cars tr.paired-bottom:hover td.ombyg-col { background: #eee8c8; }
         <div class="field"><label>Udskiftningsstatus</label>
           <select id="f-status">
             <option value="">— ingen —</option>
-            <optgroup label="Indgående"><option>Planlægges</option><option>Bestilt</option><option>Leveringsdato modtaget</option><option>Leveret til ombygning</option><option>Færdigbygget</option><option>I produktion</option></optgroup>
-            <optgroup label="Udgående"><option>Afmonteres</option><option>Afventer afhentning</option></optgroup>
+            <optgroup label="Indgående"><option>Planlægges</option><option>Bestilt</option><option>Leveringsdato modtaget</option><option>Leveret til ombygning</option><option>Færdigbygget</option><option>I drift</option><option>Fejlmeldt</option></optgroup>
+            <optgroup label="Udgående"><option>Afmonteres</option><option>Fejlmeldt</option><option>Klar til afhentning</option></optgroup>
           </select>
         </div>
         <div class="field"><label>Arbejdslokation</label>
@@ -891,7 +891,7 @@ table.cars tr.paired-bottom:hover td.ombyg-col { background: #eee8c8; }
       <option>Leveringsdato modtaget</option>
       <option>Leveret til ombygning</option>
       <option>Færdigbygget</option>
-      <option>I produktion</option>
+      <option>I drift</option>
       <option>Afmonteres</option>
       <option>Afventer afhentning</option>
     </select>
@@ -1240,20 +1240,44 @@ function leasingStatus(car) {
 }
 
 // BUILD STATUS — manual, badge with color
-function buildStatusBadge(buildStatus) {
-  if (!buildStatus) return '';
+function buildStatusBadge(buildStatus, carId) {
+  if (!buildStatus) return carId ? `<span onclick="quickStatus('${carId}')" style="display:inline-block;font-size:11px;font-weight:500;padding:2px 9px;border-radius:20px;background:#f3f4f6;color:#9ca3af;cursor:pointer;" title="Klik for at skifte status">— sæt status</span>` : '';
   const map = {
     'Planlægges':               { bg: '#f1f5f9', color: '#475569' },
     'Bestilt':                  { bg: '#dbeafe', color: '#1e40af' },
     'Leveringsdato modtaget':   { bg: '#e0e7ff', color: '#3730a3' },
     'Leveret til ombygning':    { bg: '#ffedd5', color: '#9a3412' },
     'Færdigbygget':             { bg: '#fef9c3', color: '#854d0e' },
-    'I produktion':      { bg: '#dcfce7', color: '#166534' },
+    'I drift':                  { bg: '#dcfce7', color: '#166534' },
+    'Fejlmeldt':                { bg: '#fee2e2', color: '#991b1b' },
     'Afmonteres':               { bg: '#fee2e2', color: '#991b1b' },
-    'Afventer afhentning':      { bg: '#fce7f3', color: '#9d174d' },
+    'Klar til afhentning':      { bg: '#fce7f3', color: '#9d174d' },
   };
   const s = map[buildStatus] || { bg: '#f3f4f6', color: '#374151' };
-  return `<span style="display:inline-block;font-size:11px;font-weight:500;padding:2px 9px;border-radius:20px;background:${s.bg};color:${s.color};">${buildStatus}</span>`;
+  const clickAttr = carId ? `onclick="quickStatus('${carId}')" style="cursor:pointer;" title="Klik for at skifte status"` : '';
+  return `<span ${clickAttr} style="display:inline-block;font-size:11px;font-weight:500;padding:2px 9px;border-radius:20px;background:${s.bg};color:${s.color};">${buildStatus}</span>`;
+}
+
+function quickStatus(carId) {
+  const c = cars.find(x => x.id === carId);
+  if (!c) return;
+  const statuses = [
+    'Planlægges', 'Bestilt', 'Leveringsdato modtaget',
+    'Leveret til ombygning', 'Færdigbygget', 'I drift', 'Fejlmeldt',
+    'Afmonteres', 'Klar til afhentning'
+  ];
+  const current = c.buildStatus || '';
+  const options = statuses.map((s,i) => `${i+1}. ${s}${s===current?' ✓':''}`).join('\n');
+  const choice = prompt(`Skift status for ${c.name}:\n\n${options}\n\nIndtast nummer:`);
+  if (choice === null) return;
+  const idx = parseInt(choice) - 1;
+  if (idx >= 0 && idx < statuses.length) {
+    c.buildStatus = statuses[idx];
+    saveData();
+    saveCarToAPI(c);
+    renderDashboard();
+    showToast(`${c.name} → ${c.buildStatus}`);
+  }
 }
 
 function effectiveEnd(car) { return (car.endext && car.endext.trim()) ? car.endext : (car.end || ''); }
@@ -1355,7 +1379,7 @@ function renderUdskiftningsplan() {
 
   const inProgress = cars.filter(c =>
     c.buildStatus !== 'Returneret' &&
-    (c.buildStatus && !['','I produktion'].includes(c.buildStatus) ||
+    (c.buildStatus && !['','I drift'].includes(c.buildStatus) ||
      cars.some(o => o.id !== c.id && o.name === c.name && o.location === c.location && o.buildStatus !== 'Returneret'))
   );
 
@@ -1488,7 +1512,7 @@ function renderUdskiftningsplan() {
 
 // ─── DASHBOARD ──────────────────────────────────────────────────────────────
 function renderUdskiftning() {
-  const INCOMING_STATUS = ['Planlægges','Bestilt','Leveringsdato modtaget','Leveret til ombygning','Færdigbygget','I produktion'];
+  const INCOMING_STATUS = ['Planlægges','Bestilt','Leveringsdato modtaget','Leveret til ombygning','Færdigbygget','I drift'];
   const OUTGOING_STATUS = ['Afmonteres','Afventer afhentning'];
 
   const active = cars.filter(c => c.buildStatus !== 'Returneret');
@@ -1516,7 +1540,7 @@ function renderUdskiftning() {
       'Leveringsdato modtaget': '#3b82f6',
       'Leveret til ombygning': '#8b5cf6',
       'Færdigbygget': '#10b981',
-      'I produktion': '#2a8a4a',
+      'I drift': '#2a8a4a',
       'Afmonteres': '#f97316',
       'Afventer afhentning': '#ef4444',
     };
@@ -1588,7 +1612,7 @@ function renderNewCarsGrid() {
   if (!grid) return;
   const newCars = cars.filter(nc => {
     if (!nc.buildStatus) return false;
-    if (['', 'I produktion', 'Returneret', 'Afmonteres', 'Afventer afhentning'].includes(nc.buildStatus)) return false;
+    if (['', 'I drift', 'Returneret', 'Afmonteres', 'Afventer afhentning'].includes(nc.buildStatus)) return false;
     // Hvis bilen er parret, vis kun den nyeste (ny-bil)
     const peers = cars.filter(o => o.id !== nc.id && o.name === nc.name && o.location === nc.location && o.buildStatus !== 'Returneret');
     if (peers.length > 0) {
@@ -1642,20 +1666,20 @@ function markCarArrived(carId) {
   if (!c) return;
   const dateInput = document.getElementById(`afh-date-${carId}`);
   const date = dateInput ? dateInput.value : today();
-  if (!confirm(`Sæt ${c.name} til "I produktion" pr. ${fmtDate(date)}?`)) return;
-  c.buildStatus = 'I produktion';
+  if (!confirm(`Sæt ${c.name} til "I drift" pr. ${fmtDate(date)}?`)) return;
+  c.buildStatus = 'I drift';
   c.workloc = '';
   c.buildEnd = date;
   saveData();
   saveCarToAPI(c);
   renderDashboard();
-  showToast(`${c.name} sat I produktion ✓`);
+  showToast(`${c.name} sat I drift ✓`);
 }
 
 function renderDashboard() {
   const activeCars = cars.filter(c => c.buildStatus !== 'Returneret');
   const expiring = activeCars.filter(c => { const d = daysUntil(effectiveEnd(c)); return d !== null && d <= 270 && d >= 0; });
-  const building = activeCars.filter(c => c.buildStatus && !['','I produktion'].includes(c.buildStatus));
+  const building = activeCars.filter(c => c.buildStatus && !['','I drift'].includes(c.buildStatus));
   const ordered  = activeCars.filter(c => ['Bestilt','Leveringsdato modtaget','Planlægges'].includes(c.buildStatus));
   const archived = cars.filter(c => c.buildStatus === 'Returneret');
 
@@ -1726,7 +1750,7 @@ function renderFilters(containerId, active, cb, archivedCount) {
   const ode = activeCars.filter(c => c.location === 'Odense').length;
   const kbh = activeCars.filter(c => c.location === 'København').length;
   const obg = activeCars.filter(c => c.location === 'OB Garage').length;
-  const bld = activeCars.filter(c => c.buildStatus && !['','I produktion'].includes(c.buildStatus)).length;
+  const bld = activeCars.filter(c => c.buildStatus && !['','I drift'].includes(c.buildStatus)).length;
   const arc = archivedCount || cars.filter(c => c.buildStatus === 'Returneret').length;
   const chips = [
     `<button class="filter-chip ${active==='all'?'active':''}" onclick="(${cb.toString()})('all')">Alle (${activeCars.length})</button>`,
@@ -1765,7 +1789,7 @@ function renderCarTable(tbodyId, filter, showExtras) {
     if (filter === 'Odense') return c.location === 'Odense';
     if (filter === 'København') return c.location === 'København';
     if (filter === 'OB Garage') return c.location === 'OB Garage';
-    if (filter === 'building') return c.buildStatus && !['','I produktion'].includes(c.buildStatus);
+    if (filter === 'building') return c.buildStatus && !['','I drift'].includes(c.buildStatus);
     return true;
   });
 
@@ -1860,7 +1884,7 @@ function renderCarTable(tbodyId, filter, showExtras) {
     // Note cell
     const noteHtml = `<span class="note-snippet" onclick="event.stopPropagation();openNotePopup('${c.id}',this)">${c.notes ? (c.notes.length > 40 ? c.notes.slice(0,40)+'…' : c.notes) : '<span style="color:#ccc;">+</span>'}</span>`;
 
-    const isInOmbytning = c.buildStatus && c.buildStatus !== 'I produktion';
+    const isInOmbytning = c.buildStatus && c.buildStatus !== 'I drift';
     const ombytningDim = !isInOmbytning;
 
     // Fuel card alert
@@ -1889,7 +1913,7 @@ function renderCarTable(tbodyId, filter, showExtras) {
       </td>
       <td>${leaseHtml}</td>
       <td class="ombyg-col" onclick="event.stopPropagation();openQuickEdit('${c.id}',this)" style="cursor:pointer;">
-        ${buildStatusBadge(c.buildStatus) || `<span style="color:${ombytningDim?'#ccc':'var(--text-muted)'};font-size:12px;">—</span>`}
+        ${buildStatusBadge(c.buildStatus, c.id) || buildStatusBadge('', c.id)}
       </td>
       <td class="ombyg-col" onclick="event.stopPropagation();openQuickEdit('${c.id}',this)" style="cursor:pointer;">
         <span style="font-size:12px;color:${ombytningDim?'#ccc':'var(--text-muted)'};">${c.workloc||'—'}</span>
@@ -1972,10 +1996,10 @@ function renderGantt() {
     if (ganttFilter === 'København') return c.location === 'København';
     if (ganttFilter === 'OB Garage') return c.location === 'OB Garage';
     if (ganttFilter === 'udskiftning') {
-      if (c.buildStatus && !['','I produktion'].includes(c.buildStatus)) return true;
+      if (c.buildStatus && !['','I drift'].includes(c.buildStatus)) return true;
       return cars.some(other =>
         other.id !== c.id && other.name === c.name && other.location === c.location &&
-        other.buildStatus && !['','I produktion'].includes(other.buildStatus)
+        other.buildStatus && !['','I drift'].includes(other.buildStatus)
       );
     }
     return true;
@@ -2734,10 +2758,10 @@ async function saveCar() {
     }
   }
 
-  // Advar hvis I produktion og tjekliste ikke komplet
-  if (newStatus === 'I produktion' && editingId && !checklistAnkomstComplete(editingId)) {
+  // Advar hvis I drift og tjekliste ikke komplet
+  if (newStatus === 'I drift' && editingId && !checklistAnkomstComplete(editingId)) {
     const done = CHECKLIST_ANKOMST.filter(i => (oldCar?.checklists||{})[i.id]).length;
-    if (!confirm(`Ankomst-tjeklisten er ikke komplet (${done}/${CHECKLIST_ANKOMST.length} afkrydset).\n\nVil du alligevel sætte bilen I produktion?`)) return;
+    if (!confirm(`Ankomst-tjeklisten er ikke komplet (${done}/${CHECKLIST_ANKOMST.length} afkrydset).\n\nVil du alligevel sætte bilen I drift?`)) return;
   }
 
   // Hjælpefunktion: bevar eksisterende værdi hvis form-felt er tomt
@@ -2956,13 +2980,13 @@ function autoSaveQuickEdit() {
   c.workloc = document.getElementById('qpop-workloc').value;
 
   // Auto-clear arbejdslokation når bil sættes klar til produktion
-  if (c.buildStatus === 'I produktion') {
+  if (c.buildStatus === 'I drift') {
     c.workloc = '';
     document.getElementById('qpop-workloc').value = '';
   }
 
   saveData();
-  document.getElementById('qpop-saved').textContent = c.buildStatus === 'I produktion' ? '✓ Gemt — arbejdslokation ryddet' : '✓ Gemt';
+  document.getElementById('qpop-saved').textContent = c.buildStatus === 'I drift' ? '✓ Gemt — arbejdslokation ryddet' : '✓ Gemt';
   renderCarTable('dash-tbody', dashFilter);
 }
 
@@ -3090,8 +3114,8 @@ function renderChecklist(carId) {
   if (!c.checklists || typeof c.checklists !== 'object') c.checklists = {};
   const checks = c.checklists;
 
-  // Auto-detekt: biler der ikke har været I produktion → ankomst, ellers aflevering
-  const hasBeenInProduction = c.buildStatus === 'I produktion' ||
+  // Auto-detekt: biler der ikke har været I drift → ankomst, ellers aflevering
+  const hasBeenInProduction = c.buildStatus === 'I drift' ||
     c.buildStatus === 'Afmonteres' || c.buildStatus === 'Afventer afhentning' ||
     c.buildStatus === 'Returneret';
 
@@ -3101,7 +3125,7 @@ function renderChecklist(carId) {
     return (c.start||'') <= (peers[0].start||'');
   })();
 
-  // Gammel bil i par → aflevering, ny bil eller enkeltbil der er I produktion → aflevering, ellers ankomst
+  // Gammel bil i par → aflevering, ny bil eller enkeltbil der er I drift → aflevering, ellers ankomst
   const mode = (isOldCar || hasBeenInProduction) ? 'aflevering' : 'ankomst';
   const modeLabel = mode === 'ankomst' ? '🚗 Ankomst af ny bil' : '🔄 Aflevering af gammel bil';
   const items = mode === 'ankomst' ? CHECKLIST_ANKOMST : CHECKLIST_AFLEVERING;
@@ -3149,7 +3173,7 @@ function renderChecklist(carId) {
   html += `</div></div>
     <div style="margin-top:12px;padding:10px 12px;background:var(--gray-light);border-radius:var(--radius);font-size:12px;color:var(--text-muted);">
       ${mode === 'ankomst'
-        ? 'Bilen kan ikke sættes til "I produktion" før alle punkter er afkrydset.'
+        ? 'Bilen kan ikke sættes til "I drift" før alle punkter er afkrydset.'
         : 'Alle punkter skal afkrydses inden bilen afhentes.'}
     </div>`;
 
