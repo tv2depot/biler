@@ -800,22 +800,15 @@ table.cars tr.paired-bottom:hover td.ombyg-col { background: #eee8c8; }
       </div>
     </div>
     <div class="form-section">
-      <div class="form-section-title">Udskiftning & ombygning</div>
+      <div class="form-section-title">Ombygning</div>
       <div class="form-grid">
-        <div class="field"><label>Udskiftningsstatus</label>
-          <select id="f-status">
-            <option value="">— ingen —</option>
-            <optgroup label="Indgående"><option>Planlægges</option><option>Bestilt</option><option>Leveringsdato modtaget</option><option>Leveret til ombygning</option><option>Færdigbygget</option><option>I drift</option><option>Fejlmeldt</option></optgroup>
-            <optgroup label="Udgående"><option>Afmonteres</option><option>Fejlmeldt</option><option>Klar til afhentning</option></optgroup>
-          </select>
-        </div>
+        <input type="hidden" id="f-status">
         <div class="field"><label>Arbejdslokation</label>
           <select id="f-workloc"><option value="">—</option><option>Haarby Karosseri</option><option>SIEB Teknik</option><option>Work System</option><option>TV 2 Odense</option><option>TV 2 København</option><option>Leasingselskab</option><option>Andet</option></select>
         </div>
         <div class="field"><label>Opbygger</label>
           <select id="f-builder"><option value="">—</option><option>Haarby Karosseri</option><option>SIEB Teknik</option><option>Work System</option><option>TV 2 intern</option><option>Andet</option></select>
         </div>
-        <div class="field"></div>
         <div class="field"><label>Ombygning start</label><input type="date" id="f-build-start"></div>
         <div class="field"><label>Ombygning slut (forventet)</label><input type="date" id="f-build-end"></div>
         <div class="field" style="grid-column:span 2;" id="copy-build-dates-wrap">
@@ -1280,7 +1273,6 @@ function buildStatusBadge(buildStatus, carId) {
 function quickStatusFromModal(val) {
   const el = document.getElementById('f-status');
   if (el) el.value = val;
-  // Style the dropdown to reflect current status
   styleModalStatusSelect(val);
 }
 
