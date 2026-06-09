@@ -685,12 +685,16 @@ table.cars tr.paired-bottom:hover td.ombyg-col { background: #eee8c8; }
 <!-- ADD/EDIT MODAL -->
 <div class="modal-overlay" id="modal">
 <div class="modal">
-  <div class="modal-hdr">
-    <div>
-      <div class="modal-title" id="modal-title">Tilføj bil</div>
-      <div id="modal-status-row" style="display:none;margin-top:6px;display:flex;align-items:center;gap:8px;">
+  <div class="modal-hdr" style="align-items:flex-start;">
+    <div style="flex:1;">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <div class="modal-title" id="modal-title">Tilføj bil</div>
+        <button id="btn-partner-switch" style="display:none;font-size:11px;padding:3px 10px;border:1px solid var(--gray-border);border-radius:20px;background:none;cursor:pointer;font-family:var(--font);"></button>
+      </div>
+      <div id="modal-status-row" style="display:none;margin-top:6px;align-items:center;gap:8px;">
+        <span id="modal-plate" style="font-size:12px;color:var(--text-muted);font-family:var(--font-mono);"></span>
         <select id="modal-status-select" onchange="quickStatusFromModal(this.value)"
-          style="font-size:12px;padding:3px 8px;border:1px solid var(--gray-border);border-radius:20px;background:none;cursor:pointer;font-family:var(--font);color:var(--text);">
+          style="font-size:12px;padding:3px 10px;border:1px solid var(--gray-border);border-radius:20px;background:none;cursor:pointer;font-family:var(--font);color:var(--text);">
           <option value="">— ingen status —</option>
           <optgroup label="Indgående">
             <option>Planlægges</option><option>Bestilt</option>
@@ -703,7 +707,6 @@ table.cars tr.paired-bottom:hover td.ombyg-col { background: #eee8c8; }
         </select>
       </div>
     </div>
-    <button id="btn-partner-switch" style="display:none;font-size:12px;padding:4px 10px;border:1px solid var(--gray-border);border-radius:20px;background:none;cursor:pointer;color:var(--text-muted);margin-left:10px;font-family:var(--font);">⇄ Vis makker</button>
     <button class="modal-close" onclick="safeCloseModal()">×</button>
   </div>
   <div class="modal-tabs">
@@ -2654,29 +2657,34 @@ function openModalForCar(id, keepTab) {
     return earliestPeer && (c.start||'') > (earliestPeer.start||'');
   })());
 
-  // Nulstil titel og partner knap først
+  // Sæt titel — kun bilnavn
   document.getElementById('modal-title').textContent = 'Rediger — ' + c.name;
+
+  // Sæt nummerplade
+  const modalPlate = document.getElementById('modal-plate');
+  if (modalPlate) modalPlate.textContent = c.plate || '';
+
+  // Kombineret gl/ny knap
   const partnerSwitchEl = document.getElementById('btn-partner-switch');
-  if (partnerSwitchEl) partnerSwitchEl.style.display = 'none';
-
-  if (isReplacement) {
-    document.getElementById('modal-title').innerHTML =
-      `Rediger — ${c.name}${c.plate ? ` <span style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);font-weight:400;">${c.plate}</span>` : ''} <span style="font-size:10px;font-weight:500;color:var(--blue);font-family:var(--font);padding:2px 7px;border-radius:10px;margin-left:4px;background:var(--blue-light);">ny</span>`;
-  } else if (isPairedCar) {
-    document.getElementById('modal-title').innerHTML =
-      `Rediger — ${c.name}${c.plate ? ` <span style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);font-weight:400;">${c.plate}</span>` : ''} <span style="font-size:10px;font-weight:500;color:#7a4f00;font-family:var(--font);padding:2px 7px;border-radius:10px;margin-left:4px;background:#fff3cc;">gl.</span>`;
-  } else {
-    document.getElementById('modal-title').innerHTML =
-      `Rediger — ${c.name}${c.plate ? ` <span style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);font-weight:400;">${c.plate}</span>` : ''}`;
-  }
-
-  // Vis partner-knap
-  if (isPairedCar) {
-    const partner = cars.find(x => x.id !== c.id && x.name === c.name && x.location === c.location && x.buildStatus !== 'Returneret');
-    if (partner && partnerSwitchEl) {
-      partnerSwitchEl.style.display = 'inline-block';
-      partnerSwitchEl.textContent = '⇄ Vis ' + (isReplacement ? 'gl.' : 'ny');
-      partnerSwitchEl.onclick = () => openModalForCar(partner.id, activeModalTab);
+  if (partnerSwitchEl) {
+    if (isPairedCar) {
+      const partner = cars.find(x => x.id !== c.id && x.name === c.name && x.location === c.location && x.buildStatus !== 'Returneret');
+      if (partner) {
+        const myRole = isReplacement ? 'ny' : 'gl.';
+        const partnerRole = isReplacement ? 'gl.' : 'ny';
+        const myColor = isReplacement ? '#1e40af:#dbeafe' : '#7a4f00:#fff3cc';
+        const [color, bg] = myColor.split(':');
+        partnerSwitchEl.style.display = 'inline-flex';
+        partnerSwitchEl.style.alignItems = 'center';
+        partnerSwitchEl.style.gap = '6px';
+        partnerSwitchEl.style.background = bg;
+        partnerSwitchEl.style.color = color;
+        partnerSwitchEl.style.borderColor = color + '66';
+        partnerSwitchEl.innerHTML = `${myRole} <span style="opacity:0.5;font-size:10px;">⇄</span> Vis ${partnerRole}`;
+        partnerSwitchEl.onclick = () => openModalForCar(partner.id, activeModalTab);
+      }
+    } else {
+      partnerSwitchEl.style.display = 'none';
     }
   }
   document.getElementById('btn-delete').style.display = 'inline-block';
@@ -2697,6 +2705,8 @@ function openModalForCar(id, keepTab) {
   const modalStatusSel = document.getElementById('modal-status-select');
   if (modalStatusRow && modalStatusSel) {
     modalStatusRow.style.display = 'flex';
+    const mp = document.getElementById('modal-plate');
+    if (mp) mp.textContent = c.plate || '';
     modalStatusSel.value = c.buildStatus||'';
     styleModalStatusSelect(c.buildStatus||'');
   }
