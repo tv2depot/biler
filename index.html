@@ -585,7 +585,7 @@ table.cars tr.paired-bottom:hover td.ombyg-col { background: #eee8c8; }
       <th style="width:70px;" class="sortable" onclick="sortTable('location')">Lok.</th>
       <th class="sortable" onclick="sortTable('name')">Navn</th>
       <th class="sortable" onclick="sortTable('leasingstatus')">Leasingstatus</th>
-      <th class="ombyg-col sortable" onclick="sortTable('buildStatus')">Udskiftningsstatus</th>
+      <th class="ombyg-col sortable" onclick="sortTable('buildStatus')">Status</th>
       <th class="ombyg-col sortable" onclick="sortTable('workloc')">Arbejdslokation</th>
       <th class="sortable" onclick="sortTable('lessor')">Leasingselskab</th>
       <th class="sortable" onclick="sortTable('end')">Leasing slut</th>
@@ -686,7 +686,23 @@ table.cars tr.paired-bottom:hover td.ombyg-col { background: #eee8c8; }
 <div class="modal-overlay" id="modal">
 <div class="modal">
   <div class="modal-hdr">
-    <div class="modal-title" id="modal-title">Tilføj bil</div>
+    <div>
+      <div class="modal-title" id="modal-title">Tilføj bil</div>
+      <div id="modal-status-row" style="display:none;margin-top:6px;display:flex;align-items:center;gap:8px;">
+        <select id="modal-status-select" onchange="quickStatusFromModal(this.value)"
+          style="font-size:12px;padding:3px 8px;border:1px solid var(--gray-border);border-radius:20px;background:none;cursor:pointer;font-family:var(--font);color:var(--text);">
+          <option value="">— ingen status —</option>
+          <optgroup label="Indgående">
+            <option>Planlægges</option><option>Bestilt</option>
+            <option>Leveringsdato modtaget</option><option>Leveret til ombygning</option>
+            <option>Færdigbygget</option><option>I drift</option><option>Fejlmeldt</option>
+          </optgroup>
+          <optgroup label="Udgående">
+            <option>Afmonteres</option><option>Fejlmeldt</option><option>Klar til afhentning</option>
+          </optgroup>
+        </select>
+      </div>
+    </div>
     <button id="btn-partner-switch" style="display:none;font-size:12px;padding:4px 10px;border:1px solid var(--gray-border);border-radius:20px;background:none;cursor:pointer;color:var(--text-muted);margin-left:10px;font-family:var(--font);">⇄ Vis makker</button>
     <button class="modal-close" onclick="safeCloseModal()">×</button>
   </div>
@@ -1258,8 +1274,41 @@ function buildStatusBadge(buildStatus, carId) {
   return `<span ${clickAttr} style="display:inline-block;font-size:11px;font-weight:500;padding:2px 9px;border-radius:20px;background:${s.bg};color:${s.color};">${buildStatus}</span>`;
 }
 
+function quickStatusFromModal(val) {
+  const el = document.getElementById('f-status');
+  if (el) el.value = val;
+  // Style the dropdown to reflect current status
+  styleModalStatusSelect(val);
+}
+
+function styleModalStatusSelect(status) {
+  const sel = document.getElementById('modal-status-select');
+  if (!sel) return;
+  const map = {
+    'Planlægges':             '#f1f5f9:#475569',
+    'Bestilt':                '#dbeafe:#1e40af',
+    'Leveringsdato modtaget': '#e0e7ff:#3730a3',
+    'Leveret til ombygning':  '#ffedd5:#9a3412',
+    'Færdigbygget':           '#fef9c3:#854d0e',
+    'I drift':                '#dcfce7:#166534',
+    'Fejlmeldt':              '#fee2e2:#991b1b',
+    'Afmonteres':             '#fee2e2:#991b1b',
+    'Klar til afhentning':    '#fce7f3:#9d174d',
+  };
+  const colors = map[status];
+  if (colors) {
+    const [bg, color] = colors.split(':');
+    sel.style.background = bg;
+    sel.style.color = color;
+    sel.style.borderColor = color + '44';
+  } else {
+    sel.style.background = '';
+    sel.style.color = '';
+    sel.style.borderColor = '';
+  }
+}
+
 function quickStatus(carId) {
-  const c = cars.find(x => x.id === carId);
   if (!c) return;
   const statuses = [
     'Planlægges', 'Bestilt', 'Leveringsdato modtaget',
@@ -2565,6 +2614,8 @@ function resetModalTabs() {
 function openModal() {
   editingId = null;
   document.getElementById('modal-title').textContent = 'Tilføj bil';
+  const sr = document.getElementById('modal-status-row');
+  if (sr) sr.style.display = 'none';
   document.getElementById('btn-delete').style.display = 'none';
   document.getElementById('btn-replacement').style.display = 'none';
   ['name','plate','make','model','variant','fuel','location','status','workloc',
@@ -2641,6 +2692,14 @@ function openModalForCar(id, keepTab) {
   document.getElementById('f-fuel').value = c.fuel||'';
   document.getElementById('f-location').value = c.location||'';
   document.getElementById('f-status').value = c.buildStatus||'';
+  // Synkroniser header-status dropdown
+  const modalStatusRow = document.getElementById('modal-status-row');
+  const modalStatusSel = document.getElementById('modal-status-select');
+  if (modalStatusRow && modalStatusSel) {
+    modalStatusRow.style.display = 'flex';
+    modalStatusSel.value = c.buildStatus||'';
+    styleModalStatusSelect(c.buildStatus||'');
+  }
   document.getElementById('f-workloc').value = c.workloc||'';
   document.getElementById('f-weight-ready').value = c.weightReady||'';
   document.getElementById('f-weight-total').value = c.weightTotal||'';
