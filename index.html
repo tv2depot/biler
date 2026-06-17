@@ -1769,12 +1769,32 @@ function renderDashboard() {
     const detailLine = ['Afventer afhentning','Afmonteres'].includes(c.buildStatus)
       ? c.buildStatus + (effectiveEnd(c) ? ' · udløb ' + fmtDate(effectiveEnd(c)) : '')
       : effectiveEnd(c) ? 'Udløber ' + fmtDate(effectiveEnd(c)) : c.buildStatus||'';
+
+    // Tjekliste-progress (aflevering)
+    const checks = typeof c.checklists === 'string'
+      ? (()=>{ try{return JSON.parse(c.checklists);}catch(e){return {};} })()
+      : (c.checklists || {});
+    const checkItems = CHECKLIST_AFLEVERING.filter(i => i.text);
+    const done = checkItems.filter(i => checks[i.id]).length;
+    const total = checkItems.length;
+    const complete = total > 0 && done === total;
+    const pct = total > 0 ? Math.round(done/total*100) : 0;
+
     return `<div class="obs-card ${cls}">
       <div class="obs-card-body" onclick="openModalForCar('${c.id}')">
         <div class="obs-name">${c.name}</div>
         <div class="obs-detail">${c.make||'&nbsp;'} ${c.model||''}</div>
         <div class="obs-detail">${detailLine}</div>
         ${badgeText ? `<span class="badge ${badgeCls}">${badgeText}</span>` : ''}
+        <div style="margin-top:10px;">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-bottom:3px;">
+            <span>Tjekliste ${done}/${total}</span>
+            ${complete ? '<span style="color:#166534;font-weight:500;">&#10003; Komplet</span>' : ''}
+          </div>
+          <div style="height:4px;background:var(--gray-border);border-radius:2px;">
+            <div style="height:4px;background:${complete?'#22c55e':'#f59e0b'};border-radius:2px;width:${pct}%;transition:width .3s;"></div>
+          </div>
+        </div>
       </div>
       <div class="obs-card-footer">
         <button onclick="event.stopPropagation();openChecklistModal('${c.id}')" 
