@@ -3267,8 +3267,18 @@ function toggleCheck(carId, itemId, checked) {
   // Spørg om arkivering når afleverings-tjekliste er 100% komplet
   if (checked) {
     const checks = c.checklists || {};
-    const isOutgoing = ['Afmonteres', 'Fejlmeldt', 'Klar til afhentning'].includes(c.buildStatus);
-    if (isOutgoing) {
+
+    const hasBeenInProduction = c.buildStatus === 'I drift' ||
+      c.buildStatus === 'Afmonteres' || c.buildStatus === 'Fejlmeldt' ||
+      c.buildStatus === 'Klar til afhentning' || c.buildStatus === 'Returneret';
+    const isOldCar = (() => {
+      const peers = cars.filter(o => o.id !== c.id && o.name === c.name && o.location === c.location && o.buildStatus !== 'Returneret');
+      if (!peers.length) return false;
+      return (c.start||'') <= (peers[0].start||'');
+    })();
+    const mode = (isOldCar || hasBeenInProduction) ? 'aflevering' : 'ankomst';
+
+    if (mode === 'aflevering' && c.buildStatus !== 'Returneret') {
       const items = CHECKLIST_AFLEVERING.filter(i => i.text);
       const allDone = items.every(i => checks[i.id]);
       if (allDone) {
