@@ -702,7 +702,7 @@ table.cars tr.paired-bottom:hover td.ombyg-col { background: #eee8c8; }
             <option>Færdigbygget</option><option>I drift</option><option>Fejlmeldt</option>
           </optgroup>
           <optgroup label="Udgående">
-            <option>Afmonteres</option><option>Fejlmeldt</option><option>Klar til afhentning</option>
+            <option>Afmonteres</option><option>Fejlmeldt</option><option>Klar til afhentning</option><option>Returneret</option>
           </optgroup>
         </select>
       </div>
@@ -1264,6 +1264,7 @@ function buildStatusBadge(buildStatus, carId) {
     'Fejlmeldt':                { bg: '#fee2e2', color: '#991b1b' },
     'Afmonteres':               { bg: '#fee2e2', color: '#991b1b' },
     'Klar til afhentning':      { bg: '#fce7f3', color: '#9d174d' },
+    'Returneret':               { bg: '#f3f4f6', color: '#374151' },
   };
   const s = map[buildStatus] || { bg: '#f3f4f6', color: '#374151' };
   const clickAttr = carId ? `onclick="quickStatus('${carId}')" style="cursor:pointer;" title="Klik for at skifte status"` : '';
@@ -1289,6 +1290,7 @@ function styleModalStatusSelect(status) {
     'Fejlmeldt':              '#fee2e2:#991b1b',
     'Afmonteres':             '#fee2e2:#991b1b',
     'Klar til afhentning':    '#fce7f3:#9d174d',
+    'Returneret':             '#f3f4f6:#374151',
   };
   const colors = map[status];
   if (colors) {
@@ -1308,7 +1310,7 @@ function quickStatus(carId) {
   const statuses = [
     'Planlægges', 'Bestilt', 'Leveringsdato modtaget',
     'Leveret til ombygning', 'Færdigbygget', 'I drift', 'Fejlmeldt',
-    'Afmonteres', 'Klar til afhentning'
+    'Afmonteres', 'Klar til afhentning', 'Returneret'
   ];
   const current = c.buildStatus || '';
   const options = statuses.map((s,i) => `${i+1}. ${s}${s===current?' ✓':''}`).join('\n');
@@ -3258,9 +3260,27 @@ function toggleCheck(carId, itemId, checked) {
   if (checked) c.checklists[itemId] = new Date().toISOString().slice(0,10);
   else delete c.checklists[itemId];
   saveData();
+  saveCarToAPI(c);
   renderChecklist(carId);
-  // Update tab badge
   updateChecklistBadge(carId);
+
+  // Spørg om arkivering når afleverings-tjekliste er 100% komplet
+  if (checked) {
+    const checks = c.checklists || {};
+    const isOutgoing = ['Afmonteres', 'Fejlmeldt', 'Klar til afhentning'].includes(c.buildStatus);
+    if (isOutgoing) {
+      const items = CHECKLIST_AFLEVERING.filter(i => i.text);
+      const allDone = items.every(i => checks[i.id]);
+      if (allDone) {
+        setTimeout(() => {
+          if (confirm(`Tjeklisten for ${c.name} er nu komplet.\n\nVil du markere bilen som returneret og flytte den til arkivet?`)) {
+            closeChecklistModal();
+            markReturned(carId);
+          }
+        }, 200);
+      }
+    }
+  }
 }
 
 function updateChecklistBadge(carId) {
@@ -3300,14 +3320,14 @@ function markReturned(carId) {
     c.buildStatus = 'Returneret';
     c.returnedDate = dateInput || today();
     c.soldPrice = priceInput ? parseInt(priceInput.replace(/\D/g,'')) || '' : '';
-    saveData(); renderDashboard();
+    saveData(); saveCarToAPI(c); renderDashboard();
     showToast(c.name + ' solgt ' + fmtDate(c.returnedDate) + ' — flyttet til arkiv');
   } else {
     const dateInput = prompt(`Markér ${c.name} (${c.make} ${c.model}) som afhentet?\n\nIndtast afhentningsdato:`, today());
     if (dateInput === null) return;
     c.buildStatus = 'Returneret';
     c.returnedDate = dateInput || today();
-    saveData(); renderDashboard();
+    saveData(); saveCarToAPI(c); renderDashboard();
     showToast(c.name + ' afhentet ' + fmtDate(c.returnedDate) + ' — flyttet til arkiv');
   }
 }
