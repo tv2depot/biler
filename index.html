@@ -556,7 +556,7 @@ table.cars tr.paired-bottom:hover td.ombyg-col { background: #eee8c8; }
   <div id="view-dashboard" class="view active">
     <div class="stat-grid" id="stat-grid"></div>
     <div class="obs-section">
-      <div class="section-hdr">Indgående biler</div>
+      <div class="section-hdr">Under udskiftning</div>
       <div class="obs-grid" id="new-cars-grid"></div>
     </div>
     <div class="obs-section">
@@ -1656,35 +1656,72 @@ function renderUdskiftning() {
 function renderNewCarsGrid() {
   const grid = document.getElementById('new-cars-grid');
   if (!grid) return;
-  const newCars = cars.filter(nc => {
-    if (!nc.buildStatus) return false;
-    if (['', 'I drift', 'Returneret', 'Afmonteres', 'Afventer afhentning'].includes(nc.buildStatus)) return false;
-    // Hvis bilen er parret, vis kun den nyeste (ny-bil)
-    const peers = cars.filter(o => o.id !== nc.id && o.name === nc.name && o.location === nc.location && o.buildStatus !== 'Returneret');
-    if (peers.length > 0) {
-      // Sorter efter start — nyeste start = ny bil
-      const sorted = [nc, ...peers].sort((a,b) => (a.start||'').localeCompare(b.start||''));
-      if (sorted[0].id === nc.id) return false; // nc er den ældste = gl. bil
-    }
-    return true;
-  });
-  if (!newCars.length) {
-    grid.innerHTML = '<div style="color:var(--text-muted);font-size:13px;padding:8px 0;">Ingen indgående biler under klargøring.</div>';
+
+  // Vis alle biler med aktiv udskiftningsstatus - både gammel og ny side
+  const activeBuildCars = cars.filter(nc =>
+    nc.buildStatus && !['', 'I drift', 'Returneret'].includes(nc.buildStatus)
+  );
+
+  if (!activeBuildCars.length) {
+    grid.innerHTML = '<div style="color:var(--text-muted);font-size:13px;padding:8px 0;">Ingen biler under udskiftning lige nu.</div>';
     return;
   }
-  grid.innerHTML = newCars.map(nc => {
+
+  // Sorter: gl. og ny biler grupperes sammen
+  const nameMap = {};
+  activeBuildCars.forEach(c => {
+    const key = c.name + '|||' + c.location;
+    if (!nameMap[key]) nameMap[key] = [];
+    nameMap[key].push(c);
+  });
+
+  const seen = new Set();
+  const ordered = [];
+  activeBuildCars.forEach(c => {
+    if (seen.has(c.id)) return;
+    const key = c.name + '|||' + c.location;
+    const peers = (nameMap[key] || [c]).slice().sort((a,b) => (a.start||'').localeCompare(b.start||''));
+    peers.forEach(p => { if (!seen.has(p.id)) { seen.add(p.id); ordered.push(p); } });
+  });
+
+  grid.innerHTML = ordered.map(nc => {
+    // Find evt. makker (kan have status I drift/Returneret/blank, vises ikke selv her, men bruges til mode-detektion)
+    const peers = cars.filter(o => o.id !== nc.id && o.name === nc.name && o.location === nc.location && o.buildStatus !== 'Returneret');
+    const isPairedCar = peers.length > 0;
+    const isOldCar = isPairedCar && (() => {
+      const earliestPeer = peers.slice().sort((a,b) => (a.start||'').localeCompare(b.start||''))[0];
+      return (nc.start||'') <= (earliestPeer.start||'');
+    })();
+    const hasBeenInService = ['Afmonteres','Klar til afhentning'].includes(nc.buildStatus);
+    const mode = (isOldCar || hasBeenInService) ? 'aflevering' : 'ankomst';
+    const roleTag = isPairedCar ? (mode === 'aflevering' ? 'gl.' : 'ny') : '';
+    const roleColor = mode === 'aflevering' ? '#7a4f00:#fff3cc' : '#1e40af:#dbeafe';
+    const [roleFg, roleBg] = roleColor.split(':');
+
     const chk = typeof nc.checklists === 'string'
       ? (()=>{ try{return JSON.parse(nc.checklists);}catch(e){return {};} })()
       : (nc.checklists || {});
-    const checkItems = CHECKLIST_ANKOMST.filter(i => i.text);
+    const items = mode === 'ankomst' ? CHECKLIST_ANKOMST : CHECKLIST_AFLEVERING;
+    const checkItems = items.filter(i => i.text);
     const done = checkItems.filter(i => chk[i.id]).length;
     const total = checkItems.length;
-    const complete = done === total;
-    const pct = Math.round(done/total*100);
+    const complete = total > 0 && done === total;
+    const pct = total > 0 ? Math.round(done/total*100) : 0;
+
+    const actionBtn = complete
+      ? (mode === 'ankomst'
+          ? `<input type="date" id="afh-date-${nc.id}" style="font-size:11px;padding:3px 6px;border:1px solid var(--gray-border);border-radius:var(--radius);flex:1;" value="${today()}">
+             <button onclick="event.stopPropagation();markCarArrived('${nc.id}')" style="font-size:11px;padding:3px 8px;background:#166534;color:white;border:none;border-radius:var(--radius);cursor:pointer;white-space:nowrap;">&#10003; Klar</button>`
+          : `<button onclick="event.stopPropagation();markReturned('${nc.id}')" style="font-size:11px;padding:3px 8px;background:#166534;color:white;border:none;border-radius:var(--radius);cursor:pointer;white-space:nowrap;">&#10003; Afhentet</button>`)
+      : '';
+
     return `
-      <div class="obs-card info" onclick="openModalForCar('${nc.id}')">
+      <div class="obs-card info" onclick="openModalForCar('${nc.id}')" style="cursor:pointer;">
         <div class="obs-card-body">
-          <div class="obs-name">${nc.name}</div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div class="obs-name">${nc.name}</div>
+            ${roleTag ? `<span style="font-size:9px;font-weight:600;padding:1px 6px;border-radius:8px;background:${roleBg};color:${roleFg};">${roleTag}</span>` : ''}
+          </div>
           <div class="obs-detail">${nc.make||'&nbsp;'} ${nc.model||''}</div>
           <div class="obs-detail" style="margin-top:4px;">
             <span class="badge ${complete?'badge-ok':'badge-warning'}">${nc.buildStatus}</span>
@@ -1701,8 +1738,7 @@ function renderNewCarsGrid() {
         </div>
         <div class="obs-card-footer" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;" onclick="event.stopPropagation();">
           <button onclick="openChecklistModal('${nc.id}')" style="font-size:11px;padding:3px 8px;border:1px solid var(--gray-border);border-radius:var(--radius);background:none;cursor:pointer;color:var(--text-muted);">&#128203; Tjekliste</button>
-          ${complete ? `<input type="date" id="afh-date-${nc.id}" style="font-size:11px;padding:3px 6px;border:1px solid var(--gray-border);border-radius:var(--radius);flex:1;" value="${today()}">
-            <button onclick="markCarArrived('${nc.id}')" style="font-size:11px;padding:3px 8px;background:#166534;color:white;border:none;border-radius:var(--radius);cursor:pointer;white-space:nowrap;">&#10003; Klar</button>` : ''}
+          ${actionBtn}
         </div>
       </div>`;
   }).join('');
@@ -1750,10 +1786,10 @@ function renderDashboard() {
 
   const obsGrid = document.getElementById('obs-grid');
   const obsCars = activeCars.filter(c => {
+    if (['Afmonteres', 'Klar til afhentning'].includes(c.buildStatus)) return false;
     const d = daysUntil(effectiveEnd(c));
     if (d !== null && d <= 270 && d >= 0) return true;
     if (c.notes && c.notes.toLowerCase().includes('rykket')) return true;
-    if (['Afventer afhentning', 'Afmonteres'].includes(c.buildStatus)) return true;
     return false;
   });
   const uniqueObs = [...new Map(obsCars.map(c => [c.id, c])).values()];
@@ -1761,46 +1797,17 @@ function renderDashboard() {
   obsGrid.innerHTML = uniqueObs.length ? uniqueObs.map(c => {
     const d = daysUntil(effectiveEnd(c));
     let cls = 'info', badgeCls = 'badge-info', badgeText = '';
-    if (['Afventer afhentning','Afmonteres'].includes(c.buildStatus) && (d === null || d > 60)) {
-      cls = 'warning'; badgeCls = 'badge-warning'; badgeText = c.buildStatus;
-    } else if (d !== null && d <= 14) { cls = 'critical'; badgeCls = 'badge-critical'; badgeText = d + ' dage'; }
+    if (d !== null && d <= 14) { cls = 'critical'; badgeCls = 'badge-critical'; badgeText = d + ' dage'; }
     else if (d !== null && d <= 270) { cls = 'warning'; badgeCls = 'badge-warning'; badgeText = d + ' dage'; }
     else if (c.notes && c.notes.toLowerCase().includes('rykket')) { badgeText = 'Dato rykket'; badgeCls = 'badge-info'; }
-    const detailLine = ['Afventer afhentning','Afmonteres'].includes(c.buildStatus)
-      ? c.buildStatus + (effectiveEnd(c) ? ' · udløb ' + fmtDate(effectiveEnd(c)) : '')
-      : effectiveEnd(c) ? 'Udløber ' + fmtDate(effectiveEnd(c)) : c.buildStatus||'';
+    const detailLine = effectiveEnd(c) ? 'Udløber ' + fmtDate(effectiveEnd(c)) : (c.buildStatus||'—');
 
-    // Tjekliste-progress (aflevering)
-    const checks = typeof c.checklists === 'string'
-      ? (()=>{ try{return JSON.parse(c.checklists);}catch(e){return {};} })()
-      : (c.checklists || {});
-    const checkItems = CHECKLIST_AFLEVERING.filter(i => i.text);
-    const done = checkItems.filter(i => checks[i.id]).length;
-    const total = checkItems.length;
-    const complete = total > 0 && done === total;
-    const pct = total > 0 ? Math.round(done/total*100) : 0;
-
-    return `<div class="obs-card ${cls}">
-      <div class="obs-card-body" onclick="openModalForCar('${c.id}')">
+    return `<div class="obs-card ${cls}" onclick="openModalForCar('${c.id}')" style="cursor:pointer;">
+      <div class="obs-card-body">
         <div class="obs-name">${c.name}</div>
         <div class="obs-detail">${c.make||'&nbsp;'} ${c.model||''}</div>
         <div class="obs-detail">${detailLine}</div>
         ${badgeText ? `<span class="badge ${badgeCls}">${badgeText}</span>` : ''}
-        <div style="margin-top:10px;">
-          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-bottom:3px;">
-            <span>Tjekliste ${done}/${total}</span>
-            ${complete ? '<span style="color:#166534;font-weight:500;">&#10003; Komplet</span>' : ''}
-          </div>
-          <div style="height:4px;background:var(--gray-border);border-radius:2px;">
-            <div style="height:4px;background:${complete?'#22c55e':'#f59e0b'};border-radius:2px;width:${pct}%;transition:width .3s;"></div>
-          </div>
-        </div>
-      </div>
-      <div class="obs-card-footer">
-        <button onclick="event.stopPropagation();openChecklistModal('${c.id}')" 
-          style="font-size:11px;padding:3px 8px;border:1px solid var(--gray-border);border-radius:var(--radius);background:none;cursor:pointer;color:var(--text-muted);">
-          📋 Tjekliste
-        </button>
       </div>
     </div>`;
   }).join('') : '<div style="color:var(--text-muted);font-size:13px;padding:8px 0;">Ingen biler kræver øjeblikkelig opmærksomhed.</div>';
