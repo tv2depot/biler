@@ -1705,7 +1705,7 @@ function renderNewCarsGrid() {
           : `<button onclick="event.stopPropagation();markReturned('${nc.id}')" style="font-size:11px;padding:3px 8px;background:#166534;color:white;border:none;border-radius:var(--radius);cursor:pointer;white-space:nowrap;">&#10003; Afhentet</button>`)
       : '';
 
-    const wrapStyle = isInPair ? 'flex:1 1 200px;min-width:180px;' : '';
+    const wrapStyle = isInPair ? 'flex:1 1 200px;min-width:180px;' : 'flex:1 1 220px;min-width:200px;';
 
     return `
       <div class="obs-card info" onclick="openModalForCar('${nc.id}')" style="cursor:pointer;${wrapStyle}">
@@ -1735,6 +1735,10 @@ function renderNewCarsGrid() {
       </div>`;
   }
 
+  grid.style.display = 'flex';
+  grid.style.flexWrap = 'wrap';
+  grid.style.gap = '10px';
+
   const renderedIds = new Set();
   let html = '';
   activeBuildCars.forEach(nc => {
@@ -1746,8 +1750,11 @@ function renderNewCarsGrid() {
       group.forEach(g => renderedIds.add(g.id));
       const cardsHtml = group.map(g => buildCard(g, true)).join('');
       html += `
-        <div class="pair-wrap" style="grid-column:span 2;border:1.5px dashed var(--gray-border);border-radius:14px;padding:10px;background:rgba(37,99,235,0.025);">
-          <div style="font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">${nc.name} — udskiftning</div>
+        <div class="pair-wrap" style="flex:2 1 440px;border:2px solid #818cf8;border-radius:14px;padding:12px;background:#eef2ff;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+            <span style="font-size:14px;">🔁</span>
+            <div style="font-size:11px;font-weight:700;color:#3730a3;text-transform:uppercase;letter-spacing:.04em;">${nc.name} — udskiftning i gang</div>
+          </div>
           <div style="display:flex;gap:10px;flex-wrap:wrap;">${cardsHtml}</div>
         </div>`;
     } else {
