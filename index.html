@@ -1706,7 +1706,7 @@ function renderNewCarsGrid() {
           : `<button onclick="event.stopPropagation();markReturned('${nc.id}')" style="font-size:11px;padding:3px 8px;background:#166534;color:white;border:none;border-radius:var(--radius);cursor:pointer;white-space:nowrap;">&#10003; Afhentet</button>`)
       : '';
 
-    const wrapStyle = isInPair ? 'flex:1 1 230px;min-width:210px;' : 'flex:1 1 220px;min-width:200px;';
+    const wrapStyle = isInPair ? 'flex:1 1 230px;min-width:210px;' : '';
 
     return `
       <div class="obs-card info" onclick="openModalForCar('${nc.id}')" style="cursor:pointer;${wrapStyle}">
@@ -1736,8 +1736,8 @@ function renderNewCarsGrid() {
       </div>`;
   }
 
-  grid.style.display = 'flex';
-  grid.style.flexWrap = 'wrap';
+  grid.style.display = 'grid';
+  grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(210px, 1fr))';
   grid.style.gap = '12px';
 
   const renderedIds = new Set();
@@ -1753,7 +1753,7 @@ function renderNewCarsGrid() {
       group.forEach(g => renderedIds.add(g.id));
       const cardsHtml = group.map(g => buildCard(g, true)).join('');
       pairsHtml += `
-        <fieldset style="flex:2 1 480px;min-width:0;margin:0;border:1.5px solid var(--gray-border);border-radius:14px;padding:12px 12px 10px;">
+        <fieldset style="grid-column:span 2;min-width:0;margin:0;border:1.5px solid var(--gray-border);border-radius:14px;padding:12px 12px 10px;">
           <legend style="margin:0;padding:0 7px;font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">${nc.name} — udskiftning</legend>
           <div style="display:flex;gap:10px;flex-wrap:wrap;">${cardsHtml}</div>
         </fieldset>`;
@@ -1765,7 +1765,7 @@ function renderNewCarsGrid() {
 
   let html = pairsHtml;
   if (singlesHtml) {
-    html += '<div style="flex-basis:100%;height:0;margin:0;padding:0;"></div>' + singlesHtml;
+    html += '<div style="grid-column:1 / -1;height:0;margin:0;padding:0;"></div>' + singlesHtml;
   }
 
   grid.innerHTML = html;
