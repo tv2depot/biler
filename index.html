@@ -560,7 +560,7 @@ table.cars tr.paired-bottom:hover td.ombyg-col { background: #eee8c8; }
       <div class="obs-grid" id="new-cars-grid"></div>
     </div>
     <div class="obs-section">
-      <div class="section-hdr">Leasing udløb</div>
+      <div class="section-hdr">OBS — under 9 måneder til leasingudløb</div>
       <div class="obs-grid" id="obs-grid"></div>
     </div>
     <div class="obs-section">
@@ -1667,7 +1667,7 @@ function renderNewCarsGrid() {
     return;
   }
 
-  // Sorter: gl. og ny biler grupperes sammen
+  // Gruppér gl./ny biler der hører sammen
   const nameMap = {};
   activeBuildCars.forEach(c => {
     const key = c.name + '|||' + c.location;
@@ -1675,17 +1675,7 @@ function renderNewCarsGrid() {
     nameMap[key].push(c);
   });
 
-  const seen = new Set();
-  const ordered = [];
-  activeBuildCars.forEach(c => {
-    if (seen.has(c.id)) return;
-    const key = c.name + '|||' + c.location;
-    const peers = (nameMap[key] || [c]).slice().sort((a,b) => (a.start||'').localeCompare(b.start||''));
-    peers.forEach(p => { if (!seen.has(p.id)) { seen.add(p.id); ordered.push(p); } });
-  });
-
-  grid.innerHTML = ordered.map(nc => {
-    // Find evt. makker (kan have status I drift/Returneret/blank, vises ikke selv her, men bruges til mode-detektion)
+  function buildCard(nc, isInPair) {
     const peers = cars.filter(o => o.id !== nc.id && o.name === nc.name && o.location === nc.location && o.buildStatus !== 'Returneret');
     const isPairedCar = peers.length > 0;
     const isOldCar = isPairedCar && (() => {
@@ -1710,13 +1700,15 @@ function renderNewCarsGrid() {
 
     const actionBtn = complete
       ? (mode === 'ankomst'
-          ? `<input type="date" id="afh-date-${nc.id}" style="font-size:11px;padding:3px 6px;border:1px solid var(--gray-border);border-radius:var(--radius);flex:1;" value="${today()}">
+          ? `<input type="date" id="afh-date-${nc.id}" style="font-size:11px;padding:3px 6px;border:1px solid var(--gray-border);border-radius:var(--radius);flex:1;min-width:90px;" value="${today()}">
              <button onclick="event.stopPropagation();markCarArrived('${nc.id}')" style="font-size:11px;padding:3px 8px;background:#166534;color:white;border:none;border-radius:var(--radius);cursor:pointer;white-space:nowrap;">&#10003; Klar</button>`
           : `<button onclick="event.stopPropagation();markReturned('${nc.id}')" style="font-size:11px;padding:3px 8px;background:#166534;color:white;border:none;border-radius:var(--radius);cursor:pointer;white-space:nowrap;">&#10003; Afhentet</button>`)
       : '';
 
+    const wrapStyle = isInPair ? 'flex:1 1 200px;min-width:180px;' : '';
+
     return `
-      <div class="obs-card info" onclick="openModalForCar('${nc.id}')" style="cursor:pointer;">
+      <div class="obs-card info" onclick="openModalForCar('${nc.id}')" style="cursor:pointer;${wrapStyle}">
         <div class="obs-card-body">
           <div style="display:flex;align-items:center;gap:6px;">
             <div class="obs-name">${nc.name}</div>
@@ -1741,7 +1733,30 @@ function renderNewCarsGrid() {
           ${actionBtn}
         </div>
       </div>`;
-  }).join('');
+  }
+
+  const renderedIds = new Set();
+  let html = '';
+  activeBuildCars.forEach(nc => {
+    if (renderedIds.has(nc.id)) return;
+    const key = nc.name + '|||' + nc.location;
+    const group = (nameMap[key] || [nc]).slice().sort((a,b) => (a.start||'').localeCompare(b.start||''));
+
+    if (group.length > 1) {
+      group.forEach(g => renderedIds.add(g.id));
+      const cardsHtml = group.map(g => buildCard(g, true)).join('');
+      html += `
+        <div class="pair-wrap" style="grid-column:span 2;border:1.5px dashed var(--gray-border);border-radius:14px;padding:10px;background:rgba(37,99,235,0.025);">
+          <div style="font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">${nc.name} — udskiftning</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">${cardsHtml}</div>
+        </div>`;
+    } else {
+      renderedIds.add(nc.id);
+      html += buildCard(nc, false);
+    }
+  });
+
+  grid.innerHTML = html;
 }
 function markCarArrived(carId) {
   const c = cars.find(x => x.id === carId);
